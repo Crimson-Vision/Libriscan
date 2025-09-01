@@ -1,0 +1,3 @@
+Hello! Thank you for your interest in Libriscan. The Crimson Vision team is building this application as the capstone project for our degree program. This repository is public to let our (non-IT) end users report issues and request features, but since this is an academic project, **we are not accepting outside contributions** at the moment. 
+
+Our hope is that Libriscan continues on even after we complete our studies. If this project interests you, we'd be very grateful for your attention in the future, and we'll update this file when that's the case.
