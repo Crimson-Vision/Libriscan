@@ -31,4 +31,4 @@ jobs:
         DJANGO_DEBUG: "True"
         DJANGO_ALLOWED_HOSTS: "*"
       run: |
-        python manage.py test
+        python libriscan/manage.py test
