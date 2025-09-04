@@ -11,11 +11,11 @@
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 
   <nav>
-    {% block nav %}{% endblock %}
+    {% block nav %}{% endblock nav %}
   </nav>
 
   <div id="content">
-      {% block content %}{% endblock %}
+      {% block content %}{% endblock content %}
   </div>
 
 </body>
