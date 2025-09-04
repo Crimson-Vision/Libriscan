@@ -1,0 +1,22 @@
+{% load django_htmx %}
+<!doctype html>
+<html lang="en-US">
+
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Libriscan{% endblock %}</title>
+  {% htmx_script %}
+</head>
+
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+
+  <nav>
+    {% block nav %}{% endblock %}
+  </nav>
+
+  <div id="content">
+      {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>
