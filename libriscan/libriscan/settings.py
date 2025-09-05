@@ -80,10 +80,12 @@ WSGI_APPLICATION = "libriscan.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+DB_PATH = BASE_DIR / "db.sqlite3" if DEBUG else "/mnt/db.sqlite3"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "mnt/db.sqlite3",
+        "NAME": DB_PATH,
     }
 }
 
@@ -123,6 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static" if DEBUG else "/var/www/libriscan/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
