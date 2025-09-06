@@ -1,0 +1,11 @@
+services:
+  libriscan:
+    container_name: libriscan
+    image: ghcr.io/crimson-vision/libriscan:main
+    volumes:
+      - /opt/appdata/libriscan/:/app/mnt
+    environment:
+      - DJANGO_ALLOWED_HOSTS=<hostname>
+      - DJANGO_SECRET_KEY=<random secret key>
+    ports:
+      - 8000:8000
