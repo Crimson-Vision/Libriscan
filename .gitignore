@@ -209,3 +209,5 @@ __marimo__/
 launch.json
 
 libriscan/static/
+mnt/
+staticfiles/
