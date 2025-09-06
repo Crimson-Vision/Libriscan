@@ -2,6 +2,11 @@
 
 # Stage 1: Base build stage
 FROM python:3.13-slim AS builder
+LABEL org.opencontainers.image.title="Libriscan"
+LABEL org.opencontainers.image.description="Libriscan helps extract and analyze text from historical documents."
+LABEL org.opencontainers.image.source="https://github.com/crimson-vision/libriscan"
+LABEL org.opencontainers.image.url="https://github.com/crimson-vision/libriscan"
+
 
 # Create the app directory
 RUN mkdir /app
