@@ -14,8 +14,13 @@
     {% block nav %}
     <ol>
       <li><a href="{% url 'index' %}">Home</a></li>
-      {% if user.is_authenticated %}
+      {% if user.is_staff %}
       <li><a href="{% url 'admin:index' %}">Admin</a></li>
+      {% endif %}
+      {% if not user.is_authenticated %}
+      <li>Log In</li>
+      {% else %}
+      <li>Log Out</li>
       {% endif %}
     </ol>
     {% endblock nav %}
