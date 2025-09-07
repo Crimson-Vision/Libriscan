@@ -7,6 +7,8 @@
 <ul>
 {% for m in org.membership_set.all %}
   <li><a href="{% url 'consortium' m.id %}">{{m.consortium}}</a></li>
+{% empty %}
+  <li>No consortium memberships</li>
 {% endfor %}
 </ul>
 {% endif %}
