@@ -1,0 +1,42 @@
+[
+{
+    "model": "biblios.organization",
+    "pk": 1,
+    "fields": {
+        "name": "Amesbury Public Library",
+        "short_name": "APL",
+        "city": "Amesbury",
+        "state": "MA"
+    }
+},
+{
+    "model": "biblios.organization",
+    "pk": 2,
+    "fields": {
+        "name": "Test Library One",
+        "short_name": "TL1",
+        "city": "Miami",
+        "state": "FL"
+    }
+},
+{
+    "model": "biblios.organization",
+    "pk": 3,
+    "fields": {
+        "name": "New York Public Library",
+        "short_name": "NYPL",
+        "city": "New York",
+        "state": "NY"
+    }
+},
+{
+    "model": "biblios.organization",
+    "pk": 4,
+    "fields": {
+        "name": "Harvard Library",
+        "short_name": "HL",
+        "city": "Cambridge",
+        "state": "MA"
+    }
+}
+]

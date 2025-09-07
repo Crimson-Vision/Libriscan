@@ -1,0 +1,13 @@
+{% block content %}
+<p>{{consortium}}</p>
+
+<h5>Member Organizations</h5>
+<ul>
+{% for m in consortium.membership_set.all %}
+  <li><a href="{% url 'organization' m.organization.id %}">{{m.organization}}</a></li>
+{% empty %}
+  <li>No consortium members</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
