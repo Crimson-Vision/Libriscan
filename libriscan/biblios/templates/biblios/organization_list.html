@@ -1,8 +1,10 @@
-    {% block content %}
-    <p>Here's a list of libraries:</p>
-    <ul>
-        {% for org in orgs %}
-        <li><a href="{% url 'organization' org.id %}">{{org}}</a></li>
-        {% endfor %}
-    </ul>
-    {% endblock content %}
+{% extends "biblios/base.html" %}
+
+{% block content %}
+<p>Here's a list of libraries:</p>
+<ul>
+    {% for org in orgs %}
+    <li><a href="{% url 'organization' org.id %}">{{org}}</a></li>
+    {% endfor %}
+</ul>
+{% endblock content %}

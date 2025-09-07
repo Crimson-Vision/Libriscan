@@ -19,5 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', include("biblios.urls")), # put the Biblios app at root
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
 ]

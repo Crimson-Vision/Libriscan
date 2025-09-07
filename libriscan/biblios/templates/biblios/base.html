@@ -11,7 +11,14 @@
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 
   <nav>
-    {% block nav %}{% endblock nav %}
+    {% block nav %}
+    <ol>
+      <li><a href="{% url 'index' %}">Home</a></li>
+      {% if user.is_authenticated %}
+      <li><a href="{% url 'admin:index' %}">Admin</a></li>
+      {% endif %}
+    </ol>
+    {% endblock nav %}
   </nav>
 
   <div id="content">
