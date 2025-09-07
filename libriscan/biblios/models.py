@@ -89,7 +89,6 @@ class TextBlock(models.Model):
         HANDWRITING: "Handwriting"
     }
 
-    pk = models.CompositePrimaryKey("page_id", "extraction_id", "sequence")
     page = models.ForeignKey(Page, on_delete=models.CASCADE)
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
@@ -108,6 +107,13 @@ class TextBlock(models.Model):
     geo_y_0 = models.DecimalField(max_digits=20, decimal_places=20, validators=[MinValueValidator(0), MaxValueValidator(1)])
     geo_x_1 = models.DecimalField(max_digits=20, decimal_places=20, validators=[MinValueValidator(0), MaxValueValidator(1)])
     geo_y_1 = models.DecimalField(max_digits=20, decimal_places=20, validators=[MinValueValidator(0), MaxValueValidator(1)])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["page", "extraction_id", "sequence"], name="unique_textblock_sequence"
+            )
+        ]
 
     def __str__(self):
         return self.text
