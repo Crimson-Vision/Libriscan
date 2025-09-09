@@ -140,6 +140,8 @@ LOGGING = {
         "file": {
             "level": log_level,
             "class": "logging.handlers.RotatingFileHandler",
+            "maxBytes": 5242880,            
+            "backupCount": 10,
             "filename": LOCAL_DIR / "logs/libriscan.log",
             "formatter": "standard"
         },
