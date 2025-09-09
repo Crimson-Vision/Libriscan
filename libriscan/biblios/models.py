@@ -56,11 +56,7 @@ class Document(models.Model):
     identifier = models.CharField(max_length=25)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["identifier"], name="unique_doc_per_org"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["identifier"], name="unique_doc_per_org")]
 
     def __str__(self):
         return self.identifier
@@ -71,11 +67,7 @@ class Page(models.Model):
     number = models.SmallIntegerField(default=1)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["document", "number"], name="unique_page"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["document", "number"], name="unique_page")]
 
     def __str__(self):
         return f"{self.document} page {self.number}"
@@ -109,12 +101,31 @@ class TextBlock(models.Model):
     geo_y_1 = models.DecimalField(max_digits=20, decimal_places=20, validators=[MinValueValidator(0), MaxValueValidator(1)])
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["page", "extraction_id", "sequence"], name="unique_textblock_sequence"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["page", "extraction_id", "sequence"], name="unique_textblock_sequence")]
 
     def __str__(self):
         return self.text
     
+
+class UserRole(models.Model):
+    EDITOR = 'E'
+    STAFF = 'S'
+    ADMIN = 'A'
+    GUEST = 'G'
+
+    ROLE_CHOICES = {
+        EDITOR: "Editor",
+        STAFF: "Staff",
+        ADMIN: "Administrator",
+        GUEST: "Guest"
+    }
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["organization", "role"], name="unique_roles")]
+
+    def __str__(self):
+        return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
