@@ -21,6 +21,10 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# A directory for local storage. Expected to be mapped to a Docker volume.
+# Any files that need to survive a container restart should live here.
+LOCAL_DIR = BASE_DIR / 'mnt'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -82,12 +86,10 @@ WSGI_APPLICATION = "libriscan.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DB_PATH = BASE_DIR / "mnt/db.sqlite3"
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DB_PATH,
+        "NAME": LOCAL_DIR / "db.sqlite3",
     }
 }
 
@@ -109,6 +111,53 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+
+# Logging
+# https://docs.djangoproject.com/en/5.2/topics/logging/
+
+# Configure INFO logging as default, but can override with this env variable
+log_level = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+
+# Make sure the logging folder exists, or else we get a FileNotFoundError
+if not os.path.exists(LOCAL_DIR / "logs/"):
+    os.makedirs(LOCAL_DIR / "logs")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "{asctime} {levelname} {name} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "file": {
+            "level": log_level,
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOCAL_DIR / "logs/libriscan.log",
+            "formatter": "standard"
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file", "console"],
+            "level": log_level,
+            "propagate": True,
+        },
+    },
+}
+
 
 
 # Internationalization
