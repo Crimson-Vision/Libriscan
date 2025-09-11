@@ -1,15 +1,15 @@
 [
 {
     "model": "biblios.membership",
-    "pk": 1,
-    "fields": {
+    "pk": [1, 1],
+     "fields": {
         "organization": 1,
         "consortium": 1
     }
 },
 {
     "model": "biblios.membership",
-    "pk": 2,
+    "pk": [3, 2],
     "fields": {
         "organization": 3,
         "consortium": 2
@@ -17,7 +17,7 @@
 },
 {
     "model": "biblios.membership",
-    "pk": 3,
+    "pk": [4, 2],
     "fields": {
         "organization": 4,
         "consortium": 2

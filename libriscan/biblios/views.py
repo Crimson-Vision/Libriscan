@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
-from .models import Organization, Consortium
+from .models import Organization, Consortium, Document
 
 def index(request):
     orgs = Organization.objects.all()
@@ -25,3 +25,12 @@ class OrganizationDetail(DetailView):
 class ConsortiumDetail(DetailView):
     model = Consortium
     context_object_name = "consortium"
+
+
+class DocumentList(ListView):
+    model = Document
+
+    def get_queryset(self):
+        # security goes here
+        # find intersection between document owner and user roles
+        return super().get_queryset()
