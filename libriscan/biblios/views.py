@@ -1,7 +1,11 @@
+import logging
+
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
 from .models import Organization, Consortium, Document
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     orgs = Organization.objects.all()
