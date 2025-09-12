@@ -1,0 +1,10 @@
+[
+{
+    "model": "biblios.collection",
+    "pk": 1,
+    "fields": {
+        "owner": 1,
+        "name": "Test Collection"
+    }
+}
+]
