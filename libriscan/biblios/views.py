@@ -3,20 +3,20 @@ import logging
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 
+from rules.contrib.views import AutoPermissionRequiredMixin
+
 from .models import Organization, Consortium, Document
 
 logger = logging.getLogger(__name__)
 
+
 def index(request):
     orgs = Organization.objects.all()
-    context = {
-        "app_name": "Libriscan",
-        "orgs":orgs
-    }
+    context = {"app_name": "Libriscan", "orgs": orgs}
     return render(request, "biblios/index.html", context)
 
 
-class OrganizationList(ListView):
+class OrganizationList(ListView, AutoPermissionRequiredMixin):
     model = Organization
     context_object_name = "orgs"
 
