@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # A directory for local storage. Expected to be mapped to a Docker volume.
 # Any files that need to survive a container restart should live here.
-LOCAL_DIR = BASE_DIR / 'mnt'
+LOCAL_DIR = BASE_DIR / "mnt"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -47,8 +47,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "localflavor",
-    "biblios",
     "django_htmx",
+    "rules",
+    "biblios",
 ]
 
 MIDDLEWARE = [
@@ -56,11 +57,11 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_htmx.middleware.HtmxMiddleware"
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "libriscan.urls"
@@ -134,16 +135,16 @@ LOGGING = {
         "simple": {
             "format": "{levelname} {message}",
             "style": "{",
-        }
+        },
     },
     "handlers": {
         "file": {
             "level": log_level,
             "class": "logging.handlers.RotatingFileHandler",
-            "maxBytes": 5242880,            
+            "maxBytes": 5242880,
             "backupCount": 10,
             "filename": LOCAL_DIR / "logs/libriscan.log",
-            "formatter": "standard"
+            "formatter": "standard",
         },
         "console": {
             "level": "INFO",
@@ -159,7 +160,6 @@ LOGGING = {
         },
     },
 }
-
 
 
 # Internationalization
@@ -185,3 +185,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "biblios.User"
+
+AUTHENTICATION_BACKENDS = (
+    "rules.permissions.ObjectPermissionBackend",
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+LOGIN_REDIRECT_URL = "/"
