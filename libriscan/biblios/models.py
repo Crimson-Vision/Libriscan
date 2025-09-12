@@ -126,7 +126,7 @@ class UserRole(models.Model):
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["organization", "role"], name="unique_roles")]
+        constraints = [models.UniqueConstraint(fields=["user", "organization", "role"], name="unique_roles")]
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
