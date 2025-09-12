@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
-from .models import Series, Document, Organization, UserRole
+from .models import Series, Document, Organization, UserRole, Organization, UserRole
 
 
 class UserModelTests(TestCase):
