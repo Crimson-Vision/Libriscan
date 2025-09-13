@@ -20,12 +20,13 @@
     <ol>
       <li><a href="{% url 'index' %}">Home</a></li>
       {% if user.is_staff %}
-        <li><a href="{% url 'admin:index' %}">Admin</a></li>
+      <li><a href="{% url 'admin:index' %}">Admin</a></li>
       {% endif %}
       {% if not user.is_authenticated %}
-        <li>Log In</li>
+      <li>Log In</li>
       {% else %}
-        <li>Log Out</li>
+      <li>Log Out</li>
+      <li>{{user.username}}</li>
       {% endif %}
     </ol>
     {% endblock nav %}
@@ -36,4 +37,5 @@
   </div>
 
 </body>
+
 </html>

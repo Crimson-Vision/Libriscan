@@ -6,10 +6,20 @@
 
 <h5>Consortiums</h5>
 <ul>
-{% for m in org.membership_set.all %}
+  {% for m in org.membership_set.all %}
   <li><a href="{% url 'consortium' m.consortium.id %}">{{m.consortium}}</a></li>
-{% empty %}
+  {% empty %}
   <li>No consortium memberships</li>
-{% endfor %}
+  {% endfor %}
 </ul>
+
+<h5>Collections</h5>
+<ul>
+  {% for c in org.collection_set.all %}
+  <li><a href="{% url 'collection' org.short_name c.id %}">{{c}}</a></li>
+  {% empty %}
+  <li>No collections</li>
+  {% endfor %}
+</ul>
+
 {% endblock content %}

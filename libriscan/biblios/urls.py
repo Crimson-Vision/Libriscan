@@ -4,8 +4,22 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("organizations", views.OrganizationList.as_view(), name="organization-list"),
-    path("organizations/<int:pk>", views.OrganizationDetail.as_view(), name="organization"),
+    path("organizations", views.organization_list, name="organization-list"),
+    path(
+        "organizations/<int:pk>",
+        views.OrganizationDetail.as_view(),
+        name="organization",
+    ),
+    path(
+        "<slug:short_name>/",
+        views.OrganizationDetail.as_view(),
+        name="org_slug",
+    ),
+    path(
+        "<slug:short_name>/<int:pk>",
+        views.collection_detail,
+        name="collection",
+    ),
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
     path("sample/", views.sample, name="sample"),
 ]
