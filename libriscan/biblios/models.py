@@ -25,7 +25,7 @@ class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
 # Trying to avoid ambiguity with software libraries, and maybe non-library orgs could use this someday
 class Organization(BibliosModel):
     name = models.CharField(max_length=75)
-    short_name = models.CharField(max_length=5)
+    short_name = models.SlugField(max_length=5)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
 
@@ -34,7 +34,7 @@ class Organization(BibliosModel):
             "add": rules.is_superuser,
             "view": is_org_viewer,
             "change": is_org_archivist,
-            "delete": rules.is_superuser
+            "delete": rules.is_superuser,
         }
 
     def __str__(self):
@@ -80,7 +80,7 @@ class Series(BibliosModel):
             "add": is_org_editor,
             "view": is_org_viewer,
             "change": is_org_editor,
-            "delete": is_org_editor
+            "delete": is_org_editor,
         }
 
     def __str__(self):
@@ -99,7 +99,7 @@ class Document(BibliosModel):
             "add": is_org_editor,
             "view": is_org_viewer,
             "change": is_org_editor,
-            "delete": is_org_editor
+            "delete": is_org_editor,
         }
 
     def __str__(self):
@@ -118,7 +118,7 @@ class Page(BibliosModel):
             "add": is_org_editor,
             "view": is_org_viewer,
             "change": is_org_editor,
-            "delete": is_org_editor
+            "delete": is_org_editor,
         }
 
     def __str__(self):
@@ -180,9 +180,8 @@ class TextBlock(BibliosModel):
             "add": is_org_editor,
             "view": is_org_viewer,
             "change": is_org_editor,
-            "delete": is_org_editor
+            "delete": is_org_editor,
         }
-
 
     def __str__(self):
         return self.text

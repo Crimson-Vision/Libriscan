@@ -21,14 +21,16 @@
       <li>Log In</li>
       {% else %}
       <li>Log Out</li>
+      <li>{{user.username}}</li>
       {% endif %}
     </ol>
     {% endblock nav %}
   </nav>
 
   <div id="content">
-      {% block content %}{% endblock content %}
+    {% block content %}{% endblock content %}
   </div>
 
 </body>
+
 </html>
