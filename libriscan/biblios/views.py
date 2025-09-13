@@ -44,11 +44,14 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
 
 
 def get_org_by_collection(request, short_name, pk):
+    print(f"Checking if {request.user} is {short_name} archivist")
     return Organization.objects.get(short_name=short_name)
 
 
-@permission_required("organizations.view_organization", fn=get_org_by_collection)
-def collection_detail(request, short_name, collection_id):
-    collection = get_object_or_404(Collection, collection_id)
+@permission_required(
+    "biblios.view_organization", fn=get_org_by_collection, raise_exception=True
+)
+def collection_detail(request, short_name, pk):
+    collection = Collection.objects.get(pk=pk)
     context = {"collection": collection}
-    render(request, "biblios/collection_detail.html", context)
+    return render(request, "biblios/collection_detail.html", context)
