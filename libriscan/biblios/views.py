@@ -16,9 +16,10 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-class OrganizationList(ListView):
-    model = Organization
-    context_object_name = "orgs"
+def organization_list(request):
+    orgs = request.user.userrole_set.all()
+    context = {'orgs':orgs}
+    return render(request, "biblios/organization_list.html", context)
 
 
 class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
@@ -26,7 +27,7 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
     context_object_name = "org"
 
 
-class ConsortiumDetail(DetailView):
+class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
     model = Consortium
     context_object_name = "consortium"
 
