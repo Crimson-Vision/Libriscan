@@ -16,6 +16,11 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
+# Sample page view for Tailwind + daisyUI + HTMX
+def sample(request):
+    return render(request, "biblios/sample.html")
+
+
 class OrganizationList(ListView):
     model = Organization
     context_object_name = "orgs"
