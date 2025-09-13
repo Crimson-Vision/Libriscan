@@ -16,6 +16,11 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
+# Sample page view for Tailwind + daisyUI + HTMX
+def sample(request):
+    return render(request, "biblios/sample.html")
+
+
 def organization_list(request):
     orgs = request.user.userrole_set.all()
     context = {"orgs": orgs}
