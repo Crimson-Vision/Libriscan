@@ -1,20 +1,26 @@
 import rules
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @rules.predicate
 def is_org_archivist(user, org):
-    from .models.UserRole import ARCHIVIST
+    from .models import UserRole
+
+    logger.info(F"Checking if {user} is {org} archivist")
 
     return user.userrole_set.filter(
-        user=user, organization=org, role=ARCHIVIST
+        user=user, organization=org, role=UserRole.ARCHIVIST
     ).exists()
 
 
 @rules.predicate
 def is_org_editor(user, org):
-    from .models.UserRole import EDITOR
+    from .models import UserRole
 
-    return user.userrole_set.filter(user=user, organization=org, role=EDITOR).exists()
+    return user.userrole_set.filter(user=user, organization=org, role__in=[UserRole.EDITOR, UserRole.ARCHIVIST]).exists()
 
 
 # Anyone with any role at an org can view its objects

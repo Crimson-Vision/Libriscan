@@ -16,12 +16,12 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-class OrganizationList(ListView, AutoPermissionRequiredMixin):
+class OrganizationList(ListView):
     model = Organization
     context_object_name = "orgs"
 
 
-class OrganizationDetail(DetailView):
+class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
     model = Organization
     context_object_name = "org"
 

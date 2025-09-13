@@ -30,15 +30,17 @@ class Organization(BibliosModel):
 
     class Meta:
         rules_permissions = {
-            "add": rules.is_staff,
-            "read": is_org_archivist,
+            "add": rules.is_superuser,
+            "view": is_org_viewer,
+            "change": is_org_archivist,
+            "delete": rules.is_superuser
         }
 
     def __str__(self):
         return self.name
 
 
-class Consortium(models.Model):
+class Consortium(BibliosModel):
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -46,7 +48,7 @@ class Consortium(models.Model):
 
 
 # Using a through model for consortium membership, since there's probably additional info useful for us to track
-class Membership(models.Model):
+class Membership(BibliosModel):
     pk = models.CompositePrimaryKey("organization_id", "consortium_id")
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     consortium = models.ForeignKey(Consortium, on_delete=models.CASCADE)
@@ -68,15 +70,23 @@ class Collection(BibliosModel):
         return self.name
 
 
-class Series(models.Model):
+class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+
+    class Meta:
+        rules_permissions = {
+            "add": is_org_editor,
+            "read": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor
+        }
 
     def __str__(self):
         return self.name
 
 
-class Document(models.Model):
+class Document(BibliosModel):
     series = models.ForeignKey(Series, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=25)
 
@@ -84,12 +94,18 @@ class Document(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["identifier"], name="unique_doc_per_org")
         ]
+        rules_permissions = {
+            "add": is_org_editor,
+            "read": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor
+        }
 
     def __str__(self):
         return self.identifier
 
 
-class Page(models.Model):
+class Page(BibliosModel):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     number = models.SmallIntegerField(default=1)
 
@@ -97,12 +113,18 @@ class Page(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["document", "number"], name="unique_page")
         ]
+        rules_permissions = {
+            "add": is_org_editor,
+            "read": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor
+        }
 
     def __str__(self):
         return f"{self.document} page {self.number}"
 
 
-class TextBlock(models.Model):
+class TextBlock(BibliosModel):
     PRINTED = "P"
     HANDWRITING = "H"
     TEXT_TYPE_CHOICES = {PRINTED: "Printed", HANDWRITING: "Handwriting"}
@@ -153,6 +175,13 @@ class TextBlock(models.Model):
                 name="unique_textblock_sequence",
             )
         ]
+        rules_permissions = {
+            "add": is_org_editor,
+            "read": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor
+        }
+
 
     def __str__(self):
         return self.text
