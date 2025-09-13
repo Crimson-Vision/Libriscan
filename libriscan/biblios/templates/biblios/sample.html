@@ -1,0 +1,48 @@
+{% extends "biblios/base.html" %}
+
+{% block title %}Sample Tailwind + daisyUI + HTMX{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-4 text-primary">Welcome to Libriscan!</h1>
+
+    <!-- DaisyUI Card Component -->
+    <div class="card bg-base-100 w-96 shadow-sm">
+        <figure>
+            <img src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp" alt="Shoes" />
+        </figure>
+        <div class="card-body">
+            <h2 class="card-title">Card Title</h2>
+            <p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
+            <div class="card-actions justify-end">
+                <button class="btn btn-primary">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DaisyUI Alert Component -->
+    <div class="alert alert-success mt-8 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+        </svg>
+        <span>Success! This is a daisyUI alert with icon.</span>
+        <button class="btn btn-xs btn-success ml-auto">OK</button>
+    </div>
+
+    <!-- DaisyUI Modal Component -->
+    <button class="btn" onclick="my_modal_1.showModal()">open modal</button>
+    <dialog id="my_modal_1" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">Hello!</h3>
+            <p class="py-4">Press ESC key or click the button below to close</p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <!-- if there is a button in form, it will close the modal -->
+                    <button class="btn">Close</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+</div>
+{% endblock %}

@@ -7,4 +7,5 @@ urlpatterns = [
     path("organizations", views.OrganizationList.as_view(), name="organization-list"),
     path("organizations/<int:pk>", views.OrganizationDetail.as_view(), name="organization"),
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
+    path("sample/", views.sample, name="sample"),
 ]
