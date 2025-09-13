@@ -64,7 +64,7 @@ class Collection(BibliosModel):
             "add": is_org_archivist,
             "change": is_org_archivist,
             "delete": is_org_archivist,
-            "read": is_org_viewer,
+            "view": is_org_viewer,
         }
 
     def __str__(self):
@@ -78,7 +78,7 @@ class Series(BibliosModel):
     class Meta:
         rules_permissions = {
             "add": is_org_editor,
-            "read": is_org_viewer,
+            "view": is_org_viewer,
             "change": is_org_editor,
             "delete": is_org_editor
         }
@@ -97,7 +97,7 @@ class Document(BibliosModel):
         ]
         rules_permissions = {
             "add": is_org_editor,
-            "read": is_org_viewer,
+            "view": is_org_viewer,
             "change": is_org_editor,
             "delete": is_org_editor
         }
@@ -116,7 +116,7 @@ class Page(BibliosModel):
         ]
         rules_permissions = {
             "add": is_org_editor,
-            "read": is_org_viewer,
+            "view": is_org_viewer,
             "change": is_org_editor,
             "delete": is_org_editor
         }
@@ -178,7 +178,7 @@ class TextBlock(BibliosModel):
         ]
         rules_permissions = {
             "add": is_org_editor,
-            "read": is_org_viewer,
+            "view": is_org_viewer,
             "change": is_org_editor,
             "delete": is_org_editor
         }
