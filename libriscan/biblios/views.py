@@ -21,12 +21,19 @@ def sample(request):
     return render(request, "biblios/sample.html")
 
 
+# This is a basic way of handling RBAC on the user's org list.
+# Rules don't come into play at all. The view just only queries
+# for orgs the user is a member of, which by our rules happens
+# to be the ones they have permission to see.
 def organization_list(request):
     orgs = request.user.userrole_set.all()
     context = {"orgs": orgs}
     return render(request, "biblios/organization_list.html", context)
 
 
+# This is the easy way to handle RBAC. All the models have permissions
+# specified in models.py. This AutoPermissionRequiredMixin figures
+# out how to check them for each request user.
 class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
     model = Organization
     context_object_name = "org"
@@ -43,8 +50,13 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
     model = Document
 
 
+# This is a verbose way of handling RBAC on a collections page
+# The permission_required handle on collection_detail calls this function,
+# and passes it the same params.
+# It takes the object returned here, then checks if the request.user has
+# the permission 'biblios.view_organization' on it.
+# If so, they can access this page. If not, they get a 403.
 def get_org_by_collection(request, short_name, pk):
-    print(f"Checking if {request.user} is {short_name} archivist")
     return Organization.objects.get(short_name=short_name)
 
 
