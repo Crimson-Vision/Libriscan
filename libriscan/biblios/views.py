@@ -32,10 +32,5 @@ class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
     context_object_name = "consortium"
 
 
-class DocumentList(ListView):
+class DocumentList(AutoPermissionRequiredMixin, ListView):
     model = Document
-
-    def get_queryset(self):
-        # security goes here
-        # find intersection between document owner and user roles
-        return super().get_queryset()
