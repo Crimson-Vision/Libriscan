@@ -11,12 +11,12 @@ urlpatterns = [
         name="organization",
     ),
     path(
-        "<slug:short_name>/",
+        "organization/<slug:short_name>/",
         views.OrganizationDetail.as_view(),
         name="org_slug",
     ),
     path(
-        "<slug:short_name>/<int:pk>",
+        "organization/<slug:short_name>/<int:pk>",
         views.collection_detail,
         name="collection",
     ),
