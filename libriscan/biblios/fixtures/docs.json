@@ -1,0 +1,10 @@
+[
+{
+    "model": "biblios.document",
+    "pk": 1,
+    "fields": {
+        "series": 1,
+        "identifier": "TL12345"
+    }
+}
+]
