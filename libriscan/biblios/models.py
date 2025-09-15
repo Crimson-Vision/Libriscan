@@ -56,7 +56,8 @@ class Document(models.Model):
     identifier = models.CharField(max_length=25)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["identifier"], name="unique_doc_per_org")]
+        # In theory this would be better as a unique identifer per collection
+        constraints = [models.UniqueConstraint(fields=["series", "identifier"], name="unique_doc_per_org")]
 
     def __str__(self):
         return self.identifier
@@ -125,7 +126,7 @@ class UserRole(models.Model):
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["organization", "role"], name="unique_roles")]
+        constraints = [models.UniqueConstraint(fields=["user", "organization", "role"], name="unique_roles")]
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
