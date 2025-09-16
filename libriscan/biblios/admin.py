@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Organization, Consortium, Membership, Collection, Series, Document, Page, TextBlock, UserRole
+from .models import User, Organization, Consortium, Membership, Collection, Series, Document, Page, TextBlock, UserRole, CloudService
 
 
 
@@ -26,10 +26,14 @@ class PagesInline(admin.StackedInline):
     model = Page
     extra = 0
 
+class CloudServiceInline(admin.StackedInline):
+    model = CloudService
+    extra = 1
+
 
 @admin.register(Organization)
 class OrgAdmin(admin.ModelAdmin):
-    inlines = [MembershipInline]
+    inlines = [MembershipInline, CloudServiceInline]
     list_display = ['name', 'city', 'state']
 
 
@@ -61,4 +65,3 @@ admin.site.register(User, UserAdmin)
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ['user', 'organization', 'role']
-

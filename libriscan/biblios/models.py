@@ -21,6 +21,7 @@ class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
         abstract = True
 
 
+
 # This model is what we'll use for libraries, but calling it Org for two reasons:
 # Trying to avoid ambiguity with software libraries, and maybe non-library orgs could use this someday
 class Organization(BibliosModel):
@@ -39,6 +40,24 @@ class Organization(BibliosModel):
 
     def __str__(self):
         return self.name
+
+
+class CloudService(models.Model):
+    TEST = 'T'
+    AWS = 'A'
+    SERVICE_CHOICES = {
+        TEST: "Test",
+        AWS: "Amazon Web Services"
+    }
+
+    organization = models.OneToOneField(Organization, on_delete=models.CASCADE)
+    service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
+    client_id = models.CharField(max_length=100)
+    client_secret = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.SERVICE_CHOICES[self.service]
+
 
 
 class Consortium(BibliosModel):
