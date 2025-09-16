@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
-from .models import Organization, Consortium, Document, Collection
+from .models import Organization, Consortium, Document, Collection, Page
 
 logger = logging.getLogger(__name__)
 
@@ -67,3 +67,12 @@ def collection_detail(request, short_name, pk):
     collection = Collection.objects.get(pk=pk)
     context = {"collection": collection}
     return render(request, "biblios/collection_detail.html", context)
+
+
+
+def extract_test(request, short_name):
+    org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
+    doc = Document.objects.filter(series__collection__owner=org).first()
+
+    context = {'org':org, 'doc':doc}
+    return render(request, "biblios/page.html", context)

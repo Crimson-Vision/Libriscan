@@ -1,0 +1,25 @@
+{% extends "biblios/base.html" %}
+
+{% block content %}
+<h4>{{ org }} Extractor Test</h4>
+
+<div>
+    <p>Provider: {{ org.cloudservice.get_service_display }}</p>
+    <p>Document: {{ doc }}</p>
+
+      {% for page in doc.page_set.all %}
+      <div class="card">
+        <span>Page {{page.number}}</span>
+          <figure>
+            {% if page.image %}
+                <img src="{{page.image}}"/>
+            {% endif %}
+          </figure>
+        <div class="card-body">
+          <button class="btn btn-primary btn-block">Upload</button>
+        </div>
+      </div>
+      {% endfor %}
+</div>
+
+{% endblock %}
