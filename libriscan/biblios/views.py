@@ -1,7 +1,9 @@
 import logging
 
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
 from django.views.generic import ListView, DetailView
+from django.views.decorators.http import require_http_methods
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
@@ -50,6 +52,11 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
     model = Document
 
 
+class PageDetail(DetailView):
+    model = Page
+    template_name = "biblios/page.html"
+
+
 # This is a verbose way of handling RBAC on a collections page
 # The permission_required handle on collection_detail calls this function,
 # and passes it the same params.
@@ -69,10 +76,13 @@ def collection_detail(request, short_name, pk):
     return render(request, "biblios/collection_detail.html", context)
 
 
+@require_http_methods(["POST"])
+def extract_test(request, pk):
+    #org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
+    #doc = Document.objects.filter(series__collection__owner=org).first()
+    page = Page.objects.select_related('document__series__collection__owner').get(id=pk)
+    org = page.document.series.collection.owner
+    
+    extractor = org.cloudservice.get_extractor()
 
-def extract_test(request, short_name):
-    org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
-    doc = Document.objects.filter(series__collection__owner=org).first()
-
-    context = {'org':org, 'doc':doc}
-    return render(request, "biblios/page.html", context)
+    return JsonResponse({"text":org.name})

@@ -58,6 +58,8 @@ class CloudService(models.Model):
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
 
+    def get_extractor(self):
+        return 't'
 
 
 class Consortium(BibliosModel):

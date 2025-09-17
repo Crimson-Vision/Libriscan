@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
     path("organizations", views.organization_list, name="organization-list"),
     path(
         "organizations/<int:pk>",
@@ -20,8 +21,10 @@ urlpatterns = [
         views.collection_detail,
         name="collection",
     ),
-    
-    path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
+
+    path('page/<int:pk>', views.PageDetail.as_view(), name="page"),
+    path('page/<int:pk>/extract', views.extract_test, name="extract"),
+    #path('org/<slug:short_name>/extract', views.extract_test, name="extract"),
     path("sample/", views.sample, name="sample"),
-    path('org/<slug:short_name>/extract', views.extract_test, name="extract"),
+    
 ]
