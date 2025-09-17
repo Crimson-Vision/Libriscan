@@ -5,19 +5,21 @@
 {% url 'extract' page.id %}
 <div>
       <div class="card m-4 w-80">
-        <span>Page {{page.number}}</span>
+        <h5>Page {{page.number}}</h5>
           <figure>
             {% if page.image %}
                 <img src="{{page.image}}"/>
             {% endif %}
           </figure>
         <div class="card-body">
-          <form action="{% url 'extract' page.id %}" method="post">
-            {% csrf_token %}
-            <label>Extract: </label>
-            <input type="submit" value="OK">
-        </form>
+          <button hx-post="{% url 'extract' page.id %}" hx-target="#extraction">
+              Extract            
+          </button>
         </div>
+      </div>
+
+      <div id="extraction" class="card m-4 w-80">
+        <h5>Text Response</h5>
       </div>
 
 </div>

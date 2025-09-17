@@ -85,4 +85,4 @@ def extract_test(request, pk):
     
     extractor = org.cloudservice.get_extractor()
 
-    return JsonResponse({"text":org.name})
+    return JsonResponse({"service":extractor.service, "text":extractor.extract()})

@@ -10,7 +10,6 @@ from localflavor.us.models import USStateField
 
 from .access_rules import is_org_archivist, is_org_editor, is_org_viewer
 
-
 class User(AbstractUser):
     pass
 
@@ -59,7 +58,8 @@ class CloudService(models.Model):
         return self.SERVICE_CHOICES[self.service]
 
     def get_extractor(self):
-        return 't'
+        from .services import EXTRACTORS
+        return EXTRACTORS[self.service]()
 
 
 class Consortium(BibliosModel):
