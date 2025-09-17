@@ -78,11 +78,13 @@ def collection_detail(request, short_name, pk):
 
 @require_http_methods(["POST"])
 def extract_test(request, pk):
-    #org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
-    #doc = Document.objects.filter(series__collection__owner=org).first()
-    page = Page.objects.select_related('document__series__collection__owner').get(id=pk)
+    # org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
+    # doc = Document.objects.filter(series__collection__owner=org).first()
+    page = Page.objects.select_related("document__series__collection__owner").get(id=pk)
     org = page.document.series.collection.owner
-    
-    extractor = org.cloudservice.get_extractor()
 
-    return JsonResponse({"service":extractor.service, "text":extractor.extract()})
+    extractor = org.cloudservice.get_extractor(page)
+
+    context = {"words": extractor.get_words()}
+
+    return render(request, "biblios/words.html", context)

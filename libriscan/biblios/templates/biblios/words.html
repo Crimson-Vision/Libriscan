@@ -1,0 +1,3 @@
+{% for word in words %}
+<span class="text-{{word.text_type}}">{{word.text}} ({{word.confidence|floatformat:2}}%)</span>
+{% endfor %}

@@ -10,6 +10,7 @@ from localflavor.us.models import USStateField
 
 from .access_rules import is_org_archivist, is_org_editor, is_org_viewer
 
+
 class User(AbstractUser):
     pass
 
@@ -18,7 +19,6 @@ class User(AbstractUser):
 class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
     class Meta:
         abstract = True
-
 
 
 # This model is what we'll use for libraries, but calling it Org for two reasons:
@@ -42,12 +42,9 @@ class Organization(BibliosModel):
 
 
 class CloudService(models.Model):
-    TEST = 'T'
-    AWS = 'A'
-    SERVICE_CHOICES = {
-        TEST: "Test",
-        AWS: "Amazon Web Services"
-    }
+    TEST = "T"
+    AWS = "A"
+    SERVICE_CHOICES = {TEST: "Test", AWS: "Amazon Web Services"}
 
     organization = models.OneToOneField(Organization, on_delete=models.CASCADE)
     service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
@@ -57,9 +54,10 @@ class CloudService(models.Model):
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
 
-    def get_extractor(self):
+    def get_extractor(self, page):
         from .services import EXTRACTORS
-        return EXTRACTORS[self.service]()
+
+        return EXTRACTORS[self.service](page)
 
 
 class Consortium(BibliosModel):
@@ -115,7 +113,9 @@ class Document(BibliosModel):
     class Meta:
         # In theory this would be better as a unique identifer per collection
         constraints = [
-            models.UniqueConstraint(fields=["series", "identifier"], name="unique_doc_per_org")
+            models.UniqueConstraint(
+                fields=["series", "identifier"], name="unique_doc_per_org"
+            )
         ]
         rules_permissions = {
             "add": is_org_editor,
@@ -123,7 +123,6 @@ class Document(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
-
 
     def __str__(self):
         return self.identifier
@@ -222,7 +221,11 @@ class UserRole(models.Model):
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "organization", "role"], name="unique_roles")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "organization", "role"], name="unique_roles"
+            )
+        ]
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"

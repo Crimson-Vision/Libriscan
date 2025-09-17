@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
-from .models import Series, Document, Organization, UserRole, Organization, UserRole
+from .models import Series, Document, Organization, UserRole
 
 
 class UserModelTests(TestCase):
@@ -18,7 +18,7 @@ class UserModelTests(TestCase):
 
 
 class BibliosTests(TestCase):
-    fixtures = ['orgs', 'collections', 'series', 'docs']
+    fixtures = ["orgs", "collections", "series", "docs"]
 
     # The unique constraint tests are confirming that the constraints are applied as intended,
     # not that they generally work.
@@ -27,18 +27,17 @@ class BibliosTests(TestCase):
         # Checking that the constraint isn't being applied across different series
         d = Document.objects.first()
         s = Series.objects.create(collection=d.series.collection, name="Test series")
-        
+
         try:
             Document.objects.create(series=s, identifier=d.identifier)
             passes = True
         except IntegrityError:
             passes = False
-                
+
         self.assertTrue(passes)
 
-
     def test_unique_user_roles(self):
-        # Checking the constraint doesn't block a user from having different roles, 
+        # Checking the constraint doesn't block a user from having different roles,
         # or different users from having the same role in an org
         user_model = get_user_model()
         u = user_model.objects.create(username="tester")
@@ -47,15 +46,15 @@ class BibliosTests(TestCase):
 
         try:
             new_user = user_model.objects.create(username="tester2")
-            UserRole.objects.create(user=new_user, organization=org, role=UserRole.EDITOR)
+            UserRole.objects.create(
+                user=new_user, organization=org, role=UserRole.EDITOR
+            )
             UserRole.objects.create(user=u, organization=org, role=UserRole.ADMIN)
             passes = True
         except IntegrityError:
             passes = False
-        
+
         self.assertTrue(passes)
-
-
 
 
 # This is not the right place for this.
@@ -128,6 +127,40 @@ mock_extraction = """
         "RotationAngle": 0
       },
       "Id": "98491e1b-1b2c-4399-9318-fad0c0ac1a50"
+    },
+    {
+      "BlockType": "LNE",
+      "Confidence": 97.08146667480469,
+      "Text": "here's a new line,",
+      "TextType": "PRINTED",
+      "Geometry": {
+        "BoundingBox": {
+          "Width": 0.04265840724110603,
+          "Height": 0.014060212299227715,
+          "Left": 0.6247768998146057,
+          "Top": 0.19947728514671326
+        },
+        "Polygon": [
+          {
+            "X": 0.6247768998146057,
+            "Y": 0.19947728514671326
+          },
+          {
+            "X": 0.6673938632011414,
+            "Y": 0.19956453144550323
+          },
+          {
+            "X": 0.6674352884292603,
+            "Y": 0.21353749930858612
+          },
+          {
+            "X": 0.6248196959495544,
+            "Y": 0.21345089375972748
+          }
+        ],
+        "RotationAngle": 0
+      },
+      "Id": "67c2-4b19-959b-06cab0568a19-b756619a"
     },
     {
       "BlockType": "WORD",
