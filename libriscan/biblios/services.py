@@ -92,7 +92,8 @@ class AWSExtractor(BaseExtractor):
         service = self.page.document.series.collection.owner.cloudservice
 
         client = boto3.client(
-            "s3",
+            "textract",
+            region_name="us-east-1",
             aws_access_key_id=service.client_id,
             aws_secret_access_key=service.client_secret,
         )

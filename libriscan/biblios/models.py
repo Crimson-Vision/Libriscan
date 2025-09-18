@@ -131,7 +131,7 @@ class Document(BibliosModel):
 class Page(BibliosModel):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     number = models.SmallIntegerField(default=1)
-    image = models.ImageField(blank=True)
+    image = models.ImageField(blank=True, upload_to="pages")
 
     class Meta:
         constraints = [
