@@ -86,9 +86,22 @@ class AWSExtractor(BaseExtractor):
     service = "Amazon Web Services"
 
     def __get_extraction__(self):
-        from .tests import mock_extraction
+        import boto3
+        from textractcaller import call_textract
 
-        return json.loads(mock_extraction)
+        service = self.page.document.series.collection.owner.cloudservice
+
+        client = boto3.client(
+            "s3",
+            aws_access_key_id=service.client_id,
+            aws_secret_access_key=service.client_secret,
+        )
+
+        extracted_page = call_textract(
+            input_document=self.page.image.path, boto3_textract_client=client
+        )
+
+        return extracted_page["Blocks"]
 
     def __filter__(self, res):
         """
