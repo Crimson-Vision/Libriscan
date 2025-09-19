@@ -22,5 +22,4 @@ urlpatterns = [
         name="collection",
     ),
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
-    path("sample/", views.sample, name="sample"),
 ]

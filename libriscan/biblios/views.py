@@ -17,11 +17,6 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-# Sample page view for Tailwind + daisyUI + HTMX
-def sample(request):
-    return render(request, "biblios/sample.html")
-
-
 @login_required
 def scan(request):
     return render(request, "biblios/scan.html")
