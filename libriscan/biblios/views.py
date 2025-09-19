@@ -26,7 +26,10 @@ def sample(request):
 # for orgs the user is a member of, which by our rules happens
 # to be the ones they have permission to see.
 def organization_list(request):
-    orgs = request.user.userrole_set.all()
+    if request.user.is_authenticated:
+        orgs = request.user.userrole_set.all()
+    else:
+        orgs = []
     context = {"orgs": orgs}
     return render(request, "biblios/organization_list.html", context)
 
