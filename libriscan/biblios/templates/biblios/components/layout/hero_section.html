@@ -1,15 +1,11 @@
 {% load static %}
 
-<div class="hero bg-base-200 min-h-[300px]">
+<div class="hero bg-base-200">
   <div class="hero-content text-center">
     <div class="max-w-md">
-      <h1 class="text-5xl font-bold">
+      <h1 class="text-2xl font-bold">
         Hello, {% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% else %}Guest{% endif %}
       </h1>
-      <p class="py-6">
-        Welcome to LibriScan!
-      </p>
-      <a href="{% url 'scan' %}" class="btn btn-primary">Start Scanning</a>
     </div>
   </div>
 </div>
