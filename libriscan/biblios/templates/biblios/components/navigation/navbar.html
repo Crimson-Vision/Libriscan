@@ -28,10 +28,10 @@
       <li><a href="#" class="hover:bg-base-200">Search</a></li>
       <li>
         {% if user.is_authenticated %}
-        <form method="post" action="/account/logout/" class="m-0 p-0">
+        <a href="#" onclick="document.getElementById('logout-form').submit();" class="hover:bg-base-200">Logout</a>
+        <form id="logout-form" method="post" action="/account/logout/" class="hidden">
           {% csrf_token %}
           <input type="hidden" name="next" value="{% url 'index' %}">
-          <button type="submit" class="hover:bg-base-200 px-4 py-2 w-full text-left">Logout</button>
         </form>
         {% else %}
         <a href="/login">Login</a>
