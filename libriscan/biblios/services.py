@@ -87,7 +87,6 @@ class AWSExtractor(BaseExtractor):
 
     def __get_extraction__(self):
         import boto3
-        from textractcaller import call_textract
 
         service = self.page.document.series.collection.owner.cloudservice
 
@@ -98,9 +97,10 @@ class AWSExtractor(BaseExtractor):
             aws_secret_access_key=service.client_secret,
         )
 
-        extracted_page = call_textract(
-            input_document=self.page.image.path, boto3_textract_client=client
-        )
+        # Get the bytes of the page image to send to Textract
+        image = self.page.image.file.file.read()
+
+        extracted_page = client.analyze_document(Document={'Bytes':image})
 
         return extracted_page["Blocks"]
 

@@ -1,4 +1,3 @@
-amazon_textract_caller==0.2.4
 boto3==1.40.34
 Django==5.2.6
 django_localflavor==5.0
