@@ -12,6 +12,16 @@
   <!-- daisyUI CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  
+  <!-- Theme Toggle Script -->
+  <script>
+    function toggleTheme() {
+      const html = document.querySelector('html');
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+    }
+  </script>
 </head>
 
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' class="min-h-screen bg-base-100">
