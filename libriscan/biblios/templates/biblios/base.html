@@ -24,7 +24,7 @@
   </script>
 </head>
 
-<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' class="min-h-screen bg-base-100">
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' class="min-h-screen bg-base-100 flex flex-col">
   <!-- Navigation -->
   {% include "biblios/components/navigation/navbar.html" %}
 
@@ -34,12 +34,12 @@
   {% endblock hero %}
 
   <!-- Main Content -->
-  <main class="container mx-auto px-4">
+  <main class="container mx-auto px-4 flex-grow">
     {% block content %}{% endblock content %}
   </main>
 
   <!-- Footer -->
-  <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
     <div>
       <p>Copyright © 2025 - All rights reserved by LibriScan</p>
     </div>
