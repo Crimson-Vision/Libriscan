@@ -14,7 +14,11 @@
       <li><a href="#" class="hover:bg-base-200">Search</a></li>
       <li>
         {% if user.is_authenticated %}
-        <a href="{% url 'logout' %}">Logout</a>
+        <form method="post" action="/account/logout/" class="m-0 p-0">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'index' %}">
+          <button type="submit" class="hover:bg-base-200 px-4 py-2 w-full text-left">Logout</button>
+        </form>
         {% else %}
         <a href="{% url 'login' %}">Login</a>
         {% endif %}
