@@ -1,9 +1,10 @@
 {% load django_htmx %}
 <!doctype html>
-<html lang="en-US">
+<html lang="en-US" data-theme="light">
 
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Libriscan{% endblock %}</title>
   {% htmx_script %}
   <!-- Tailwind CSS CDN -->
@@ -11,31 +12,38 @@
   <!-- daisyUI CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  
+  <!-- Theme Toggle Script -->
+  <script>
+    function toggleTheme() {
+      const html = document.querySelector('html');
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+    }
+  </script>
 </head>
 
-<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' class="min-h-screen bg-base-100 flex flex-col">
+  <!-- Navigation -->
+  {% include "biblios/components/navigation/navbar.html" %}
 
-  <nav>
-    {% block nav %}
-    <ol>
-      <li><a href="{% url 'index' %}">Home</a></li>
-      {% if user.is_staff %}
-      <li><a href="{% url 'admin:index' %}">Admin</a></li>
-      {% endif %}
-      {% if not user.is_authenticated %}
-      <li>Log In</li>
-      {% else %}
-      <li>Log Out</li>
-      <li>{{user.username}}</li>
-      {% endif %}
-    </ol>
-    {% endblock nav %}
-  </nav>
+  <!-- Hero Section -->
+  {% block hero %}
+    {% include "biblios/components/layout/hero_section.html" %}
+  {% endblock hero %}
 
-  <div id="content">
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 flex-grow">
     {% block content %}{% endblock content %}
-  </div>
+  </main>
 
+  <!-- Footer -->
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
+    <div>
+      <p>Copyright © 2025 - All rights reserved by LibriScan</p>
+    </div>
+  </footer>
 </body>
 
 </html>

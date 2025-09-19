@@ -2,6 +2,7 @@ import logging
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView, DetailView
+from django.contrib.auth.decorators import login_required
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
@@ -16,9 +17,9 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-# Sample page view for Tailwind + daisyUI + HTMX
-def sample(request):
-    return render(request, "biblios/sample.html")
+@login_required
+def scan(request):
+    return render(request, "biblios/scan.html")
 
 
 # This is a basic way of handling RBAC on the user's org list.

@@ -20,6 +20,9 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
 urlpatterns = [
+    path("login/", auth_views.LoginView.as_view(
+        template_name="registration/login.html"
+    ), name="login"),
     path("", include("biblios.urls")),  # put the Biblios app at root
     path("admin/", admin.site.urls, name="admin"),
     path("account/", include("django.contrib.auth.urls")),
