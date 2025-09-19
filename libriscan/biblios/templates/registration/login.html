@@ -32,17 +32,21 @@
           {% endif %}
         {% endif %}
 
-        <fieldset class="fieldset">
-          <label class="label" for="{{ form.username.id_for_label }}">Username</label>
-          {{ form.username }}
+        <fieldset class="fieldset space-y-4 p-1">
+          <div class="mb-1">
+            <label class="label text-sm mb-2" for="{{ form.username.id_for_label }}">Username</label>
+            <input type="text" name="username" class="input input-bordered w-full p-3 border-2 border-gray-300" id="{{ form.username.id_for_label }}" required>
+          </div>
 
-          <label class="label" for="{{ form.password.id_for_label }}">Password</label>
-          {{ form.password }}
+          <div class="mb-1">
+            <label class="label text-sm mb-2" for="{{ form.password.id_for_label }}">Password</label>
+            <input type="password" name="password" class="input input-bordered w-full p-3 border-2 border-gray-300" id="{{ form.password.id_for_label }}" required>
+          </div>
 
-          <div><a href="{% url 'password_reset' %}" class="link link-hover">Forgot password?</a></div>
+          <div class="mt-2"><a href="{% url 'password_reset' %}" class="link link-hover text-sm">Forgot password?</a></div>
 
           <input type="hidden" name="next" value="{{ next }}">
-          <button class="btn btn-neutral mt-4" type="submit">Login</button>
+          <button class="btn btn-neutral mt-6 w-full" type="submit">Login</button>
         </fieldset>
       </form>
     </div>
