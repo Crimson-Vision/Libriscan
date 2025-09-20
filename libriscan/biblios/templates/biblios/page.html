@@ -12,7 +12,7 @@
             {% endif %}
           </figure>
         <div class="card-body">
-          <button hx-post="{% url 'extract' page.id %}" hx-target="#extraction">
+          <button hx-post="{% url 'extract' page.id %}" hx-target="#extraction" {% if page.has_extraction %} disabled {% endif %}>
               Extract            
           </button>
         </div>
@@ -20,6 +20,7 @@
 
       <div id="extraction" class="card m-4 w-80">
         <h3>Extracted Text</h3>
+        <p>{% for word in page.textblock_set.all %} {{word}} {% endfor %}</p>
       </div>
 
 </div>

@@ -52,6 +52,8 @@ class BaseExtractor(object):
         response = self.__get_extraction__()
         words = [self.__create_text_block__(w) for w in self.__filter__(response)]
 
+        TextBlock.objects.bulk_create(words)
+
         return words
 
     def process_image(self, image):
@@ -100,7 +102,8 @@ class AWSExtractor(BaseExtractor):
         # Get the bytes of the page image to send to Textract
         image = self.page.image.file.file.read()
 
-        extracted_page = client.analyze_document(Document={'Bytes':image})
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/textract/client/detect_document_text.html
+        extracted_page = client.detect_document_text(Document={'Bytes':image})
 
         return extracted_page["Blocks"]
 
@@ -111,16 +114,20 @@ class AWSExtractor(BaseExtractor):
         return [r for r in res if r["BlockType"] == "WORD"]
 
     def __create_text_block__(self, word):
-        return {
-            "extraction_id": word["Id"],
-            "text": word["Text"],
-            "text_type": word["TextType"],
-            "confidence": word["Confidence"],
-            "geo_x_0": word["Geometry"]["Polygon"][0]["X"],
-            "geo_y_0": word["Geometry"]["Polygon"][0]["Y"],
-            "geo_x_1": word["Geometry"]["Polygon"][2]["X"],
-            "geo_y_1": word["Geometry"]["Polygon"][2]["Y"],
-        }
+
+        text_type = TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
+
+        return TextBlock(
+            extraction_id=word["Id"],
+            page=self.page,
+            text=word["Text"],
+            text_type=text_type,
+            confidence=word["Confidence"],
+            geo_x_0=word["Geometry"]["Polygon"][0]["X"],
+            geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
+            geo_x_1=word["Geometry"]["Polygon"][2]["X"],
+            geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
+        )
 
 
 EXTRACTORS = {CloudService.TEST: TestExtractor, CloudService.AWS: AWSExtractor}

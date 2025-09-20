@@ -146,6 +146,10 @@ class Page(BibliosModel):
 
     def __str__(self):
         return f"{self.document} page {self.number}"
+    
+    @property
+    def has_extraction(self):
+        return self.textblock_set.exists()
 
 
 class TextBlock(BibliosModel):
