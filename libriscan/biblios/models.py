@@ -4,15 +4,27 @@ from rules.contrib.models import RulesModelMixin, RulesModelBase
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.translation import gettext_lazy as _
 
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
 
 from .access_rules import is_org_archivist, is_org_editor, is_org_viewer
+from .managers import CustomUserManager
 
 
+# Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
 class User(AbstractUser):
-    pass
+    username = None
+    email = models.EmailField(_("email address"), unique=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
 
 
 # Custom model in case there's a need for anything more than just the rules meta class

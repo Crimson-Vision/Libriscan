@@ -3,6 +3,5 @@
 {% block title %}Libriscan{% endblock %}
 
 {% block content %}
-    <h2>Welcome to {{ app_name }}</h2>
-    <p>Check out some <a href="{% url 'organization-list' %}">libraries</a>.</p>
+  {% include "biblios/components/layout/welcome_section.html" %}
 {% endblock content %}

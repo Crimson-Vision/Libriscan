@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
+    path("scan/", views.scan, name="scan"),
     path("organizations", views.organization_list, name="organization-list"),
     path(
         "organizations/<int:pk>",
@@ -12,12 +13,14 @@ urlpatterns = [
         name="organization",
     ),
     path(
-        "org/<slug:short_name>/",
+
+        "organization/<slug:short_name>/",
         views.OrganizationDetail.as_view(),
         name="org_slug",
     ),
     path(
-        "org/<slug:short_name>/<int:pk>",
+
+        "organization/<slug:short_name>/<int:pk>",
         views.collection_detail,
         name="collection",
     ),
@@ -26,5 +29,4 @@ urlpatterns = [
     path('page/<int:pk>/extract', views.extract_test, name="extract"),
     #path('org/<slug:short_name>/extract', views.extract_test, name="extract"),
     path("sample/", views.sample, name="sample"),
-    
 ]

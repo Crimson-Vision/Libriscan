@@ -191,7 +191,11 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
 )
 
+LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 
 MEDIA_ROOT = LOCAL_DIR / "images"
 MEDIA_URL = "images/"
+
+LOGOUT_REDIRECT_URL = "/"
+
