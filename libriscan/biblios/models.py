@@ -17,6 +17,8 @@ from .managers import CustomUserManager
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -106,7 +108,9 @@ class Document(BibliosModel):
     class Meta:
         # In theory this would be better as a unique identifer per collection
         constraints = [
-            models.UniqueConstraint(fields=["series", "identifier"], name="unique_doc_per_org")
+            models.UniqueConstraint(
+                fields=["series", "identifier"], name="unique_doc_per_org"
+            )
         ]
         rules_permissions = {
             "add": is_org_editor,
@@ -114,7 +118,6 @@ class Document(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
-
 
     def __str__(self):
         return self.identifier
@@ -213,7 +216,11 @@ class UserRole(models.Model):
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "organization", "role"], name="unique_roles")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "organization", "role"], name="unique_roles"
+            )
+        ]
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
