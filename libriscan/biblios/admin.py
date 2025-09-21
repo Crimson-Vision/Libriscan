@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User, Organization, Consortium, Membership, Collection, Series, Document, Page, TextBlock, UserRole
+from .models import User, UserRole, Organization, Consortium, Membership, CloudService
+from .models import Collection, Series, Document, Page, TextBlock
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
 
