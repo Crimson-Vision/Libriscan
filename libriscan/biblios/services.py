@@ -25,7 +25,7 @@ class BaseExtractor(object):
         return f"{self.service} Extractor"
 
     def __get_extraction__(self):
-        from .tests import mock_extraction
+        from biblios.tests import mock_extraction
 
         return json.loads(mock_extraction)
 

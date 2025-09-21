@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
-from .models import Series, Document, Organization, UserRole
+from biblios.models import Series, Document, Organization, UserRole
 
 
 class UserModelTests(TestCase):
@@ -40,16 +40,16 @@ class BibliosTests(TestCase):
         # Checking the constraint doesn't block a user from having different roles,
         # or different users from having the same role in an org
         user_model = get_user_model()
-        u = user_model.objects.create(username="tester")
+        u = user_model.objects.create(email="1@2.com")
         org = Organization.objects.first()
         UserRole.objects.create(user=u, organization=org, role=UserRole.EDITOR)
 
         try:
-            new_user = user_model.objects.create(username="tester2")
+            new_user = user_model.objects.create(email="2@2.com")
             UserRole.objects.create(
                 user=new_user, organization=org, role=UserRole.EDITOR
             )
-            UserRole.objects.create(user=u, organization=org, role=UserRole.ADMIN)
+            UserRole.objects.create(user=u, organization=org, role=UserRole.ARCHIVIST)
             passes = True
         except IntegrityError:
             passes = False
