@@ -169,6 +169,11 @@ class TextBlock(BibliosModel):
     HANDWRITING = "H"
     TEXT_TYPE_CHOICES = {PRINTED: "Printed", HANDWRITING: "Handwriting"}
 
+    INCLUDE = 'I'
+    MERGE = 'M'
+    OMIT = 'O'
+    PRINT_CONTROL_CHOICES = {INCLUDE: "Include", MERGE: "Merge With Prior", OMIT: "Omit"}
+
     page = models.ForeignKey(Page, on_delete=models.CASCADE)
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
@@ -184,6 +189,12 @@ class TextBlock(BibliosModel):
         decimal_places=3,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
+
+    # Controls whether this word should be included from document exports.
+    # Include: a normal word to include in the exported file
+    # Merge With Prior: a word fragment; don't include the text, and extend the previous word's bounding box
+    # Omit: leave it out completely
+    print_control = models.CharField(max_length=1, choices=PRINT_CONTROL_CHOICES, default=INCLUDE)
 
     # The bounding box is recorded as the bottom-left corner (X,Y 0) and top-right corner (X,Y 1)
     # Textract returns values that are percentages of the page width, so these need to be decimals too
@@ -224,6 +235,7 @@ class TextBlock(BibliosModel):
 
     def __str__(self):
         return self.text
+
 
 
 class UserRole(models.Model):
