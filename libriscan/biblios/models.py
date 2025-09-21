@@ -67,7 +67,7 @@ class CloudService(models.Model):
         return self.SERVICE_CHOICES[self.service]
 
     def get_extractor(self, page):
-        from .services import EXTRACTORS
+        from .services.extractors import EXTRACTORS
 
         return EXTRACTORS[self.service](page)
 

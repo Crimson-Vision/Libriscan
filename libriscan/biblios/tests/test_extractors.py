@@ -5,7 +5,7 @@ from django.test import TestCase
 from unittest.mock import patch
 
 from biblios.models import Document, Page, TextBlock
-from biblios.services import AWSExtractor
+from biblios.services.extractors import AWSExtractor
 
 
 class AWSExtractorTests(TestCase):
