@@ -15,8 +15,24 @@ spell = SpellChecker()
 LONG_S_REGEX = re.compile('(?<!f|s)[fſ](?!f|-|\'|$)')
 
 def long_s_conversion(word, modern=True):
-
-    # Replace the fs with the real long-s character if modern = False, but assume the user wants s by default
+    """Replace every potential misidentified long-s with the correct version of the letter."""
+    # The replacement letter is the real long-s character if modern = False, but s by default
     s = 's' if modern else 'ſ'
 
     return re.sub(LONG_S_REGEX, s, word)
+
+
+def generate_suggestions(words, n=3):
+    """Find possible spellcheck suggestions of all the words in a list, and return the top n candidates."""
+    # Since there are likely to be duplicate candidates for the words, guarantee uniqueness by using a set
+    suggestions = set()
+    
+    for word in words:
+        for candidate in spell.candidates(word):
+            suggestions.add((candidate, spell.word_frequency[candidate]))
+
+    # Sort the suggestions by their frequency, descending
+    suggestions.sort(key=lambda c: c[1], reverse=True)
+    
+    return suggestions[:n]
+    
