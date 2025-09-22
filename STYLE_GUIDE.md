@@ -40,7 +40,7 @@
 
 **How:**
 - Add CDN <script> tags for Tailwind and daisyUI in `biblios/base.html`.
-- Use Tailwind utility classes and daisyUI components directly in your templates (see `sample.html` for example usage).
+- Use Tailwind utility classes and daisyUI components directly in your templates
 
 **Example:**
 ```html
