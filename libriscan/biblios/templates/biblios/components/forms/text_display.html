@@ -13,8 +13,33 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-          <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <div class="flex flex-wrap gap-2">
+            <button class="btn btn-sm" onclick="handleWordClick(this)">Lorem</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">ipsum</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">dolor</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">sit</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">amet</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">consectetur</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">adipiscing</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">elit</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">Sed</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">do</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">eiusmod</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">tempor</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">incididunt</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">ut</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">labore</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">et</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">dolore</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">magna</button>
+            <button class="btn btn-sm" onclick="handleWordClick(this)">aliqua</button>
+          </div>
+          <div id="clickedWordsContainer" class="mt-6 hidden">
+            <div class="alert">
+              <span>Clicked word: </span>
+              <span id="clickedWord" class="font-bold"></span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -54,3 +79,14 @@
     </div>
   </div>
 </div>
+
+<script>
+function handleWordClick(button) {
+  const word = button.textContent;
+  const container = document.getElementById('clickedWordsContainer');
+  const wordSpan = document.getElementById('clickedWord');
+  
+  container.classList.remove('hidden');
+  wordSpan.textContent = word;
+}
+</script>
