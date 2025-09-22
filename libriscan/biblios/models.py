@@ -247,7 +247,7 @@ class TextBlock(BibliosModel):
     
     @cached_property
     def suggestions(self):
-        """Get spellcheck suggestions for the word, including any special check like long-s detection"""
+        """Get spellcheck suggestions for the word, including any special checks like long-s detection"""
         words = [self.text,]
 
         # Check for potential long-s variants, if the doc expects any.
@@ -255,7 +255,7 @@ class TextBlock(BibliosModel):
             s_word = long_s_conversion(self.text)
             if s_word != self.text:
                 words.append(s_word)
-        print(words)
+
         return generate_suggestions(words)
 
 
