@@ -13,31 +13,33 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <div class="flex flex-wrap gap-2">
-            <button class="btn btn-sm" onclick="handleWordClick(this)">Lorem</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">ipsum</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">dolor</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">sit</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">amet</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">consectetur</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">adipiscing</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">elit</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">Sed</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">do</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">eiusmod</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">tempor</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">incididunt</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">ut</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">labore</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">et</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">dolore</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">magna</button>
-            <button class="btn btn-sm" onclick="handleWordClick(this)">aliqua</button>
+          <div id="wordContainer" class="flex flex-wrap gap-4 p-4">
+            <!-- Words will be dynamically inserted here -->
           </div>
-          <div id="clickedWordsContainer" class="mt-6 hidden">
-            <div class="alert">
-              <span>Clicked word: </span>
-              <span id="clickedWord" class="font-bold"></span>
+          <div id="clickedWordsContainer" class="mt-8 hidden">
+            <div class="card bg-base-100 shadow-xl">
+              <div class="card-body">
+                <h3 class="card-title">Word Details</h3>
+                <div class="stats shadow">
+                  <div class="stat">
+                    <div class="stat-title">Word</div>
+                    <div id="clickedWord" class="stat-value text-2xl"></div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-title">Confidence Score</div>
+                    <div id="confidenceScore" class="stat-value text-2xl"></div>
+                    <div class="stat-desc">
+                      <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
+                    </div>
+                  </div>
+                </div>
+                <div id="suggestionsContainer" class="hidden mt-4">
+                  <div class="divider">Suggestions</div>
+                  <div id="suggestionsList" class="space-y-3">
+                    <!-- Suggestions will be dynamically inserted here -->
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -81,12 +83,86 @@
 </div>
 
 <script>
-function handleWordClick(button) {
-  const word = button.textContent;
+let wordData = null;
+let activeButton = null;
+
+// Load word data from JSON file
+fetch('{% static "js/word-data.json" %}')
+  .then(response => response.json())
+  .then(data => {
+    wordData = data;
+    renderWords();
+  })
+  .catch(error => console.error('Error loading word data:', error));
+
+function getConfidenceClass(confidence) {
+  if (confidence < 50) return 'btn-outline btn-error';
+  if (confidence < 80) return 'btn-outline btn-warning';
+  return 'btn-outline';
+}
+
+function getActiveBackgroundClass(confidence) {
+  if (confidence < 50) return 'bg-error/20';
+  if (confidence < 80) return 'bg-warning/20';
+  return 'bg-base-200';
+}
+
+function renderWords() {
+  const container = document.getElementById('wordContainer');
+  wordData.words.forEach(wordInfo => {
+    const button = document.createElement('button');
+    button.className = `btn btn-outline ${getConfidenceClass(wordInfo.confidence)} px-6`;
+    button.textContent = wordInfo.word;
+    button.onclick = () => handleWordClick(wordInfo, button);
+    container.appendChild(button);
+  });
+}
+
+function handleWordClick(wordInfo, button) {
+  // Remove active state from previous button
+  if (activeButton) {
+    activeButton.classList.remove('btn-active');
+    // Remove all possible background classes
+    activeButton.classList.remove('bg-error/20', 'bg-warning/20', 'bg-base-200');
+  }
+  
+  // Add active state to clicked button
+  button.classList.add('btn-active');
+  button.classList.add(getActiveBackgroundClass(wordInfo.confidence));
+  activeButton = button;
+
   const container = document.getElementById('clickedWordsContainer');
-  const wordSpan = document.getElementById('clickedWord');
+  const wordElement = document.getElementById('clickedWord');
+  const scoreElement = document.getElementById('confidenceScore');
+  const progressBar = document.getElementById('confidenceBar');
+  const suggestionsContainer = document.getElementById('suggestionsContainer');
+  const suggestionsList = document.getElementById('suggestionsList');
   
   container.classList.remove('hidden');
-  wordSpan.textContent = word;
+  wordElement.textContent = wordInfo.word;
+  scoreElement.textContent = `${wordInfo.confidence}%`;
+  progressBar.value = wordInfo.confidence;
+  progressBar.className = `progress ${wordInfo.confidence < 50 ? 'progress-error' : wordInfo.confidence < 80 ? 'progress-warning' : wordInfo.confidence >= 90 ? 'progress-success' : ''}`;
+  
+  // Handle suggestions
+  if (wordInfo.suggestions) {
+    suggestionsContainer.classList.remove('hidden');
+    suggestionsList.innerHTML = '';
+    wordInfo.suggestions.forEach(suggestion => {
+      const div = document.createElement('div');
+      div.className = 'flex items-center justify-between p-3 bg-base-200 rounded-lg';
+      div.innerHTML = `
+        <span class="font-medium">${suggestion.word}</span>
+        <div class="flex items-center gap-3">
+          <span class="text-sm">${suggestion.confidence}%</span>
+          <progress class="progress w-24 ${suggestion.confidence < 50 ? 'progress-error' : suggestion.confidence < 80 ? 'progress-warning' : suggestion.confidence >= 90 ? 'progress-success' : ''}" 
+                   value="${suggestion.confidence}" max="100"></progress>
+        </div>
+      `;
+      suggestionsList.appendChild(div);
+    });
+  } else {
+    suggestionsContainer.classList.add('hidden');
+  }
 }
 </script>
