@@ -4,13 +4,15 @@ from rules.contrib.models import RulesModelMixin, RulesModelBase
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
 
-from .access_rules import is_org_archivist, is_org_editor, is_org_viewer
-from .managers import CustomUserManager
+from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
+from biblios.managers import CustomUserManager
+from biblios.services.suggestions import long_s_conversion, generate_suggestions
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -121,6 +123,9 @@ class Series(BibliosModel):
 class Document(BibliosModel):
     series = models.ForeignKey(Series, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=25)
+    
+    # Spelling suggestion rules
+    use_long_s_detection = models.BooleanField(default=True)
 
     class Meta:
         # In theory this would be better as a unique identifer per collection
@@ -226,6 +231,9 @@ class TextBlock(BibliosModel):
                 name="unique_textblock_sequence",
             )
         ]
+        indexes = [
+            models.Index(fields=["geo_x_0", "geo_y_0"]),
+        ]
         rules_permissions = {
             "add": is_org_editor,
             "view": is_org_viewer,
@@ -233,8 +241,22 @@ class TextBlock(BibliosModel):
             "delete": is_org_editor,
         }
 
+
     def __str__(self):
         return self.text
+    
+    @cached_property
+    def suggestions(self):
+        """Get spellcheck suggestions for the word, including any special check like long-s detection"""
+        words = [self.text,]
+
+        # Check for potential long-s variants, if the doc expects any.
+        if self.page.document.use_long_s_detection:
+            s_word = long_s_conversion(self.text)
+            if s_word != self.text:
+                words.append(s_word)
+
+        return generate_suggestions(words)
 
 
 
