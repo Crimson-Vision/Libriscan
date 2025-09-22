@@ -255,7 +255,7 @@ class TextBlock(BibliosModel):
             s_word = long_s_conversion(self.text)
             if s_word != self.text:
                 words.append(s_word)
-
+        print(words)
         return generate_suggestions(words)
 
 

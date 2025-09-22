@@ -1,4 +1,5 @@
 import re
+from string import punctuation
 
 from spellchecker import SpellChecker
 
@@ -26,13 +27,22 @@ def generate_suggestions(words, n=3):
     """Find possible spellcheck suggestions of all the words in a list, and return the top n candidates."""
     # Since there are likely to be duplicate candidates for the words, guarantee uniqueness by using a set
     suggestions = set()
-    
+
     for word in words:
-        for candidate in spell.candidates(word):
-            suggestions.add((candidate, spell.word_frequency[candidate]))
+        # Sometimes the last letter of the word is punctuation, like a comma or period.
+        # Pull it off, generate the suggestions, and then add it back in later
+        if word[-1] in punctuation:
+            last_letter = word[-1]
+            word = word[:-1]
+        else:
+            last_letter = ''
+        candidates = spell.candidates(word)
+        if candidates:
+            for candidate in candidates:
+                suggestions.add((F"{candidate}{last_letter}", spell.word_frequency[candidate]))
 
     # Sort the suggestions by their frequency, descending
-    suggestions.sort(key=lambda c: c[1], reverse=True)
+    suggestions = sorted(suggestions, key=lambda c: c[1], reverse=True)
     
     return suggestions[:n]
     
