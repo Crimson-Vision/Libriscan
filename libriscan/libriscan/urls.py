@@ -14,10 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
 urlpatterns = [
-    path('', include("biblios.urls")), # put the Biblios app at root
-    path('admin/', admin.site.urls, name='admin'),
+    path("login/", auth_views.LoginView.as_view(
+        template_name="registration/login.html"
+    ), name="login"),
+    path("", include("biblios.urls")),  # put the Biblios app at root
+    path("admin/", admin.site.urls, name="admin"),
+    path("account/", include("django.contrib.auth.urls")),
 ]

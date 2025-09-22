@@ -1,0 +1,55 @@
+{% extends "biblios/base.html" %}
+
+{% block content %}
+<div class="hero bg-base-200 min-h-screen">
+  <div class="hero-content flex-col">
+    <div class="text-center">
+      <h1 class="text-5xl font-bold">Login</h1>
+      <p class="py-6">
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+      </p>
+    </div>
+
+    <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+      <form method="post" action="{% url 'login' %}" class="card-body">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-error">
+          <span>Your username and password didn't match. Please try again.</span>
+        </div>
+        {% endif %}
+
+        {% if next %}
+          {% if user.is_authenticated %}
+          <div class="alert alert-warning">
+            <span>Your account doesn't have access to this page. Please login with an account that has access.</span>
+          </div>
+          {% else %}
+          <div class="alert alert-info">
+            <span>Please login to see this page.</span>
+          </div>
+          {% endif %}
+        {% endif %}
+
+        <fieldset class="fieldset space-y-4 p-1">
+          <div class="mb-1">
+            <label class="label text-sm mb-2" for="{{ form.username.id_for_label }}">Username</label>
+            <input type="text" name="username" class="input input-bordered w-full p-3 border-2 border-gray-300" id="{{ form.username.id_for_label }}" required>
+          </div>
+
+          <div class="mb-1">
+            <label class="label text-sm mb-2" for="{{ form.password.id_for_label }}">Password</label>
+            <input type="password" name="password" class="input input-bordered w-full p-3 border-2 border-gray-300" id="{{ form.password.id_for_label }}" required>
+          </div>
+
+          <div class="mt-2"><a href="{% url 'password_reset' %}" class="link link-hover text-sm">Forgot password?</a></div>
+
+          <input type="hidden" name="next" value="{{ next }}">
+          <button class="btn btn-neutral mt-6 w-full" type="submit">Login</button>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

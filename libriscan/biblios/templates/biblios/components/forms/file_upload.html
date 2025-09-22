@@ -1,0 +1,40 @@
+{% load static %}
+
+<div class="card bg-base-100 shadow-sm h-full">
+    <div class="card-body">
+      <h2 class="card-title text-2xl mb-6">Quick Text Recognition</h2>
+      
+      <!-- File Upload Area -->
+      <div class="upload-area w-full">
+        <div class="border-2 border-dashed border-base-300 rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
+             hx-post="/upload"
+             hx-trigger="dragover dragenter"
+             hx-swap="none">
+          <!-- Upload Icon -->
+          <!-- https://heroicons.com/ -->
+          <div class="flex justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          </div>
+          
+          <!-- Upload Text -->
+          <div class="space-y-2">
+            <p class="text-lg font-semibold">Upload Image</p>
+            <p class="text-base-content opacity-60">Drag and drop files here or browse files</p>
+          </div>
+
+          <!-- Hidden File Input -->
+          <input type="file" 
+                 class="hidden" 
+                 accept="image/*"
+                 hx-post="/upload"
+                 hx-trigger="change"
+                 hx-target="#upload-status">
+        </div>
+
+        <!-- Upload Status -->
+        <div id="upload-status" class="mt-4"></div>
+      </div>
+    </div>
+</div>
