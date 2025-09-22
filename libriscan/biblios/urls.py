@@ -22,4 +22,7 @@ urlpatterns = [
         name="collection",
     ),
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
+    path('page/<int:pk>', views.PageDetail.as_view(), name="page"),
+    path('page/<int:pk>/extract', views.extract_test, name="extract"),
+    
 ]

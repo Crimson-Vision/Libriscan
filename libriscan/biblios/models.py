@@ -53,6 +53,25 @@ class Organization(BibliosModel):
         return self.name
 
 
+class CloudService(models.Model):
+    TEST = "T"
+    AWS = "A"
+    SERVICE_CHOICES = {TEST: "Test", AWS: "Amazon Web Services"}
+
+    organization = models.OneToOneField(Organization, on_delete=models.CASCADE)
+    service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
+    client_id = models.CharField(max_length=100)
+    client_secret = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.SERVICE_CHOICES[self.service]
+
+    def get_extractor(self, page):
+        from .services import EXTRACTORS
+
+        return EXTRACTORS[self.service](page)
+
+
 class Consortium(BibliosModel):
     name = models.CharField(max_length=50)
 
@@ -106,7 +125,9 @@ class Document(BibliosModel):
     class Meta:
         # In theory this would be better as a unique identifer per collection
         constraints = [
-            models.UniqueConstraint(fields=["series", "identifier"], name="unique_doc_per_org")
+            models.UniqueConstraint(
+                fields=["series", "identifier"], name="unique_doc_per_org"
+            )
         ]
         rules_permissions = {
             "add": is_org_editor,
@@ -115,7 +136,6 @@ class Document(BibliosModel):
             "delete": is_org_editor,
         }
 
-
     def __str__(self):
         return self.identifier
 
@@ -123,6 +143,7 @@ class Document(BibliosModel):
 class Page(BibliosModel):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
     number = models.SmallIntegerField(default=1)
+    image = models.ImageField(blank=True, upload_to="pages")
 
     class Meta:
         constraints = [
@@ -137,6 +158,10 @@ class Page(BibliosModel):
 
     def __str__(self):
         return f"{self.document} page {self.number}"
+    
+    @property
+    def has_extraction(self):
+        return self.textblock_set.exists()
 
 
 class TextBlock(BibliosModel):
@@ -213,7 +238,11 @@ class UserRole(models.Model):
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["user", "organization", "role"], name="unique_roles")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "organization", "role"], name="unique_roles"
+            )
+        ]
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
