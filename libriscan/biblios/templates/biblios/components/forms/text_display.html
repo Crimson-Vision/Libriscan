@@ -16,32 +16,7 @@
           <div id="wordContainer" class="flex flex-wrap gap-4 p-4">
             <!-- Words will be dynamically inserted here -->
           </div>
-          <div id="clickedWordsContainer" class="mt-8 hidden">
-            <div class="card bg-base-100 shadow-xl">
-              <div class="card-body">
-                <h3 class="card-title">Word Details</h3>
-                <div class="stats shadow">
-                  <div class="stat">
-                    <div class="stat-title">Word</div>
-                    <div id="clickedWord" class="stat-value text-2xl"></div>
-                  </div>
-                  <div class="stat">
-                    <div class="stat-title">Confidence Score</div>
-                    <div id="confidenceScore" class="stat-value text-2xl"></div>
-                    <div class="stat-desc">
-                      <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
-                    </div>
-                  </div>
-                </div>
-                <div id="suggestionsContainer" class="hidden mt-4">
-                  <div class="divider">Suggestions</div>
-                  <div id="suggestionsList" class="space-y-3">
-                    <!-- Suggestions will be dynamically inserted here -->
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {% include 'biblios/components/forms/word_details.html' %}
         </div>
       </div>
 
@@ -86,6 +61,7 @@
 let wordData = null;
 let activeButton = null;
 
+// TODO: Remove after fetch is implemented
 // Load word data from JSON file
 fetch('{% static "js/word-data.json" %}')
   .then(response => response.json())
@@ -131,38 +107,9 @@ function handleWordClick(wordInfo, button) {
   button.classList.add(getActiveBackgroundClass(wordInfo.confidence));
   activeButton = button;
 
-  const container = document.getElementById('clickedWordsContainer');
-  const wordElement = document.getElementById('clickedWord');
-  const scoreElement = document.getElementById('confidenceScore');
-  const progressBar = document.getElementById('confidenceBar');
-  const suggestionsContainer = document.getElementById('suggestionsContainer');
-  const suggestionsList = document.getElementById('suggestionsList');
-  
-  container.classList.remove('hidden');
-  wordElement.textContent = wordInfo.word;
-  scoreElement.textContent = `${wordInfo.confidence}%`;
-  progressBar.value = wordInfo.confidence;
-  progressBar.className = `progress ${wordInfo.confidence < 50 ? 'progress-error' : wordInfo.confidence < 80 ? 'progress-warning' : wordInfo.confidence >= 90 ? 'progress-success' : ''}`;
-  
-  // Handle suggestions
-  if (wordInfo.suggestions) {
-    suggestionsContainer.classList.remove('hidden');
-    suggestionsList.innerHTML = '';
-    wordInfo.suggestions.forEach(suggestion => {
-      const div = document.createElement('div');
-      div.className = 'flex items-center justify-between p-3 bg-base-200 rounded-lg';
-      div.innerHTML = `
-        <span class="font-medium">${suggestion.word}</span>
-        <div class="flex items-center gap-3">
-          <span class="text-sm">${suggestion.confidence}%</span>
-          <progress class="progress w-24 ${suggestion.confidence < 50 ? 'progress-error' : suggestion.confidence < 80 ? 'progress-warning' : suggestion.confidence >= 90 ? 'progress-success' : ''}" 
-                   value="${suggestion.confidence}" max="100"></progress>
-        </div>
-      `;
-      suggestionsList.appendChild(div);
-    });
-  } else {
-    suggestionsContainer.classList.add('hidden');
-  }
+  // Dispatch event for word details component
+  document.dispatchEvent(new CustomEvent('wordSelected', {
+    detail: wordInfo
+  }));
 }
 </script>
