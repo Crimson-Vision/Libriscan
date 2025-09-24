@@ -72,7 +72,7 @@ fetch('{% static "js/word-data.json" %}')
   .catch(error => console.error('Error loading word data:', error));
 
 function getConfidenceClass(confidence) {
-  if (confidence >= 90) return 'btn-outline btn-neutral';
+  if (confidence >= 90) return 'btn-outline';
   if (confidence < 50) return 'btn-outline btn-error';
   if (confidence < 80) return 'btn-outline btn-warning';
   return 'btn-outline btn-primary';
@@ -94,7 +94,7 @@ function handleWordClick(wordInfo, button) {
   if (activeButton) {
     activeButton.classList.remove('btn-active');
     // Add outline back to previous button
-    if (activeButton.confidence >= 90) activeButton.classList.add('btn-outline', 'btn-neutral');
+    if (activeButton.confidence >= 90) activeButton.classList.add('btn-outline');
     else if (activeButton.confidence < 80) activeButton.classList.add('btn-outline', 'btn-warning');
     else if (activeButton.confidence < 50) activeButton.classList.add('btn-outline', 'btn-error');
     else activeButton.classList.add('btn-outline', 'btn-primary');
