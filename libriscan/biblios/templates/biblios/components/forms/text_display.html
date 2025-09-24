@@ -72,22 +72,17 @@ fetch('{% static "js/word-data.json" %}')
   .catch(error => console.error('Error loading word data:', error));
 
 function getConfidenceClass(confidence) {
+  if (confidence >= 90) return 'btn-outline btn-neutral';
   if (confidence < 50) return 'btn-outline btn-error';
   if (confidence < 80) return 'btn-outline btn-warning';
-  return 'btn-outline';
-}
-
-function getActiveBackgroundClass(confidence) {
-  if (confidence < 50) return 'bg-error/20';
-  if (confidence < 80) return 'bg-warning/20';
-  return 'bg-base-200';
+  return 'btn-outline btn-primary';
 }
 
 function renderWords() {
   const container = document.getElementById('wordContainer');
   wordData.words.forEach(wordInfo => {
     const button = document.createElement('button');
-    button.className = `btn btn-outline ${getConfidenceClass(wordInfo.confidence)} px-6`;
+    button.className = `btn ${getConfidenceClass(wordInfo.confidence)} px-6`;
     button.textContent = wordInfo.word;
     button.onclick = () => handleWordClick(wordInfo, button);
     container.appendChild(button);
@@ -95,17 +90,20 @@ function renderWords() {
 }
 
 function handleWordClick(wordInfo, button) {
-  // Remove active state from previous button
+  // Remove active state and restore outline to previous button
   if (activeButton) {
     activeButton.classList.remove('btn-active');
-    // Remove all possible background classes
-    activeButton.classList.remove('bg-error/20', 'bg-warning/20', 'bg-base-200');
+    // Add outline back to previous button
+    if (activeButton.confidence >= 90) activeButton.classList.add('btn-outline', 'btn-neutral');
+    else if (activeButton.confidence < 80) activeButton.classList.add('btn-outline', 'btn-warning');
+    else if (activeButton.confidence < 50) activeButton.classList.add('btn-outline', 'btn-error');
+    else activeButton.classList.add('btn-outline', 'btn-primary');
   }
   
-  // Add active state to clicked button
-  button.classList.add('btn-active');
-  button.classList.add(getActiveBackgroundClass(wordInfo.confidence));
+  // Remove outline from clicked button
+  button.classList.remove('btn-outline');
   activeButton = button;
+  activeButton.confidence = wordInfo.confidence; // Store confidence for later use
 
   // Dispatch event for word details component
   document.dispatchEvent(new CustomEvent('wordSelected', {
