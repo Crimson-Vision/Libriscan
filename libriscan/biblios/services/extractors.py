@@ -2,7 +2,7 @@ import json
 from django.http import HttpResponse
 from PIL import Image
 
-from .models import CloudService, Page, TextBlock
+from biblios.models import CloudService, TextBlock
 
 
 class BaseExtractor(object):
