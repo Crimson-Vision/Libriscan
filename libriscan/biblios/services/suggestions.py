@@ -39,7 +39,9 @@ def generate_suggestions(words, n=3):
 
         # Pyspellchecker will convert to lowercase, so check for common capitalization schemes.
         # Check for all lowercase first, since that's most common
-        if word.islower():
+        if len(word) <= 1:
+          case = None
+        elif word.islower():
             case = None # nothing to do in this case
         elif word[0].isupper() and word[1:].islower(): # there's no iscapitalize method
             case = str.capitalize
