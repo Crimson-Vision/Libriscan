@@ -1,18 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import (
-    User,
-    Organization,
-    Consortium,
-    Membership,
-    Collection,
-    Series,
-    Document,
-    Page,
-    TextBlock,
-    UserRole,
-)
+from .models import User, UserRole, Organization, Consortium, Membership, CloudService
+from .models import Collection, Series, Document, Page, TextBlock
+
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
 
@@ -41,11 +32,15 @@ class PagesInline(admin.StackedInline):
     model = Page
     extra = 0
 
+class CloudServiceInline(admin.StackedInline):
+    model = CloudService
+    extra = 1
+
 
 @admin.register(Organization)
 class OrgAdmin(admin.ModelAdmin):
-    inlines = [MembershipInline]
-    list_display = ["name", "city", "state"]
+    inlines = [MembershipInline, CloudServiceInline]
+    list_display = ['name', 'city', 'state']
 
 
 @admin.register(Consortium)
@@ -74,7 +69,6 @@ class PageAdmin(admin.ModelAdmin):
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ["user", "organization", "role"]
-
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm

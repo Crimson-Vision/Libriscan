@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
@@ -25,5 +27,5 @@ urlpatterns = [
     ), name="login"),
     path("", include("biblios.urls")),  # put the Biblios app at root
     path("admin/", admin.site.urls, name="admin"),
-    path("account/", include("django.contrib.auth.urls")),
-]
+    path("account/", include("django.contrib.auth.urls")),   
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
