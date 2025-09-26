@@ -19,6 +19,8 @@ from biblios.services.suggestions import long_s_conversion, generate_suggestions
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
