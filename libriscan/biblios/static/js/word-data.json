@@ -1,0 +1,165 @@
+{
+  "words": [
+    {
+      "word": "receive",
+      "confidence": 95
+    },
+    {
+      "word": "their",
+      "confidence": 92
+    },
+    {
+      "word": "accomodate",
+      "confidence": 65,
+      "suggestions": [
+        {"word": "accommodate", "confidence": 98}
+      ]
+    },
+    {
+      "word": "occured",
+      "confidence": 70,
+      "suggestions": [
+        {"word": "occurred", "confidence": 95}
+      ]
+    },
+    {
+      "word": "seperate",
+      "confidence": 45,
+      "suggestions": [
+        {"word": "separate", "confidence": 95}
+      ]
+    },
+    {
+      "word": "recieved",
+      "confidence": 40,
+      "suggestions": [
+        {"word": "received", "confidence": 98}
+      ]
+    },
+    {
+      "word": "definately",
+      "confidence": 35,
+      "suggestions": [
+        {"word": "definitely", "confidence": 95}
+      ]
+    },
+    {
+      "word": "excellent",
+      "confidence": 98
+    },
+    {
+      "word": "research",
+      "confidence": 96
+    },
+    {
+      "word": "analysis",
+      "confidence": 94
+    },
+    {
+      "word": "developement",
+      "confidence": 55,
+      "suggestions": [
+        {"word": "development", "confidence": 97},
+        {"word": "envelope", "confidence": 45},
+        {"word": "deployment", "confidence": 40}
+      ]
+    },
+    {
+      "word": "colaboration",
+      "confidence": 60,
+      "suggestions": [
+        {"word": "collaboration", "confidence": 96},
+        {"word": "elaboration", "confidence": 50}
+      ]
+    },
+    {
+      "word": "implementation",
+      "confidence": 93
+    },
+    {
+      "word": "proccess",
+      "confidence": 48,
+      "suggestions": [
+        {"word": "process", "confidence": 95},
+        {"word": "proceed", "confidence": 40},
+        {"word": "princess", "confidence": 30}
+      ]
+    },
+    {
+      "word": "strategy",
+      "confidence": 91
+    },
+    {
+      "word": "inovative",
+      "confidence": 65,
+      "suggestions": [
+        {"word": "innovative", "confidence": 94},
+        {"word": "invasive", "confidence": 45}
+      ]
+    },
+    {
+      "word": "solution",
+      "confidence": 95
+    },
+    {
+      "word": "maintainance",
+      "confidence": 42,
+      "suggestions": [
+        {"word": "maintenance", "confidence": 96},
+        {"word": "maintained", "confidence": 45}
+      ]
+    },
+    {
+      "word": "performance",
+      "confidence": 97
+    },
+    {
+      "word": "eficient",
+      "confidence": 58,
+      "suggestions": [
+        {"word": "efficient", "confidence": 93},
+        {"word": "sufficient", "confidence": 48}
+      ]
+    },
+    {
+      "word": "technology",
+      "confidence": 96
+    },
+    {
+      "word": "inteligent",
+      "confidence": 52,
+      "suggestions": [
+        {"word": "intelligent", "confidence": 95},
+        {"word": "indulgent", "confidence": 40}
+      ]
+    },
+    {
+      "word": "experience",
+      "confidence": 94
+    },
+    {
+      "word": "knowlege",
+      "confidence": 45,
+      "suggestions": [
+        {"word": "knowledge", "confidence": 97},
+        {"word": "college", "confidence": 35}
+      ]
+    },
+    {
+      "word": "quality",
+      "confidence": 92
+    },
+    {
+      "word": "asessment",
+      "confidence": 68,
+      "suggestions": [
+        {"word": "assessment", "confidence": 96},
+        {"word": "assent", "confidence": 42}
+      ]
+    },
+    {
+      "word": "management",
+      "confidence": 95
+    }
+  ]
+}
