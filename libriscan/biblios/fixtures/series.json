@@ -1,0 +1,10 @@
+[
+{
+    "model": "biblios.series",
+    "pk": 1,
+    "fields": {
+        "collection": 1,
+        "name": "The Jones House"
+    }
+}
+]

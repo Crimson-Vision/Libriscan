@@ -38,5 +38,16 @@
         "city": "Cambridge",
         "state": "MA"
     }
+},
+
+{
+    "model": "biblios.cloudservice",
+    "pk": 1,
+    "fields": {
+        "organization": 1,
+        "service": "A",
+        "client_id": "123",
+        "client_secret": "098"
+    }
 }
 ]
