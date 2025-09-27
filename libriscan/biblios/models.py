@@ -148,7 +148,7 @@ class Document(BibliosModel):
 
 
 class Page(BibliosModel):
-    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="pages")
     number = models.SmallIntegerField(default=1)
     image = models.ImageField(blank=True, upload_to="pages")
 
@@ -203,7 +203,7 @@ class TextBlock(BibliosModel):
     # Omit: leave it out completely
     print_control = models.CharField(max_length=1, choices=PRINT_CONTROL_CHOICES, default=INCLUDE)
 
-    # The bounding box is recorded as the bottom-left corner (X,Y 0) and top-right corner (X,Y 1)
+    # The bounding box is recorded as the top-left corner (X,Y 0) and bottom-right corner (X,Y 1)
     # Textract returns values that are percentages of the page width, so these need to be decimals too
     geo_x_0 = models.DecimalField(
         max_digits=20,
