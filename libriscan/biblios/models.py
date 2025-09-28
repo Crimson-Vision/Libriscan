@@ -156,6 +156,14 @@ class Document(BibliosModel):
         from biblios.services.exporters import export_pdf
 
         return export_pdf(self, use_image)
+    
+    def export_text(self):
+        """
+        Provide a text file version of the document.
+        """
+        from biblios.services.exporters import export_text
+
+        return export_text(self)
 
 
 class Page(BibliosModel):

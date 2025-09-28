@@ -5,8 +5,8 @@
 
 <p>Downloads:</p>
 <ul class="list">
-  <li class="list-row"><a href="{% url 'pdf' document.id %}">PDF</a></li>
-  <li class="list-row"><a href="{% url 'textpdf' document.id %}">Text-only PDF</a></li>
+  <li class="list-row"><a href="{% url 'export_pdf' document.id %}">PDF</a></li>
+  <li class="list-row"><a href="{% url 'export_textpdf' document.id %}">Text-only PDF</a></li>
 </ul>
 
 {% endblock content %}

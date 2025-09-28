@@ -9,6 +9,50 @@ from biblios.models import Document, TextBlock
 
 logger = logging.getLogger(__name__)
 
+def export_text(doc):
+    """
+    Returns a text file of this document.
+    """
+    logger.info(F"Generating a text file of {doc}")
+    if not isinstance(doc, Document):
+        logger.error(F"export_text() called with object of {type(doc)} type.")
+        return HttpResponseBadRequest("Invalid document")
+    
+    # Lines will be tracked by comparing each word's horizontal position on the page to the previous.
+    # If a word is suddenly to the left of the previous one's right-most corner, it's a new line.
+    # Don't use vertical position though -- too many false positives from variation in the exact Y positions
+    lines = []
+    words = []
+    current_x = 0
+    
+    # Create a buffer that can be returned as a file download
+    output = io.BytesIO()
+
+    for page in doc.pages.order_by("number"):
+        # skip pages that don't have an image yet (even if we're not printing them)
+        if not page.image:
+            pass
+
+        for word in page.textblock_set.filter(print_control=TextBlock.INCLUDE):
+            # Since the typography can get fairly ornate, track the midpoint of this word
+            x = (word.geo_x_0 + word.geo_x_1)/2
+            # If the position of this word is less than the last word's lower-right X, start a new line
+            if x < current_x:                
+                lines.append(F"{' '.join(words)}\n")
+                words = []
+
+            # Update the current line to the word's *right* X value. Not the midpoint this time.
+            current_x = word.geo_x_1
+            words.append(word.text)
+        lines.append(F"{' '.join(words)}\n")
+        words = []
+
+    # Write the text to the buffer and send it as a file response
+    output.write(bytes(''.join(lines), 'utf-8'))
+    output.seek(0)
+    return FileResponse(output, as_attachment=True, filename=F"{doc.identifier}.txt")
+
+
 def export_pdf(doc, use_image=True):
     """
     Returns a PDF version of this document with the images and text of all its pages.

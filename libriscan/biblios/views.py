@@ -110,3 +110,10 @@ def export_pdf(request, pk, use_image=True):
     return doc.export_pdf(use_image)
 
 
+def export_text(request, pk):
+    """
+    Generates a text file of a given doc ID.
+    """
+    doc = Document.objects.get(pk=pk)
+    return doc.export_text()
+
