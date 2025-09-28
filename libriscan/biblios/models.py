@@ -12,7 +12,6 @@ from localflavor.us.models import USStateField
 
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
-from biblios.services.suggestions import long_s_conversion, generate_suggestions
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -145,6 +144,18 @@ class Document(BibliosModel):
 
     def __str__(self):
         return self.identifier
+    
+    def export_pdf(self, use_image=True):
+        """
+        Provide a full PDF version of the document.
+        
+        use_image:
+            true: generate the PDF using page images
+            false: generate the PDF using just the extracted text
+        """
+        from biblios.services.exporters import export_pdf
+
+        return export_pdf(self, use_image)
 
 
 class Page(BibliosModel):
@@ -249,7 +260,9 @@ class TextBlock(BibliosModel):
     
     @cached_property
     def suggestions(self):
-        """Get spellcheck suggestions for the word, including any special checks like long-s detection"""
+        """Get spellcheck suggestions for the word, including any special checks like long-s detection."""
+        from biblios.services.suggestions import long_s_conversion, generate_suggestions
+
         words = [self.text,]
 
         # Check for potential long-s variants, if the doc expects any.

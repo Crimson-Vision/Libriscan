@@ -1,9 +1,13 @@
+import io
+import logging
 from decimal import Decimal
 from pymupdf import Document as PdfDocument, Point
 
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseBadRequest
 
 from biblios.models import Document, TextBlock
+
+logger = logging.getLogger(__name__)
 
 def export_pdf(doc, use_image=True):
     """
@@ -12,9 +16,10 @@ def export_pdf(doc, use_image=True):
     doc: a Document object
     use_image: whether to generate the PDF with the doc's page images or just render the text
     """
-
+    logger.info(F"Generating a PDF of {doc}")
     if not isinstance(doc, Document):
-        return False
+        logger.error(F"export_pdf() called with object of {type(doc)} type.")
+        return HttpResponseBadRequest("Invalid document")
 
     new_pdf = PdfDocument()
 
@@ -39,11 +44,11 @@ def export_pdf(doc, use_image=True):
             x0 = word.geo_x_0 * width
             y0 = word.geo_y_0 * height
             x1 = word.geo_x_1 * width
-            # y1 = word.geo_y_1 * height -- unused
+            # y1 = word.geo_y_1 * height //unused
 
             # Use a font size that will fill the height of the text block.
             # Courier characters are about 0.6x as wide as they are tall, so divide the width of the word in pts by
-            # the number of characters in it and multiple by 1.667 to get the font size
+            # the number of characters in it and multiple by 1.67 to get the font size
             size = int(((x1-x0)/len(word.text)) * Decimal(1.67))
 
             # Text will be placed relative to the bottom-left point of its geometry.
@@ -59,5 +64,8 @@ def export_pdf(doc, use_image=True):
             # Add the word to the page
             new_pdf[-1].insert_text(point=point, text=word.text, fontsize=size, fontname=font, render_mode=render_mode)
 
-    # new_pdf.save(F"{doc.identifier}.pdf")
-    return FileResponse(new_pdf, filename=F"{doc.identifier}.pdf")
+    # Save the new PDF to a buffer that can be returned as a file download
+    output = io.BytesIO()
+    new_pdf.save(output)
+    output.seek(0)
+    return FileResponse(output, as_attachment=True, filename=F"{doc.identifier}.pdf")
