@@ -1,12 +1,26 @@
 {% extends "biblios/index.html" %}
-
 {% block content %}
-<h3>{{document}}</h3>
-
-<p>Downloads:</p>
-<ul class="list">
-  <li class="list-row"><a href="{% url 'export_pdf' document.id %}">PDF</a></li>
-  <li class="list-row"><a href="{% url 'export_textpdf' document.id %}">Text-only PDF</a></li>
-</ul>
-
+  <h3>{{ document }}</h3>
+  <ul class="list">
+    <li class="list-row">Pages</li>
+    {% for page in document.pages.all %}
+      <li class="list-row">
+        <a href="{{ page.get_absolute_url }}">Page {{ page.number }}</a>
+      </li>
+    {% empty %}
+      <li class="list-row">No pages</li>
+    {% endfor %}
+  </ul>
+  <ul class="list">
+    <li class="list-row">Downloads</li>
+    <li class="list-row">
+      <a href="{% url 'export_pdf' keys.owner keys.collection document.id %}">PDF</a>
+    </li>
+    <li class="list-row">
+      <a href="{% url 'export_textpdf' keys.owner keys.collection document.id %}">Text-only PDF</a>
+    </li>
+    <li class="list-row">
+      <a href="{% url 'export_text' keys.owner keys.collection document.id %}">Text file</a>
+    </li>
+  </ul>
 {% endblock content %}

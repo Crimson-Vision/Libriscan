@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from biblios.models import User, Document
+from biblios.models import User, Document, Page
 
 
 # Custom user forms from https://testdriven.io/blog/django-custom-user-model/
@@ -20,4 +20,10 @@ class CustomUserChangeForm(UserChangeForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
+        fields = "__all__"
+
+
+class PageForm(forms.ModelForm):
+    class Meta:
+        model = Page
         fields = "__all__"

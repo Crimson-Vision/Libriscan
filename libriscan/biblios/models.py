@@ -197,6 +197,15 @@ class Page(BibliosModel):
     def __str__(self):
         return f"{self.document} page {self.number}"
 
+    def get_absolute_url(self):
+        keys = {
+            "short_name": self.document.series.collection.owner.short_name,
+            "collection_id": self.document.series.collection_id,
+            "document_id": self.document_id,
+            "number": self.number,
+        }
+        return reverse("page", kwargs=keys)
+
     @property
     def has_extraction(self):
         return self.textblock_set.exists()
