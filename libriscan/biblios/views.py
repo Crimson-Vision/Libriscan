@@ -1,10 +1,11 @@
 import logging
 
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
@@ -61,7 +62,22 @@ class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
     model = Document
 
 
-class PageDetail(DetailView):
+class DocumentCreateView(AutoPermissionRequiredMixin, CreateView):
+    model = Document
+    fields = ["series", "identifier", "use_long_s_detection"]
+
+
+class DocumentUpdateView(AutoPermissionRequiredMixin, UpdateView):
+    model = Document
+
+
+class DocumentDeleteView(AutoPermissionRequiredMixin, DeleteView):
+    model = Document
+    success_url = reverse_lazy("index")
+    # success_url = reverse_lazy("org_slug", kwargs={"slug":})
+
+
+class PageDetail(AutoPermissionRequiredMixin, DetailView):
     model = Page
     template_name = "biblios/page.html"
 
@@ -116,4 +132,3 @@ def export_text(request, pk):
     """
     doc = Document.objects.get(pk=pk)
     return doc.export_text()
-
