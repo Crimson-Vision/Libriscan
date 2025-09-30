@@ -24,5 +24,9 @@ urlpatterns = [
     path("consortiums/<int:pk>", views.ConsortiumDetail.as_view(), name="consortium"),
     path('page/<int:pk>', views.PageDetail.as_view(), name="page"),
     path('page/<int:pk>/extract', views.extract_test, name="extract"),
+    path("document/<int:pk>", views.DocumentDetail.as_view(), name="document"),    
+    path("document/<int:pk>/pdf", views.export_pdf, {"use_image": True}, name="export_pdf"),
+    path("document/<int:pk>/pdftext", views.export_pdf, {"use_image": False}, name="export_textpdf"),
+    path("document/<int:pk>/text", views.export_text, name="export_text"),
     
 ]

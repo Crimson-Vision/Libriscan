@@ -57,6 +57,10 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
     model = Document
 
 
+class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
+    model = Document
+
+
 class PageDetail(DetailView):
     model = Page
     template_name = "biblios/page.html"
@@ -93,3 +97,23 @@ def extract_test(request, pk):
     context = {"words": extractor.get_words()}
 
     return render(request, "biblios/words.html", context)
+
+
+def export_pdf(request, pk, use_image=True):
+    """
+    Generates a PDF of a given doc ID.
+    use_image:
+        True: generate the PDF using page images
+        False: generate the PDF using just the extracted text
+    """
+    doc = Document.objects.get(pk=pk)
+    return doc.export_pdf(use_image)
+
+
+def export_text(request, pk):
+    """
+    Generates a text file of a given doc ID.
+    """
+    doc = Document.objects.get(pk=pk)
+    return doc.export_text()
+

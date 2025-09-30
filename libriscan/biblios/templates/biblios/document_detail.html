@@ -1,0 +1,12 @@
+{% extends "biblios/index.html" %}
+
+{% block content %}
+<h3>{{document}}</h3>
+
+<p>Downloads:</p>
+<ul class="list">
+  <li class="list-row"><a href="{% url 'export_pdf' document.id %}">PDF</a></li>
+  <li class="list-row"><a href="{% url 'export_textpdf' document.id %}">Text-only PDF</a></li>
+</ul>
+
+{% endblock content %}

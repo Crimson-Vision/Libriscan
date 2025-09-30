@@ -12,7 +12,6 @@ from localflavor.us.models import USStateField
 
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
-from biblios.services.suggestions import long_s_conversion, generate_suggestions
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -145,10 +144,30 @@ class Document(BibliosModel):
 
     def __str__(self):
         return self.identifier
+    
+    def export_pdf(self, use_image=True):
+        """
+        Provide a full PDF version of the document.
+        
+        use_image:
+            true: generate the PDF using page images
+            false: generate the PDF using just the extracted text
+        """
+        from biblios.services.exporters import export_pdf
+
+        return export_pdf(self, use_image)
+    
+    def export_text(self):
+        """
+        Provide a text file version of the document.
+        """
+        from biblios.services.exporters import export_text
+
+        return export_text(self)
 
 
 class Page(BibliosModel):
-    document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="pages")
     number = models.SmallIntegerField(default=1)
     image = models.ImageField(blank=True, upload_to="pages")
 
@@ -203,7 +222,7 @@ class TextBlock(BibliosModel):
     # Omit: leave it out completely
     print_control = models.CharField(max_length=1, choices=PRINT_CONTROL_CHOICES, default=INCLUDE)
 
-    # The bounding box is recorded as the bottom-left corner (X,Y 0) and top-right corner (X,Y 1)
+    # The bounding box is recorded as the top-left corner (X,Y 0) and bottom-right corner (X,Y 1)
     # Textract returns values that are percentages of the page width, so these need to be decimals too
     geo_x_0 = models.DecimalField(
         max_digits=20,
@@ -249,7 +268,9 @@ class TextBlock(BibliosModel):
     
     @cached_property
     def suggestions(self):
-        """Get spellcheck suggestions for the word, including any special checks like long-s detection"""
+        """Get spellcheck suggestions for the word, including any special checks like long-s detection."""
+        from biblios.services.suggestions import long_s_conversion, generate_suggestions
+
         words = [self.text,]
 
         # Check for potential long-s variants, if the doc expects any.

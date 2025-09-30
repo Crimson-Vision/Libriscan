@@ -8,3 +8,4 @@ rules==3.5
 gunicorn==23.0.0
 whitenoise==6.11.0
 pyspellchecker==0.8.3
+pymupdf==1.26.4
