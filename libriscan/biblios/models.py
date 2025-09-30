@@ -283,6 +283,21 @@ class TextBlock(BibliosModel):
             kwargs["update_fields"] = {"suggestions"}.union(update_fields)
         super().save(**kwargs)
 
+    @cached_property
+    def confidence_level(self):
+        """Provides a scale rating of the word's confidence level"""            
+        if self.confidence >= 99.9:
+            return "accepted"
+        elif self.confidence >= 90:
+            return "high"
+        elif self.confidence >= 80:
+            return "medium"
+        elif self.confidence >= 50:
+            return "low"
+        else:
+            return "none"
+
+
 
 class UserRole(models.Model):
     EDITOR = "E"
