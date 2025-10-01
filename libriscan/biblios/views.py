@@ -1,5 +1,6 @@
 import logging
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -88,20 +89,36 @@ class DocumentDeleteView(AutoPermissionRequiredMixin, DeleteView):
 
 class PageCreateView(AutoPermissionRequiredMixin, CreateView):
     model = Page
-    fields = "__all__"
+    fields = ("number", "image")
 
     def get_initial(self, **kwargs):
+        """Dynamically construct initial values for some fields"""
         from django.db.models import Max
 
         initial = super().get_initial(**kwargs)
         doc = Document.objects.get(id=self.kwargs.get("document_id"))
         number = doc.pages.aggregate(Max("number", default=0))
-        initial["document"] = doc
+        
         initial["number"] = number["number__max"] + 1
 
-        print(initial)
         return initial
 
+
+    def post(self, request, **kwargs):
+        from biblios.forms import PageForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Document to it
+        # Users shouldn't set this directly in the form -- it's based on the doc they're working from
+        post = request.POST.copy()
+        post.update({'document':Document.objects.get(id=self.kwargs.get("document_id"))})
+
+        # Bind the image file to the form data when we instatiate it
+        form = PageForm(post, request.FILES)
+        
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)        
+        
 
 class PageDetail(AutoPermissionRequiredMixin, DetailView):
     model = Page

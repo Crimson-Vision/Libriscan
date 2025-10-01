@@ -20,10 +20,10 @@ class CustomUserChangeForm(UserChangeForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = "__all__"
+        fields = ("series", "identifier", "use_long_s_detection")
 
 
 class PageForm(forms.ModelForm):
     class Meta:
         model = Page
-        fields = "__all__"
+        fields = ("document", "number", "image")
