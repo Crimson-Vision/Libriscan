@@ -16,12 +16,7 @@ class SeriesInline(admin.TabularInline):
     model = Series
     extra = 1
     verbose_name_plural = "Series"
-
-
-class TextBlockInline(admin.StackedInline):
-    model = TextBlock
-    extra = 1
-
+    
 
 class UserRoleInline(admin.TabularInline):
     model = UserRole
@@ -62,7 +57,6 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
-    inlines = [TextBlockInline]
     list_display = ["number", "document", "document__series__collection__owner"]
 
 
@@ -123,6 +117,7 @@ admin.site.register(User, CustomUserAdmin)
 class TextAdmin(admin.ModelAdmin):    
     search_fields = ("document", "page")
     list_display = ["text", "page__document", "page"]
+    list_filter = ["page__document", "page"]
 
 
 admin.site.register(TextBlock, TextAdmin)
