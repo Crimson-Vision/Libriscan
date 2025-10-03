@@ -1,28 +1,21 @@
 {% extends "biblios/base.html" %}
-
 {% block content %}
-<h4>{{ page }} Extractor Test</h4>
-{% url 'extract' page.id %}
-<div>
-      <div class="card m-4 w-80">
-        <h5>Page {{page.number}}</h5>
-          <figure>
-            {% if page.image %}
-                <img src="{{page.image.url}}"/>
-            {% endif %}
-          </figure>
-        <div class="card-body">
-          <button hx-post="{% url 'extract' page.id %}" hx-target="#extraction" {% if page.has_extraction %} disabled {% endif %}>
-              Extract            
-          </button>
-        </div>
+  <h4>{{ page }} Extractor Test</h4>
+  <div>
+    <div class="card m-4 w-80">
+      <h5>Page {{ page.number }}</h5>
+      <figure>
+        {% if page.image %}<img width=auto height=auto src="{{ page.image.url }}" />{% endif %}
+      </figure>
+      <div class="card-body">
+        <button hx-post="{% url 'extract' keys.owner keys.collection keys.doc page.number %}"
+                hx-target="#extraction"
+                {% if page.has_extraction %}disabled{% endif %}>Extract</button>
       </div>
-
-      <div id="extraction" class="card m-4 w-80">
-        <h3>Extracted Text</h3>
-        <p>{% for word in page.textblock_set.all %} {{word}} {% endfor %}</p>
-      </div>
-
-</div>
-
+    </div>
+    <div id="extraction" class="card m-4 w-80">
+      <h3>Extracted Text</h3>
+      <p>{{ page.textblock_set.all|join:' ' }}</p>
+    </div>
+  </div>
 {% endblock %}

@@ -1,10 +1,12 @@
 import logging
 
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse_lazy
 
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
@@ -60,10 +62,92 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
 class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
     model = Document
 
+    def get_context_data(self, **kwargs):
+        # Insert some of the URL parameters into the context
+        # Probably something does this out of the box...
+        context = super().get_context_data(**kwargs)
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_id")
+        context["keys"] = {"owner": owner, "collection": collection}
+        return context
 
-class PageDetail(DetailView):
+
+class DocumentCreateView(AutoPermissionRequiredMixin, CreateView):
+    model = Document
+    fields = ["series", "identifier", "use_long_s_detection"]
+
+
+class DocumentUpdateView(AutoPermissionRequiredMixin, UpdateView):
+    model = Document
+
+
+class DocumentDeleteView(AutoPermissionRequiredMixin, DeleteView):
+    model = Document
+    success_url = reverse_lazy("index")
+    # success_url = reverse_lazy("org_slug", kwargs={"slug":})
+
+
+class PageCreateView(AutoPermissionRequiredMixin, CreateView):
+    model = Page
+    fields = ("number", "image")
+
+    def get_initial(self, **kwargs):
+        """Dynamically construct initial values for some fields"""
+        from django.db.models import Max
+
+        initial = super().get_initial(**kwargs)
+        doc = Document.objects.get(id=self.kwargs.get("document_id"))
+        number = doc.pages.aggregate(Max("number", default=0))
+        
+        initial["number"] = number["number__max"] + 1
+
+        return initial
+
+
+    def post(self, request, **kwargs):
+        from biblios.forms import PageForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Document to it
+        # Users shouldn't set this directly in the form -- it's based on the doc they're working from
+        post = request.POST.copy()
+        post.update({'document':Document.objects.get(id=self.kwargs.get("document_id"))})
+
+        # Bind the image file to the form data when we instatiate it
+        form = PageForm(post, request.FILES)
+        
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)        
+        
+
+class PageDetail(AutoPermissionRequiredMixin, DetailView):
     model = Page
     template_name = "biblios/page.html"
+    context_name = "pages"
+
+    def get_context_data(self, **kwargs):
+        # Insert some of the URL parameters into the context
+        # Probably something does this out of the box...
+        context = super().get_context_data(**kwargs)
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_id")
+        doc = self.kwargs.get("document_id")
+        context["keys"] = {"owner": owner, "collection": collection, "doc": doc}
+        return context
+
+    def get_object(self, **kwargs):
+        # The org owner and collection are part of the URL, so make sure the request is for a valid combo
+        # Obviously, a URL of 'page/<int:pk>' would be more efficient, but gives the user less context
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_id")
+        doc = self.kwargs.get("document_id")
+        number = self.kwargs.get("number")
+        return self.get_queryset().get(
+            document__series__collection__owner__short_name=owner,
+            document__series__collection=collection,
+            document_id=doc,
+            number=number,
+        )
 
 
 # This is a verbose way of handling RBAC on a collections page
@@ -86,10 +170,13 @@ def collection_detail(request, short_name, pk):
 
 
 @require_http_methods(["POST"])
-def extract_test(request, pk):
-    # org = Organization.objects.select_related('cloudservice').get(short_name=short_name)
-    # doc = Document.objects.filter(series__collection__owner=org).first()
-    page = Page.objects.select_related("document__series__collection__owner").get(id=pk)
+def extract_test(request, owner, collection, doc, number):
+    page = Page.objects.select_related("document__series__collection__owner").get(
+        document__series__collection__owner=owner,
+        document__series__collection=collection,
+        document_id=doc,
+        number=number,
+    )
     org = page.document.series.collection.owner
 
     extractor = org.cloudservice.get_extractor(page)
@@ -116,4 +203,3 @@ def export_text(request, pk):
     """
     doc = Document.objects.get(pk=pk)
     return doc.export_text()
-
