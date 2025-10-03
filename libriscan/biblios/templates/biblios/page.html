@@ -8,7 +8,7 @@
         {% if page.image %}<img width=auto height=auto src="{{ page.image.url }}" />{% endif %}
       </figure>
       <div class="card-body">
-        <button hx-post="{% url 'extract' keys.owner keys.collection keys.doc page.number %}"
+        <button hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
                 hx-target="#extraction"
                 {% if page.has_extraction %}disabled{% endif %}>Extract</button>
       </div>

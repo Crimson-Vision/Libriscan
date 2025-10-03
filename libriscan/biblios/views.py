@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
-from .models import Organization, Consortium, Document, Collection, Page
+from .models import Organization, Consortium, Document, Collection, Series, Page
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +27,18 @@ def scan(request):
     return render(request, "biblios/scan.html")
 
 
+class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
+    model = Consortium
+    context_object_name = "consortium"
+
+
 # This is a basic way of handling RBAC on the user's org list.
 # Rules don't come into play at all. The view just only queries
 # for orgs the user is a member of, which by our rules happens
 # to be the ones they have permission to see.
 def organization_list(request):
     if request.user.is_authenticated:
+        # This ignores the superuser flag
         orgs = request.user.userrole_set.all()
     else:
         orgs = []
@@ -50,9 +56,29 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
     slug_url_kwarg = "short_name"
 
 
-class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
-    model = Consortium
-    context_object_name = "consortium"
+# This is a verbose way of handling RBAC on a collections page
+# The permission_required handle on collection_detail calls this function,
+# and passes it the same params.
+# It takes the object returned here, then checks if the request.user has
+# the permission 'biblios.view_organization' on it.
+# If so, they can access this page. If not, they get a 403.
+def get_org_by_collection(request, short_name, collection_slug):
+    return Organization.objects.get(short_name=short_name)
+
+
+@permission_required(
+    "biblios.view_organization", fn=get_org_by_collection, raise_exception=True
+)
+def collection_detail(request, short_name, collection_slug):
+    collection = Collection.objects.get(slug=collection_slug)
+    context = {"collection": collection}
+    return render(request, "biblios/collection_detail.html", context)
+
+
+class SeriesDetail(AutoPermissionRequiredMixin, DetailView):
+    model = Series
+    context_object_name = "series"
+    slug_url_kwarg = "series_slug"
 
 
 class DocumentList(AutoPermissionRequiredMixin, ListView):
@@ -61,14 +87,17 @@ class DocumentList(AutoPermissionRequiredMixin, ListView):
 
 class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
     model = Document
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
 
     def get_context_data(self, **kwargs):
         # Insert some of the URL parameters into the context
         # Probably something does this out of the box...
         context = super().get_context_data(**kwargs)
-        owner = self.kwargs.get("short_name")
-        collection = self.kwargs.get("collection_id")
-        context["keys"] = {"owner": owner, "collection": collection}
+        context["keys"] = {
+            "owner": self.kwargs.get("short_name"),
+            "collection_slug": self.kwargs.get("collection_slug"),
+        }
         return context
 
 
@@ -96,13 +125,12 @@ class PageCreateView(AutoPermissionRequiredMixin, CreateView):
         from django.db.models import Max
 
         initial = super().get_initial(**kwargs)
-        doc = Document.objects.get(id=self.kwargs.get("document_id"))
+        doc = Document.objects.get(identifier=self.kwargs.get("identifier"))
         number = doc.pages.aggregate(Max("number", default=0))
-        
+
         initial["number"] = number["number__max"] + 1
 
         return initial
-
 
     def post(self, request, **kwargs):
         from biblios.forms import PageForm
@@ -112,13 +140,15 @@ class PageCreateView(AutoPermissionRequiredMixin, CreateView):
         # Create a mutable copy of the POST object and add the parent Document to it
         # Users shouldn't set this directly in the form -- it's based on the doc they're working from
         post = request.POST.copy()
-        post.update({'document':Document.objects.get(id=self.kwargs.get("document_id"))})
+        post.update(
+            {"document": Document.objects.get(identifier=self.kwargs.get("identifier"))}
+        )
 
         # Bind the image file to the form data when we instatiate it
         form = PageForm(post, request.FILES)
-        
-        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)        
-        
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
 
 class PageDetail(AutoPermissionRequiredMixin, DetailView):
     model = Page
@@ -130,51 +160,32 @@ class PageDetail(AutoPermissionRequiredMixin, DetailView):
         # Probably something does this out of the box...
         context = super().get_context_data(**kwargs)
         owner = self.kwargs.get("short_name")
-        collection = self.kwargs.get("collection_id")
-        doc = self.kwargs.get("document_id")
-        context["keys"] = {"owner": owner, "collection": collection, "doc": doc}
+        collection = self.kwargs.get("collection_slug")
+        doc = self.kwargs.get("identifier")
+        context["keys"] = {"owner": owner, "collection_slug": collection, "doc": doc}
         return context
 
     def get_object(self, **kwargs):
         # The org owner and collection are part of the URL, so make sure the request is for a valid combo
         # Obviously, a URL of 'page/<int:pk>' would be more efficient, but gives the user less context
         owner = self.kwargs.get("short_name")
-        collection = self.kwargs.get("collection_id")
-        doc = self.kwargs.get("document_id")
+        collection = self.kwargs.get("collection_slug")
+        doc = self.kwargs.get("identifier")
         number = self.kwargs.get("number")
         return self.get_queryset().get(
             document__series__collection__owner__short_name=owner,
-            document__series__collection=collection,
-            document_id=doc,
+            document__series__collection__slug=collection,
+            document__identifier=doc,
             number=number,
         )
 
 
-# This is a verbose way of handling RBAC on a collections page
-# The permission_required handle on collection_detail calls this function,
-# and passes it the same params.
-# It takes the object returned here, then checks if the request.user has
-# the permission 'biblios.view_organization' on it.
-# If so, they can access this page. If not, they get a 403.
-def get_org_by_collection(request, short_name, pk):
-    return Organization.objects.get(short_name=short_name)
-
-
-@permission_required(
-    "biblios.view_organization", fn=get_org_by_collection, raise_exception=True
-)
-def collection_detail(request, short_name, pk):
-    collection = Collection.objects.get(pk=pk)
-    context = {"collection": collection}
-    return render(request, "biblios/collection_detail.html", context)
-
-
 @require_http_methods(["POST"])
-def extract_test(request, owner, collection, doc, number):
+def extract_text(request, short_name, collection_slug, identifier, number):
     page = Page.objects.select_related("document__series__collection__owner").get(
-        document__series__collection__owner=owner,
-        document__series__collection=collection,
-        document_id=doc,
+        document__series__collection__owner__short_name=short_name,
+        document__series__collection__slug=collection_slug,
+        document__identifier=identifier,
         number=number,
     )
     org = page.document.series.collection.owner

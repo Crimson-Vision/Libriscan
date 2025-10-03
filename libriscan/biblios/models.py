@@ -57,6 +57,10 @@ class Organization(BibliosModel):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        keys = {"short_name": self.short_name}
+        return reverse("organization", kwargs=keys)
+
 
 class CloudService(models.Model):
     TEST = "T"
@@ -108,6 +112,10 @@ class Collection(BibliosModel):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        keys = {"short_name": self.owner.short_name, "collection_slug": self.slug}
+        return reverse("collection", kwargs=keys)
+
 
 class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
@@ -124,6 +132,14 @@ class Series(BibliosModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        keys = {
+            "short_name": self.collection.owner.short_name,
+            "collection_slug": self.collection.slug,
+            "series_slug": self.slug,
+        }
+        return reverse("series", kwargs=keys)
 
 
 class Document(BibliosModel):
@@ -153,8 +169,8 @@ class Document(BibliosModel):
     def get_absolute_url(self):
         keys = {
             "short_name": self.series.collection.owner.short_name,
-            "collection_id": self.series.collection_id,
-            "pk": self.id,
+            "collection_slug": self.series.collection.slug,
+            "identifier": self.identifier,
         }
         return reverse("document", kwargs=keys)
 
@@ -203,8 +219,8 @@ class Page(BibliosModel):
     def get_absolute_url(self):
         keys = {
             "short_name": self.document.series.collection.owner.short_name,
-            "collection_id": self.document.series.collection_id,
-            "document_id": self.document_id,
+            "collection_slug": self.document.series.collection.slug,
+            "identifier": self.document.identifier,
             "number": self.number,
         }
         return reverse("page", kwargs=keys)
