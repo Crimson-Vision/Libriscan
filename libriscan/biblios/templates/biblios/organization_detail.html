@@ -14,7 +14,7 @@
   </ul>
   <h5>Collections</h5>
   <ul>
-    {% for c in org.collection_set.all %}
+    {% for c in org.collections.all %}
       <li>
         <a href="{{ c.get_absolute_url }}">{{ c }}</a>
       </li>

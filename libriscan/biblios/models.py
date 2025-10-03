@@ -42,7 +42,7 @@ class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
 # Trying to avoid ambiguity with software libraries, and maybe non-library orgs could use this someday
 class Organization(BibliosModel):
     name = models.CharField(max_length=75)
-    short_name = models.SlugField(max_length=5)
+    short_name = models.SlugField(max_length=10)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
 
@@ -53,6 +53,9 @@ class Organization(BibliosModel):
             "change": is_org_archivist,
             "delete": rules.is_superuser,
         }
+        constraints = [
+            models.UniqueConstraint(fields=["short_name"], name="unique_org_shortname")
+        ]
 
     def __str__(self):
         return self.name
@@ -97,7 +100,9 @@ class Membership(BibliosModel):
 
 
 class Collection(BibliosModel):
-    owner = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="collections"
+    )
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
 
@@ -108,6 +113,11 @@ class Collection(BibliosModel):
             "delete": is_org_archivist,
             "view": is_org_viewer,
         }
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "slug"], name="unique_collection_slug"
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -129,6 +139,11 @@ class Series(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "slug"], name="unique_series_slug"
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -143,7 +158,9 @@ class Series(BibliosModel):
 
 
 class Document(BibliosModel):
-    series = models.ForeignKey(Series, on_delete=models.CASCADE)
+    series = models.ForeignKey(
+        Series, on_delete=models.CASCADE, related_name="documents"
+    )
     identifier = models.SlugField(max_length=25)
 
     # Spelling suggestion rules
@@ -227,7 +244,7 @@ class Page(BibliosModel):
 
     @property
     def has_extraction(self):
-        return self.textblock_set.exists()
+        return self.words.exists()
 
 
 class TextBlock(BibliosModel):
@@ -244,7 +261,7 @@ class TextBlock(BibliosModel):
         OMIT: "Omit",
     }
 
-    page = models.ForeignKey(Page, on_delete=models.CASCADE)
+    page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="words")
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
     extraction_id = models.CharField(max_length=50, blank=True)
