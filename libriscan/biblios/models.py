@@ -272,6 +272,8 @@ class TextBlock(BibliosModel):
         validators=[MinValueValidator(0), MaxValueValidator(1)],
     )
 
+    suggestions = models.JSONField(blank=True, default=dict)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -292,22 +294,35 @@ class TextBlock(BibliosModel):
     def __str__(self):
         return self.text
 
-    @cached_property
-    def suggestions(self):
+    def __get_suggestions__(self):
         """Get spellcheck suggestions for the word, including any special checks like long-s detection."""
-        from biblios.services.suggestions import long_s_conversion, generate_suggestions
+        from biblios.services.suggestions import generate_suggestions
 
-        words = [
-            self.text,
-        ]
+        return generate_suggestions(self.text, self.page.document.use_long_s_detection)
+    
+    def save(self, **kwargs):
+        """Generate spellcheck suggestions on save"""
+        self.suggestions = self.__get_suggestions__()
+        # In case the word text has been specified as an update_field, include the suggestions too
+        if (
+            update_fields := kwargs.get("update_fields")
+        ) is not None and "text" in update_fields:
+            kwargs["update_fields"] = {"suggestions"}.union(update_fields)
+        super().save(**kwargs)
 
-        # Check for potential long-s variants, if the doc expects any.
-        if self.page.document.use_long_s_detection:
-            s_word = long_s_conversion(self.text)
-            if s_word != self.text:
-                words.append(s_word)
-
-        return generate_suggestions(words)
+    @cached_property
+    def confidence_level(self):
+        """Provides a scale rating of the word's confidence level"""            
+        if self.confidence >= 99.9:
+            return "accepted"
+        elif self.confidence >= 90:
+            return "high"
+        elif self.confidence >= 80:
+            return "medium"
+        elif self.confidence >= 50:
+            return "low"
+        else:
+            return "none"
 
 
 class UserRole(models.Model):

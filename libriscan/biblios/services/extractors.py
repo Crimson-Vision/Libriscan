@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from PIL import Image
 
 from biblios.models import CloudService, TextBlock
+from biblios.services.suggestions import generate_suggestions
 
 
 class BaseExtractor(object):
@@ -42,6 +43,7 @@ class BaseExtractor(object):
             "text": word,
             "text_type": None,
             "confidence": None,
+            "suggestions": None,
             "geo_x_0": None,
             "geo_y_0": None,
             "geo_x_1": None,
@@ -77,6 +79,7 @@ class TestExtractor(BaseExtractor):
             "text": word["Text"].upper(),
             "text_type": word["TextType"],
             "confidence": word["Confidence"],
+            "suggestions": [(word, 1)],
             "geo_x_0": word["Geometry"]["Polygon"][0]["X"],
             "geo_y_0": word["Geometry"]["Polygon"][0]["Y"],
             "geo_x_1": word["Geometry"]["Polygon"][2]["X"],
@@ -123,6 +126,8 @@ class AWSExtractor(BaseExtractor):
             text=word["Text"],
             text_type=text_type,
             confidence=word["Confidence"],
+            # TextBlock does this on save(), but the bulk create process bypasses its method override
+            suggestions=generate_suggestions(word["Text"], self.page.document.use_long_s_detection),
             geo_x_0=word["Geometry"]["Polygon"][0]["X"],
             geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
             geo_x_1=word["Geometry"]["Polygon"][2]["X"],
