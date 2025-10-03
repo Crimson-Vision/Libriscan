@@ -1,10 +1,11 @@
 [
-{
-    "model": "biblios.collection",
-    "pk": 1,
-    "fields": {
-        "owner": 1,
-        "name": "Test Collection"
+    {
+        "model": "biblios.collection",
+        "pk": 1,
+        "fields": {
+            "owner": 1,
+            "name": "Test Collection",
+            "slug": "test-collection"
+        }
     }
-}
 ]

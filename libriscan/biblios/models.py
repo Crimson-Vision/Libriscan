@@ -79,6 +79,7 @@ class CloudService(models.Model):
 
 class Consortium(BibliosModel):
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     def __str__(self):
         return self.name
@@ -94,6 +95,7 @@ class Membership(BibliosModel):
 class Collection(BibliosModel):
     owner = models.ForeignKey(Organization, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     class Meta:
         rules_permissions = {
@@ -110,6 +112,7 @@ class Collection(BibliosModel):
 class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     class Meta:
         rules_permissions = {
@@ -125,7 +128,7 @@ class Series(BibliosModel):
 
 class Document(BibliosModel):
     series = models.ForeignKey(Series, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=25)
+    identifier = models.SlugField(max_length=25)
 
     # Spelling suggestion rules
     use_long_s_detection = models.BooleanField(default=True)
@@ -299,7 +302,7 @@ class TextBlock(BibliosModel):
         from biblios.services.suggestions import generate_suggestions
 
         return generate_suggestions(self.text, self.page.document.use_long_s_detection)
-    
+
     def save(self, **kwargs):
         """Generate spellcheck suggestions on save"""
         self.suggestions = self.__get_suggestions__()
@@ -312,7 +315,7 @@ class TextBlock(BibliosModel):
 
     @cached_property
     def confidence_level(self):
-        """Provides a scale rating of the word's confidence level"""            
+        """Provides a scale rating of the word's confidence level"""
         if self.confidence >= 99.9:
             return "accepted"
         elif self.confidence >= 90:
