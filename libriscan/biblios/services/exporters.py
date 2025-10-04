@@ -9,22 +9,23 @@ from biblios.models import Document, TextBlock
 
 logger = logging.getLogger(__name__)
 
+
 def export_text(doc):
     """
     Returns a text file of this document.
     """
-    logger.info(F"Generating a text file of {doc}")
+    logger.info(f"Generating a text file of {doc}")
     if not isinstance(doc, Document):
-        logger.error(F"export_text() called with object of {type(doc)} type.")
+        logger.error(f"export_text() called with object of {type(doc)} type.")
         return HttpResponseBadRequest("Invalid document")
-    
+
     # Lines will be tracked by comparing each word's horizontal position on the page to the previous.
     # If a word is suddenly to the left of the previous one's right-most corner, it's a new line.
     # Don't use vertical position though -- too many false positives from variation in the exact Y positions
     lines = []
     words = []
     current_x = 0
-    
+
     # Create a buffer that can be returned as a file download
     output = io.BytesIO()
 
@@ -33,36 +34,36 @@ def export_text(doc):
         if not page.image:
             pass
 
-        for word in page.textblock_set.filter(print_control=TextBlock.INCLUDE):
+        for word in page.words.filter(print_control=TextBlock.INCLUDE):
             # Since the typography can get fairly ornate, track the midpoint of this word
-            x = (word.geo_x_0 + word.geo_x_1)/2
+            x = (word.geo_x_0 + word.geo_x_1) / 2
             # If the position of this word is less than the last word's lower-right X, start a new line
-            if x < current_x:                
-                lines.append(F"{' '.join(words)}\n")
+            if x < current_x:
+                lines.append(f"{' '.join(words)}\n")
                 words = []
 
             # Update the current line to the word's *right* X value. Not the midpoint this time.
             current_x = word.geo_x_1
             words.append(word.text)
-        lines.append(F"{' '.join(words)}\n")
+        lines.append(f"{' '.join(words)}\n")
         words = []
 
     # Write the text to the buffer and send it as a file response
-    output.write(bytes(''.join(lines), 'utf-8'))
+    output.write(bytes("".join(lines), "utf-8"))
     output.seek(0)
-    return FileResponse(output, as_attachment=True, filename=F"{doc.identifier}.txt")
+    return FileResponse(output, as_attachment=True, filename=f"{doc.identifier}.txt")
 
 
 def export_pdf(doc, use_image=True):
     """
     Returns a PDF version of this document with the images and text of all its pages.
-    
+
     doc: a Document object
     use_image: whether to generate the PDF with the doc's page images or just render the text
     """
-    logger.info(F"Generating a PDF of {doc}")
+    logger.info(f"Generating a PDF of {doc}")
     if not isinstance(doc, Document):
-        logger.error(F"export_pdf() called with object of {type(doc)} type.")
+        logger.error(f"export_pdf() called with object of {type(doc)} type.")
         return HttpResponseBadRequest("Invalid document")
 
     new_pdf = PdfDocument()
@@ -80,9 +81,11 @@ def export_pdf(doc, use_image=True):
 
         new_pdf.new_page(-1, width=width, height=height)
         if use_image:
-            new_pdf[-1].insert_image(rect=(0, 0, width, height), filename=page.image.path)
+            new_pdf[-1].insert_image(
+                rect=(0, 0, width, height), filename=page.image.path
+            )
 
-        for word in page.textblock_set.filter(print_control=TextBlock.INCLUDE):
+        for word in page.words.filter(print_control=TextBlock.INCLUDE):
             # TextBlock coordinates are percentages of page size, so convert them to real pixels
             # x0, y0 is top left, x1, y1 is bottom right.
             x0 = word.geo_x_0 * width
@@ -93,23 +96,29 @@ def export_pdf(doc, use_image=True):
             # Use a font size that will fill the height of the text block.
             # Courier characters are about 0.6x as wide as they are tall, so divide the width of the word in pts by
             # the number of characters in it and multiple by 1.67 to get the font size
-            size = int(((x1-x0)/len(word.text)) * Decimal(1.67))
+            size = int(((x1 - x0) / len(word.text)) * Decimal(1.67))
 
             # Text will be placed relative to the bottom-left point of its geometry.
             # Don't use y1 for this -- y1 is too low when there are descenders like g or q.
             # Instead, use the font size as an offset to y0.
-            point = Point(x0, y0+size)
+            point = Point(x0, y0 + size)
 
             # Courier font so we can calculate size more easily, italicized if it's handwriting.
             # Font choices are shown here: https://pymupdf.readthedocs.io/en/latest/recipes-text.html
             # Hopefully they don't change these strings
-            font = 'coit' if word.text_type is TextBlock.HANDWRITING else 'cour'
+            font = "coit" if word.text_type is TextBlock.HANDWRITING else "cour"
 
             # Add the word to the page
-            new_pdf[-1].insert_text(point=point, text=word.text, fontsize=size, fontname=font, render_mode=render_mode)
+            new_pdf[-1].insert_text(
+                point=point,
+                text=word.text,
+                fontsize=size,
+                fontname=font,
+                render_mode=render_mode,
+            )
 
     # Save the new PDF to a buffer that can be returned as a file download
     output = io.BytesIO()
     new_pdf.save(output)
     output.seek(0)
-    return FileResponse(output, as_attachment=True, filename=F"{doc.identifier}.pdf")
+    return FileResponse(output, as_attachment=True, filename=f"{doc.identifier}.pdf")

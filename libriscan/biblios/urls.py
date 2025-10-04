@@ -5,67 +5,74 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("scan/", views.scan, name="scan"),
+    path("consortiums/<int:pk>/", views.ConsortiumDetail.as_view(), name="consortium"),
     path("organizations", views.organization_list, name="organization-list"),
-    path(
-        "organizations/<int:pk>/",
-        views.OrganizationDetail.as_view(),
-        name="organization",
-    ),
     path(
         "<slug:short_name>/",
         views.OrganizationDetail.as_view(),
-        name="org_slug",
+        name="organization",
     ),
     # Collection URLs
     path(
-        "<slug:short_name>/<int:pk>/",
-        views.collection_detail,
-        name="collection",
-    ),
-    path("consortiums/<int:pk>/", views.ConsortiumDetail.as_view(), name="consortium"),
-    # Document URLs
-    path(
-        "<slug:short_name>/<int:collection_id>/document/",
+        "<slug:short_name>/<slug:collection_slug>/",
         include(
             [
                 path(
-                    "new/",
+                    "",
+                    views.collection_detail,
+                    name="collection",
+                ),
+                path(
+                    "new-document/",
                     views.DocumentCreateView.as_view(),
                     name="document_create",
                 ),
                 path(
-                    "<int:pk>/",
-                    views.DocumentDetail.as_view(),
-                    name="document",
+                    "<slug:series_slug>-series/",
+                    views.SeriesDetail.as_view(),
+                    name="series",
                 ),
+                # Document URLs
                 path(
-                    "<int:pk>/pdf/",
-                    views.export_pdf,
-                    {"use_image": True},
-                    name="export_pdf",
-                ),
-                path(
-                    "<int:pk>/pdftext/",
-                    views.export_pdf,
-                    {"use_image": False},
-                    name="export_textpdf",
-                ),
-                path("<int:pk>/text", views.export_text, name="export_text"),
-                # page URLs
-                path(
-                    "<int:document_id>/new/",
-                    views.PageCreateView.as_view(),
-                    name="page_create",
-                ),
-                path(
-                    "<int:document_id>/page<int:number>/",
-                    views.PageDetail.as_view(),
-                    name="page",
-                ),
-                path(
-                    "<int:document_id>/page<int:number>/extract/",
-                    views.PageDetail.as_view(),
-                    name="extract",
+                    "<slug:identifier>/",
+                    include(
+                        [
+                            path(
+                                "",
+                                views.DocumentDetail.as_view(),
+                                name="document",
+                            ),
+                            path(
+                                "pdf/",
+                                views.export_pdf,
+                                {"use_image": True},
+                                name="export_pdf",
+                            ),
+                            path(
+                                "pdftext/",
+                                views.export_pdf,
+                                {"use_image": False},
+                                name="export_textpdf",
+                            ),
+                            path("text/", views.export_text, name="export_text"),
+                            # page URLs
+                            path(
+                                "page/new",
+                                views.PageCreateView.as_view(),
+                                name="page_create",
+                            ),
+                            path(
+                                "page/<int:number>/",
+                                views.PageDetail.as_view(),
+                                name="page",
+                            ),
+                            path(
+                                "page<int:number>/extract/",
+                                views.extract_text,
+                                name="page_extract",
+                            ),
+                        ]
+                    ),
                 ),
             ]
         ),
