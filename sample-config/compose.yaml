@@ -1,11 +1,30 @@
 services:
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    user: 1000:1000
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - ~/appdata/caddy/caddy:/etc/caddy:z
+      - ~/appdata/caddy/data:/data:z
+      - ~/appdata/caddy/config:/config:z
+    environment:
+      - TZ=America/New_York
+
   libriscan:
     container_name: libriscan
     image: ghcr.io/crimson-vision/libriscan:main
+    user: 1000:1000
     volumes:
       - /opt/appdata/libriscan/:/app/mnt
     environment:
-      - DJANGO_ALLOWED_HOSTS=<hostname>
-      - DJANGO_SECRET_KEY=<random secret key>
+      - TZ=America/New_York
     ports:
       - 8000:8000
