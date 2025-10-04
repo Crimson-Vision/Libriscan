@@ -15,8 +15,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load env variables from the .env file in project root
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # A directory for local storage. Expected to be mapped to a Docker volume.
 # Any files that need to survive a container restart should live here.
 LOCAL_DIR = BASE_DIR / "mnt"
+
+# Load env variables from the .env file in the mounted directory
+load_dotenv(dotenv_path=LOCAL_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,7 +36,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = os.environ.get("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
-
+CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_TRUSTED_ORIGINS", "").split(",")
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = not DEBUG
 
 # Application definition
 
