@@ -1,7 +1,7 @@
 name: Feature Request
 description: Suggest a new feature or enhancement for the LibriScan project.
 title: "[Feature]: "
-labels: ["enhancement", "triage"]
+labels: ["enhancement"]
 projects: ["CrimsonVision/LibriScan"]
 assignees:
   - crimson-vision-lead
@@ -51,14 +51,6 @@ body:
       placeholder: e.g., Reduces processing time by 50% for large collections; improves staff efficiency.
     validations:
       required: true
-  - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives Considered
-      description: Describe any alternative solutions or workarounds you’ve considered and why they are less ideal.
-      placeholder: e.g., Manual batch processing is too slow and error-prone.
-    validations:
-      required: false
   - type: textarea
     id: additional-context
     attributes:
