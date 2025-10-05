@@ -42,7 +42,7 @@ class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
 # Trying to avoid ambiguity with software libraries, and maybe non-library orgs could use this someday
 class Organization(BibliosModel):
     name = models.CharField(max_length=75)
-    short_name = models.SlugField(max_length=5)
+    short_name = models.SlugField(max_length=10)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
 
@@ -53,9 +53,16 @@ class Organization(BibliosModel):
             "change": is_org_archivist,
             "delete": rules.is_superuser,
         }
+        constraints = [
+            models.UniqueConstraint(fields=["short_name"], name="unique_org_shortname")
+        ]
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        keys = {"short_name": self.short_name}
+        return reverse("organization", kwargs=keys)
 
 
 class CloudService(models.Model):
@@ -79,6 +86,7 @@ class CloudService(models.Model):
 
 class Consortium(BibliosModel):
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     def __str__(self):
         return self.name
@@ -92,8 +100,11 @@ class Membership(BibliosModel):
 
 
 class Collection(BibliosModel):
-    owner = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="collections"
+    )
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     class Meta:
         rules_permissions = {
@@ -102,14 +113,24 @@ class Collection(BibliosModel):
             "delete": is_org_archivist,
             "view": is_org_viewer,
         }
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "slug"], name="unique_collection_slug"
+            )
+        ]
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        keys = {"short_name": self.owner.short_name, "collection_slug": self.slug}
+        return reverse("collection", kwargs=keys)
 
 
 class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
 
     class Meta:
         rules_permissions = {
@@ -118,14 +139,29 @@ class Series(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        constraints = [
+            models.UniqueConstraint(
+                fields=["collection", "slug"], name="unique_series_slug"
+            )
+        ]
 
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        keys = {
+            "short_name": self.collection.owner.short_name,
+            "collection_slug": self.collection.slug,
+            "series_slug": self.slug,
+        }
+        return reverse("series", kwargs=keys)
+
 
 class Document(BibliosModel):
-    series = models.ForeignKey(Series, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=25)
+    series = models.ForeignKey(
+        Series, on_delete=models.CASCADE, related_name="documents"
+    )
+    identifier = models.SlugField(max_length=25)
 
     # Spelling suggestion rules
     use_long_s_detection = models.BooleanField(default=True)
@@ -150,8 +186,8 @@ class Document(BibliosModel):
     def get_absolute_url(self):
         keys = {
             "short_name": self.series.collection.owner.short_name,
-            "collection_id": self.series.collection_id,
-            "pk": self.id,
+            "collection_slug": self.series.collection.slug,
+            "identifier": self.identifier,
         }
         return reverse("document", kwargs=keys)
 
@@ -200,15 +236,15 @@ class Page(BibliosModel):
     def get_absolute_url(self):
         keys = {
             "short_name": self.document.series.collection.owner.short_name,
-            "collection_id": self.document.series.collection_id,
-            "document_id": self.document_id,
+            "collection_slug": self.document.series.collection.slug,
+            "identifier": self.document.identifier,
             "number": self.number,
         }
         return reverse("page", kwargs=keys)
 
     @property
     def has_extraction(self):
-        return self.textblock_set.exists()
+        return self.words.exists()
 
 
 class TextBlock(BibliosModel):
@@ -225,7 +261,7 @@ class TextBlock(BibliosModel):
         OMIT: "Omit",
     }
 
-    page = models.ForeignKey(Page, on_delete=models.CASCADE)
+    page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="words")
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
     extraction_id = models.CharField(max_length=50, blank=True)
@@ -299,7 +335,7 @@ class TextBlock(BibliosModel):
         from biblios.services.suggestions import generate_suggestions
 
         return generate_suggestions(self.text, self.page.document.use_long_s_detection)
-    
+
     def save(self, **kwargs):
         """Generate spellcheck suggestions on save"""
         self.suggestions = self.__get_suggestions__()
@@ -312,7 +348,7 @@ class TextBlock(BibliosModel):
 
     @cached_property
     def confidence_level(self):
-        """Provides a scale rating of the word's confidence level"""            
+        """Provides a scale rating of the word's confidence level"""
         if self.confidence >= 99.9:
             return "accepted"
         elif self.confidence >= 90:

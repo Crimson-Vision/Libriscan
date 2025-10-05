@@ -26,9 +26,7 @@ class BaseExtractor(object):
         return f"{self.service} Extractor"
 
     def __get_extraction__(self):
-        from biblios.tests import mock_extraction
-
-        return json.loads(mock_extraction)
+        return []
 
     def __filter__(self, res):
         """
@@ -50,6 +48,7 @@ class BaseExtractor(object):
             "geo_y_1": None,
         }
 
+    # Ideally, don't override this
     def get_words(self):
         response = self.__get_extraction__()
         words = [self.__create_text_block__(w) for w in self.__filter__(response)]
@@ -73,18 +72,33 @@ class BaseExtractor(object):
 class TestExtractor(BaseExtractor):
     service = "Test Service"
 
+    def __get_extraction__(self):
+        with open("biblios/tests/textract_response.json") as j:
+            response = json.load(j)
+        return response["Blocks"]
+
     def __create_text_block__(self, word):
-        return {
-            "extraction_id": word["Id"],
-            "text": word["Text"].upper(),
-            "text_type": word["TextType"],
-            "confidence": word["Confidence"],
-            "suggestions": [(word, 1)],
-            "geo_x_0": word["Geometry"]["Polygon"][0]["X"],
-            "geo_y_0": word["Geometry"]["Polygon"][0]["Y"],
-            "geo_x_1": word["Geometry"]["Polygon"][2]["X"],
-            "geo_y_1": word["Geometry"]["Polygon"][2]["Y"],
-        }
+        text_type = (
+            TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
+        )
+        return TextBlock(
+            extraction_id=word["Id"],
+            page=self.page,
+            text=word["Text"],
+            text_type=text_type,
+            confidence=word["Confidence"],
+            # TextBlock does this on save(), but the bulk create process bypasses its method override
+            suggestions=generate_suggestions(
+                word["Text"], self.page.document.use_long_s_detection
+            ),
+            geo_x_0=word["Geometry"]["Polygon"][0]["X"],
+            geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
+            geo_x_1=word["Geometry"]["Polygon"][2]["X"],
+            geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
+        )
+
+    def __filter__(self, res):
+        return [r for r in res if r["BlockType"] == "WORD"]
 
 
 class AWSExtractor(BaseExtractor):
@@ -106,7 +120,7 @@ class AWSExtractor(BaseExtractor):
         image = self.page.image.file.file.read()
 
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/textract/client/detect_document_text.html
-        extracted_page = client.detect_document_text(Document={'Bytes':image})
+        extracted_page = client.detect_document_text(Document={"Bytes": image})
 
         return extracted_page["Blocks"]
 
@@ -117,8 +131,9 @@ class AWSExtractor(BaseExtractor):
         return [r for r in res if r["BlockType"] == "WORD"]
 
     def __create_text_block__(self, word):
-
-        text_type = TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
+        text_type = (
+            TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
+        )
 
         return TextBlock(
             extraction_id=word["Id"],
@@ -127,7 +142,9 @@ class AWSExtractor(BaseExtractor):
             text_type=text_type,
             confidence=word["Confidence"],
             # TextBlock does this on save(), but the bulk create process bypasses its method override
-            suggestions=generate_suggestions(word["Text"], self.page.document.use_long_s_detection),
+            suggestions=generate_suggestions(
+                word["Text"], self.page.document.use_long_s_detection
+            ),
             geo_x_0=word["Geometry"]["Polygon"][0]["X"],
             geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
             geo_x_1=word["Geometry"]["Polygon"][2]["X"],
