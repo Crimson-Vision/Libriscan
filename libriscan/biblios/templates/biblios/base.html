@@ -1,6 +1,6 @@
 {% load django_htmx %}
 <!doctype html>
-<html lang="en-US" data-theme="light">
+<html lang="en-US" data-theme="light" id="html-root">
 
 <head>
   <meta charset="utf-8" />
@@ -19,12 +19,27 @@
   
   <!-- Theme Toggle Script -->
   <script>
+    // Persist theme selection in localStorage
+    function setTheme(theme) {
+      const html = document.getElementById('html-root');
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('libriscan-theme', theme);
+    }
+
     function toggleTheme() {
-      const html = document.querySelector('html');
+      const html = document.getElementById('html-root');
       const currentTheme = html.getAttribute('data-theme');
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', newTheme);
+      setTheme(newTheme);
     }
+
+    // On page load, set theme from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('libriscan-theme');
+      if (savedTheme) {
+        setTheme(savedTheme);
+      }
+    });
   </script>
 </head>
 
