@@ -13,5 +13,6 @@
             <li>No series</li>
         {% endfor %}
     </ul>
-    <a href="{% url 'document_create' collection.owner.short_name collection.slug %}">Add New Document</a>
+    <!-- TODO: Add ability to create new series within this collection. -->
+    <a href="{% url 'document_create' collection.owner.short_name collection.slug %}">Add New Series</a>
 {% endblock content %}

@@ -1,11 +1,25 @@
 {% extends "biblios/base.html" %}
 {% block content %}
-    <p>Here's a list of libraries:</p>
-    <ul class="list">
-        {% for role in orgs %}
-            <li class="list-row">
-                <a href="{{ role.organization.get_absolute_url }}">{{ role.organization }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container mx-auto px-4 py-8">
+        <p class="mb-6 text-lg font-semibold">Organizations you can access:</p>
+        <ul class="list bg-base-100 rounded-box shadow-md">
+            {% for role in orgs %}
+                <li class="my-2">
+                    <a href="{{ role.organization.get_absolute_url }}" class="block list-row flex items-center gap-6 px-6 py-4 border-b hover:bg-primary hover:text-primary-content transition">
+                        <div class="mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 rounded-box text-base-content">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-base">{{ role.organization }}</span>
+                            <div class="text-xs uppercase font-semibold opacity-60 mt-1">{{ role.organization.short_name|default:"Library" }}</div>
+                        </div>
+                    </a>
+                </li>
+            {% empty %}
+                <li class="p-6 text-center text-sm opacity-60">No organizations found.</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock content %}
