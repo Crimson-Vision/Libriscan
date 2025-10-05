@@ -1,7 +1,7 @@
 name: Bug Report
 description: File a bug report for the LibriScan project.
 title: "[Bug]: "
-labels: ["bug", "triage"]
+labels: ["bug"]
 projects: ["CrimsonVision/LibriScan"]
 assignees:
   - crimson-vision-lead
