@@ -63,6 +63,16 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
     slug_field = "short_name"
     slug_url_kwarg = "short_name"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            from .models import UserRole
+            role = UserRole.objects.filter(user=self.request.user, organization=self.object).first()
+            context["user_role"] = UserRole.ROLE_CHOICES.get(getattr(role, "role", None), None)
+        else:
+            context["user_role"] = None
+        return context
+
 
 # This is a verbose way of handling RBAC on a collections page
 # The permission_required handle on collection_detail calls this function,
