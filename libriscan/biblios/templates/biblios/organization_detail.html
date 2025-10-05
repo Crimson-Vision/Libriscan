@@ -1,25 +1,59 @@
 {% extends "biblios/base.html" %}
 {% block content %}
-  <p>{{ org }}</p>
-  <p>{{ org.city }}, {{ org.state }}</p>
-  <h5>Consortiums</h5>
-  <ul>
-    {% for m in org.membership_set.all %}
-      <li>
-        <a href="{% url 'consortium' m.consortium.id %}">{{ m.consortium }}</a>
-      </li>
-    {% empty %}
-      <li>No consortium memberships</li>
-    {% endfor %}
-  </ul>
-  <h5>Collections</h5>
-  <ul>
-    {% for c in org.collections.all %}
-      <li>
-        <a href="{{ c.get_absolute_url }}">{{ c }}</a>
-      </li>
-    {% empty %}
-      <li>No collections</li>
-    {% endfor %}
-  </ul>
+  <div class="max-w-2xl mx-auto py-10">
+    <!-- Organization Card -->
+    <div class="card bg-base-100 shadow-xl mb-10 border border-base-300">
+      <div class="card-body flex flex-col gap-2">
+        <div class="flex items-center gap-4 mb-2">
+          <span class="inline-flex items-center justify-center size-12 rounded-full bg-primary/10">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-primary">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+            </svg>
+          </span>
+          <span class="text-2xl font-bold">{{ org }}</span>
+        </div>
+        <p class="text-base opacity-70 ml-1">{{ org.city }}, {{ org.state }}</p>
+      </div>
+    </div>
+
+    <!-- Consortiums Section -->
+    <div class="mb-10">
+      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        Consortiums
+      </h3>
+      <ul class="list bg-base-100 rounded-box shadow divide-y divide-base-200">
+        {% for m in org.membership_set.all %}
+          <li class="px-6 py-4 flex items-center gap-3 hover:bg-secondary/10 transition rounded-box">
+            <span class="inline-flex items-center justify-center size-8 rounded-full bg-secondary/20">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-secondary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-2.25-1.313M21 7.5v2.25m0-2.25-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3 2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75 2.25-1.313M12 21.75V19.5m0 2.25-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25" />
+              </svg>
+            </span>
+            <a href="{% url 'consortium' m.consortium.id %}" class="font-medium hover:underline">{{ m.consortium }}</a>
+          </li>
+        {% empty %}
+          <li class="px-6 py-4 text-center text-sm opacity-60">No consortium memberships</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Collections Section -->
+    <div>
+      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        Collections
+      </h3>
+      <ul class="list bg-base-100 rounded-box shadow divide-base-200">
+        {% for c in org.collections.all %}
+          <li class="px-6 py-4 flex items-center gap-3 hover:bg-accent/10 transition rounded-box">
+            <span class="inline-flex items-center justify-center size-8 rounded-full bg-accent/20">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+            </span>
+            <a href="{{ c.get_absolute_url }}" class="font-medium hover:underline">{{ c }}</a>
+          </li>
+        {% empty %}
+          <li class="px-6 py-4 text-center text-sm opacity-60">No collections</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 {% endblock content %}
