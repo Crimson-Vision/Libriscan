@@ -68,14 +68,6 @@ body:
       label: Relevant Log Output
       description: Paste any relevant logs or error messages (e.g., Django errors, AWS Textract output). These will be formatted as code automatically.
       render: shell
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/CrimsonVision/LibriScan/blob/main/CODE_OF_CONDUCT.md).
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
   - type: textarea
     id: additional-context
     attributes:
