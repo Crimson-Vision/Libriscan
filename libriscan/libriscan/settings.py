@@ -202,3 +202,6 @@ MEDIA_URL = "images/"
 
 LOGOUT_REDIRECT_URL = "/"
 
+# File upload settings
+ALLOWED_UPLOAD_TYPES = ["image/tiff", "image/jpeg", "image/png"]
+MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB
