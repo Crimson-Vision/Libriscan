@@ -1,11 +1,24 @@
 {% extends "biblios/index.html" %}
 
 {% block content %}
-
-<form method="post">
+<form method="post" class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
+    <div class="form-control">
+        <label for="id_series" class="label">Series</label>
+        <select name="series" id="id_series" class="select select-bordered w-full">
+            {% for s in form.fields.series.queryset %}
+                <option value="{{ s.pk }}" {% if form.series.value == s.pk %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-control">
+        <label for="id_identifier" class="label">Identifier</label>
+        <input type="text" name="identifier" id="id_identifier" class="input input-bordered w-full" value="{{ form.identifier.value|default_if_none:'' }}">
+    </div>
+    <div class="form-control flex-row items-center gap-2">
+        <input type="checkbox" name="use_long_s_detection" id="id_use_long_s_detection" class="checkbox" {% if form.use_long_s_detection.value %}checked{% endif %}>
+        <label for="id_use_long_s_detection" class="label cursor-pointer">Use long s ⟨ſ⟩ detection</label>
+    </div>
+    <button type="submit" class="btn btn-primary w-full">Submit</button>
 </form>
-
 {% endblock content %}
