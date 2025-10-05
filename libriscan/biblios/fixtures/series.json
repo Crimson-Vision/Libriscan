@@ -1,10 +1,11 @@
 [
-{
-    "model": "biblios.series",
-    "pk": 1,
-    "fields": {
-        "collection": 1,
-        "name": "The Jones House"
+    {
+        "model": "biblios.series",
+        "pk": 1,
+        "fields": {
+            "collection": 1,
+            "name": "The Jones House",
+            "slug": "jones-house"
+        }
     }
-}
 ]

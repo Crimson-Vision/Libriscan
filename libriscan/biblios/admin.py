@@ -16,11 +16,7 @@ class SeriesInline(admin.TabularInline):
     model = Series
     extra = 1
     verbose_name_plural = "Series"
-
-
-class TextBlockInline(admin.StackedInline):
-    model = TextBlock
-    extra = 1
+    prepopulated_fields = {"slug": ["name"]}
 
 
 class UserRoleInline(admin.TabularInline):
@@ -32,6 +28,7 @@ class PagesInline(admin.StackedInline):
     model = Page
     extra = 0
 
+
 class CloudServiceInline(admin.StackedInline):
     model = CloudService
     extra = 1
@@ -40,7 +37,7 @@ class CloudServiceInline(admin.StackedInline):
 @admin.register(Organization)
 class OrgAdmin(admin.ModelAdmin):
     inlines = [MembershipInline, CloudServiceInline]
-    list_display = ['name', 'city', 'state']
+    list_display = ["name", "city", "state"]
 
 
 @admin.register(Consortium)
@@ -52,6 +49,7 @@ class ConsortiumAdmin(admin.ModelAdmin):
 class CollectionAdmin(admin.ModelAdmin):
     inlines = [SeriesInline]
     list_display = ["name", "owner"]
+    prepopulated_fields = {"slug": ["name"]}
 
 
 @admin.register(Document)
@@ -62,13 +60,13 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
-    inlines = [TextBlockInline]
     list_display = ["number", "document", "document__series__collection__owner"]
 
 
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ["user", "organization", "role"]
+
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -118,3 +116,12 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(User, CustomUserAdmin)
+
+
+class TextAdmin(admin.ModelAdmin):
+    search_fields = ("document", "page")
+    list_display = ["text", "page__document", "page"]
+    list_filter = ["page__document", "page"]
+
+
+admin.site.register(TextBlock, TextAdmin)

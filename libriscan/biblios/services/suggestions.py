@@ -23,8 +23,25 @@ def long_s_conversion(word, modern=True):
     return re.sub(LONG_S_REGEX, s, word)
 
 
-def generate_suggestions(words, n=3):
-    """Find possible spellcheck suggestions of all the words in a list, and return the top n candidates."""
+def generate_suggestions(wrd, long_s_detect, s=3):
+    """
+    Find possible spellcheck suggestions of a word and its variants, and return the top n candidates.
+
+    wrd (str): the potentially misspelled word
+    long_s_detect (bool): whether to use long-s detection rules
+    s (int): the number of suggestions to return
+
+    Returns a list of (suggestion, frequency) tuples.
+    """
+
+    words = [wrd,]
+
+    # If the caller wants long s detection, find that variant
+    if long_s_detect:
+        c = long_s_conversion(wrd)
+        if c != wrd:
+            words.append(c)
+
     # Since there are likely to be duplicate candidates for the words, guarantee uniqueness by using a set
     suggestions = set()
 
@@ -62,5 +79,5 @@ def generate_suggestions(words, n=3):
     # Sort the suggestions by their frequency, descending
     suggestions = sorted(suggestions, key=lambda c: c[1], reverse=True)
     
-    return suggestions[:n]
+    return suggestions[:s]
     

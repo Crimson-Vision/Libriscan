@@ -1,0 +1,17 @@
+{% extends "biblios/base.html" %}
+{% block content %}
+    <p>{{ series }}</p>
+    <ul>
+        <li>
+            <b>Series</b>
+        </li>
+        {% for doc in series.documents.all %}
+            <li>
+                <a href="{{ doc.get_absolute_url }}">{{ doc }}</a>
+            </li>
+        {% empty %}
+            <li>No documents</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'document_create' series.collection.owner.short_name series.collection.slug %}">Add New Document</a>
+{% endblock content %}

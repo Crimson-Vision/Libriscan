@@ -11,8 +11,21 @@
     </div>
     
     <!-- Right Column: Text Display -->
-    <div class="w-full">
-      {% include "biblios/components/forms/text_display.html" %}
+    <div id="rightColumn" class="w-full">
+      <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
+        <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
+          <h2 class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
+          <p class="mb-4">Please upload an image containing text and click <span class="font-bold">Extract</span> after uploading for intelligent extraction.</p>
+        </div>  
+      </div>
+      <div id="loadingContainer" style="display:none;" class="card bg-base-100 shadow-sm h-full">
+        <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
+          <span class="loading loading-infinity loading-xl"></span>
+        </div>
+      </div>
+      <div id="textDisplayContainer" style="display:none;" class="w-full">
+        {% include "biblios/components/forms/text_display.html" %}
+      </div>
     </div>
   </div>
 </div>
