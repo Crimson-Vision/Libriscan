@@ -6,6 +6,12 @@ body * {
   pointer-events: auto;
 }
 
+/* Remove blocking credits */
+/* https://pqina.nl/filepond/docs/api/instance/properties/#disabling-credits */
+.filepond--credits {
+  display: none !important;
+}
+
 .upload-area {
   pointer-events: none;
 }
@@ -29,12 +35,19 @@ body * {
              accept="image/tiff,image/jpeg,image/png"
              data-max-file-size="5MB">
 
-             <!-- Upload Button -->
-             <button id="uploadBtn" 
-             class="btn btn-primary mt-4 w-full"
-             disabled>
-             Upload
-            </button>
+             <!-- Upload and Analyze Buttons Side by Side -->
+             <div class="flex gap-2 mt-4 w-full">
+               <button id="uploadBtn" 
+                 class="btn btn-primary flex-1 flex items-center gap-2"
+                 disabled>
+                 <span id="uploadBtnText">Upload</span>
+                 <span id="uploadSpinner" class="loading loading-bars loading-sm hidden"></span>
+               </button>
+               <button id="extractBtn" class="btn btn-accent flex-1 flex items-center gap-2" disabled>
+                 <span id="extractBtnText">Extract</span>
+                 <span id="extractSpinner" class="loading loading-bars loading-sm hidden"></span>
+               </button>
+             </div>
     </div>
   </div>
 </div>
@@ -99,16 +112,79 @@ body * {
       document.getElementById('uploadBtn').disabled = false;
     },
     onprocessfile: (error, file) => {
+      const btn = document.getElementById('uploadBtn');
+      const spinner = document.getElementById('uploadSpinner');
+      const btnText = document.getElementById('uploadBtnText');
+
+      // Hide loading state
+      spinner.classList.add('hidden');
+      btnText.textContent = 'Upload';
+      
       if (error) {
         console.error('Upload error:', error);
       }
       // Disable upload button after processing
-      document.getElementById('uploadBtn').disabled = true;
+      btn.disabled = true;
     }
   });
 
   // Handle upload button click
   document.getElementById('uploadBtn').addEventListener('click', () => {
+    const btn = document.getElementById('uploadBtn');
+    const spinner = document.getElementById('uploadSpinner');
+    const btnText = document.getElementById('uploadBtnText');
+    
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.textContent = 'Uploading...';
+    
     pond.processFiles();
+  });
+
+  // Enable Analyze button after upload
+  pond.on('processfile', (error, file) => {
+    if (!error) {
+      document.getElementById('extractBtn').disabled = false;
+    }
+  });
+
+  // Handle Extract button click
+  document.getElementById('extractBtn').addEventListener('click', function() {
+    const btn = this;
+    const spinner = document.getElementById('extractSpinner');
+    const btnText = document.getElementById('extractBtnText');
+
+    // Show loading state
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.textContent = 'Extracting...';
+    
+    // Simulate extraction process
+    setTimeout(function() {
+      // Hide extract button spinner
+      spinner.classList.add('hidden');
+      btnText.textContent = 'Extract';
+      btn.disabled = false;
+      
+      // Hide right column temporarily
+      document.getElementById('rightColumn').style.display = 'none';
+      
+      // After a brief pause, show loading animation
+      setTimeout(function() {
+        document.getElementById('rightColumn').style.display = '';
+        document.getElementById('extractPrompt').style.display = 'none';
+        const loadingContainer = document.getElementById('loadingContainer');
+        loadingContainer.style.display = '';
+      }, 300); // Short delay for smooth transition
+
+      // After a delay, hide loading and show text display
+      setTimeout(function() {
+        loadingContainer.style.display = 'none';
+        const textDisplayContainer = document.getElementById('textDisplayContainer');
+        textDisplayContainer.style.display = '';
+        textDisplayContainer.scrollIntoView({ behavior: 'smooth' });
+      }, 1500); // Show loading animation for 1.5 seconds
+    }, 2000);
   });
 </script>
