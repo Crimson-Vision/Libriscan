@@ -1,40 +1,114 @@
 {% load static %}
 
+<style>
+/* Prevent drag events outside upload area */
+body * {
+  pointer-events: auto;
+}
+
+.upload-area {
+  pointer-events: none;
+}
+
+.upload-area .filepond--root,
+.upload-area .border-2 {
+  pointer-events: auto;
+}
+</style>
+
 <div class="card bg-base-100 shadow-sm h-full">
-    <div class="card-body">
-      <h2 class="card-title text-2xl mb-6">Quick Text Recognition</h2>
-      
-      <!-- File Upload Area -->
-      <div class="upload-area w-full">
-        <div class="border-2 border-dashed border-base-300 rounded-lg p-12 text-center hover:border-primary transition-colors cursor-pointer"
-             hx-post="/upload"
-             hx-trigger="dragover dragenter"
-             hx-swap="none">
-          <!-- Upload Icon -->
-          <!-- https://heroicons.com/ -->
-          <div class="flex justify-center mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-base-content opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-          </div>
-          
-          <!-- Upload Text -->
-          <div class="space-y-2">
-            <p class="text-lg font-semibold">Upload Image</p>
-            <p class="text-base-content opacity-60">Drag and drop files here or browse files</p>
-          </div>
+  <div class="card-body">
+    <h2 class="card-title text-2xl mb-6">Quick Text Recognition</h2>
+    
+    <!-- File Upload Area -->
+    <div class="upload-area w-full">
+      <!-- FilePond Input -->
+      <input type="file" 
+             class="filepond"
+             name="image"
+             accept="image/tiff,image/jpeg,image/png"
+             data-max-file-size="5MB">
 
-          <!-- Hidden File Input -->
-          <input type="file" 
-                 class="hidden" 
-                 accept="image/*"
-                 hx-post="/upload"
-                 hx-trigger="change"
-                 hx-target="#upload-status">
-        </div>
-
-        <!-- Upload Status -->
-        <div id="upload-status" class="mt-4"></div>
-      </div>
+             <!-- Upload Button -->
+             <button id="uploadBtn" 
+             class="btn btn-primary mt-4 w-full"
+             disabled>
+             Upload
+            </button>
     </div>
+  </div>
 </div>
+
+<!-- Drag Drop Prevention Script -->
+<script>
+  // Prevent default drag behavior outside upload area
+  document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, false);
+
+  document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, false);
+</script>
+
+<!-- FilePond Initialization -->
+<script>
+  // Register the image preview plugin
+  FilePond.registerPlugin(FilePondPluginImagePreview);
+
+  // Get the input element
+  const inputElement = document.querySelector('input[type="file"].filepond');
+
+  // Create the FilePond instance
+  const pond = FilePond.create(inputElement, {
+    // Disable automatic upload
+    instantUpload: false,
+
+  // File validation using Django settings
+    acceptedFileTypes: ['image/tiff', 'image/jpeg', 'image/png'],
+    maxFileSize: '5MB',
+
+    // Style settings
+    styleButtonRemoveItemPosition: 'right',
+    stylePanelLayout: 'integrated',
+    styleLoadIndicatorPosition: 'center',
+    styleProgressIndicatorPosition: 'center',
+    styleButtonProcessItemPosition: 'center',
+    stylePanelAspectRatio: 1.25,
+    
+    // Image preview settings
+    allowImagePreview: true,
+    imageCropAspectRatio: '1:1',
+    
+    server: {
+      process: {
+        url: "{% url 'handle_upload' %}",
+        headers: {
+          'X-CSRFToken': document.querySelector('body').getAttribute('hx-headers').match(/"x-csrftoken":\s*"([^"]+)"/)[1]
+        }
+      }
+    },
+
+    onaddfile: (error, file) => {
+      if (error) {
+        console.error('File addition error:', error.body || error.message);
+        return;
+      }
+      document.getElementById('uploadBtn').disabled = false;
+    },
+    onprocessfile: (error, file) => {
+      if (error) {
+        console.error('Upload error:', error);
+      }
+      // Disable upload button after processing
+      document.getElementById('uploadBtn').disabled = true;
+    }
+  });
+
+  // Handle upload button click
+  document.getElementById('uploadBtn').addEventListener('click', () => {
+    pond.processFiles();
+  });
+</script>
