@@ -1,17 +1,63 @@
 {% extends "biblios/base.html" %}
 {% block content %}
-    <p>{{ series }}</p>
-    <ul>
-        <li>
-            <b>Series</b>
-        </li>
-        {% for doc in series.documents.all %}
-            <li>
-                <a href="{{ doc.get_absolute_url }}">{{ doc }}</a>
-            </li>
-        {% empty %}
-            <li>No documents</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'document_create' series.collection.owner.short_name series.collection.slug %}">Add New Document</a>
+        <!-- Breadcrumb Navigation with Icons -->
+        <nav class="mb-6 text-sm breadcrumbs">
+            <ul>
+                <li>
+                    <a href="{{ series.collection.owner.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
+                        <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                            </svg>
+                        </span>
+                        {{ series.collection.owner }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ series.collection.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
+                        <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                        </span>
+                        {{ series.collection }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ series.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
+                        <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                        </span>
+                        {{ series }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="card bg-base-100 shadow mb-6">
+            <div class="card-body">
+                <h2 class="card-title text-xl font-bold mb-2 flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center size-8 rounded-full bg-secondary/10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+                    </span>
+                    {{ series }}
+                </h2>
+                <div class="mb-2 text-base font-semibold text-base-content/80">Documents in this series:</div>
+                <ul class="list bg-base-100 rounded-box shadow divide-base-200">
+                    {% for doc in series.documents.all %}
+                        <li class="px-4 py-3 flex items-center gap-2 hover:bg-secondary/10 transition rounded-box">
+                            <span class="inline-flex items-center justify-center size-8 rounded-full bg-warning/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                </svg>
+                            </span>
+                            <a href="{{ doc.get_absolute_url }}" class="font-medium hover:underline">{{ doc }}</a>
+                        </li>
+                    {% empty %}
+                        <li class="px-4 py-3 text-center text-sm opacity-60">No documents in this series yet.</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4 flex justify-end">
+                    <a href="{% url 'document_create' series.collection.owner.short_name series.collection.slug %}" class="btn btn-secondary btn-md">Add New Document</a>
+                </div>
+            </div>
+        </div>
 {% endblock content %}
