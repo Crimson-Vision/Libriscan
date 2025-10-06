@@ -1,11 +1,40 @@
-{% extends "biblios/index.html" %}
+{% extends "biblios/base.html" %}
 
 {% block content %}
-
-<form enctype="multipart/form-data" method="post">
+<form enctype="multipart/form-data" method="post" class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4" id="pageUploadForm">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
+    <div class="space-y-6">
+        {% for field in form.visible_fields %}
+        <div class="form-control">
+            <label for="{{ field.id_for_label }}" class="label font-semibold text-lg text-base-content mb-2">{{ field.label }}</label>
+            {% if field.field.widget.input_type == "number" %}
+                <input type="number" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="input input-bordered input-lg rounded-lg w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150 placeholder:text-base-content/60" value="{{ field.value|default_if_none:'' }}" placeholder="Enter page number" {% if field.field.required %}required{% endif %}>
+            {% elif field.field.widget.input_type == "file" %}
+                <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept=".jpeg,.jpg,.png,.tiff,image/jpeg,image/png,image/tiff" class="file-input file-input-bordered w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150" {% if field.field.required %}required{% endif %}>
+            {% else %}
+                {{ field }}
+            {% endif %}
+            {% if field.help_text %}
+                <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="text-error text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary w-full" id="uploadBtn" disabled>Upload</button>
 </form>
-
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.querySelector('#pageUploadForm input[type="file"]');
+        const uploadBtn = document.getElementById('uploadBtn');
+        if (fileInput && uploadBtn) {
+            const toggle = () => uploadBtn.disabled = !fileInput.files.length;
+            fileInput.addEventListener('change', toggle);
+            toggle();
+        }
+    });
+</script>
 {% endblock content %}

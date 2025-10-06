@@ -1,0 +1,7 @@
+{
+        email <your email address>
+}
+
+https://<hostname> {
+        reverse_proxy libriscan:8000
+}

@@ -6,4 +6,4 @@ python manage.py migrate --noinput
 
 python manage.py collectstatic --noinput
 
-python -m gunicorn --bind 0.0.0.0:8000 --workers 3 libriscan.wsgi:application
+python -m gunicorn -c ./mnt/gunicorn.conf.py libriscan.wsgi:application

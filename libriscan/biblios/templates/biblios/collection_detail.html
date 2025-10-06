@@ -1,17 +1,55 @@
 {% extends "biblios/base.html" %}
 {% block content %}
-    <p>{{ collection }}</p>
-    <ul>
+    <!-- Breadcrumb Navigation with Icons -->
+    <nav class="mb-6 text-sm breadcrumbs">
+      <ul>
         <li>
-            <b>Series</b>
+          <a href="{{ collection.owner.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
+            <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+              </svg>
+            </span>
+            {{ collection.owner }}
+          </a>
         </li>
-        {% for series in collection.series_set.all %}
-            <li>
-                <a href="{{ series.get_absolute_url }}">{{ series }}</a>
+        <li>
+          <a href="{{ collection.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
+            <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+            </span>
+            {{ collection }}
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="card bg-base-100 shadow mb-6">
+      <div class="card-body">
+        <h2 class="card-title text-xl font-bold mb-2 flex items-center gap-2">
+          <span class="inline-flex items-center justify-center size-8 rounded-full bg-accent/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+          </span>
+          {{ collection }}
+        </h2>
+        <div class="mb-2 text-base font-semibold text-base-content/80">Series in this collection:</div>
+        <ul class="list bg-base-100 rounded-box shadow divide-base-200">
+          {% for series in collection.series_set.all %}
+            <li class="px-4 py-3 flex items-center gap-2 hover:bg-accent/10 transition rounded-box">
+              <span class="inline-flex items-center justify-center size-8 rounded-full bg-secondary/10">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 text-secondary">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                </svg>
+              </span>
+              <a href="{{ series.get_absolute_url }}" class="font-medium hover:underline">{{ series }}</a>
             </li>
-        {% empty %}
-            <li>No series</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'document_create' collection.owner.short_name collection.slug %}">Add New Document</a>
+          {% empty %}
+            <li class="px-4 py-3 text-center text-sm opacity-60">No series in this collection yet.</li>
+          {% endfor %}
+        </ul>
+        <div class="mt-4 flex justify-end">
+          <a href="{% url 'document_create' collection.owner.short_name collection.slug %}" class="btn btn-primary btn-md">Add New Series</a>
+        </div>
+      </div>
+    </div>
 {% endblock content %}
