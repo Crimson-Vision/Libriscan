@@ -1,7 +1,7 @@
 {% extends "biblios/index.html" %}
 
 {% block content %}
-<form enctype="multipart/form-data" method="post" class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4">
+<form enctype="multipart/form-data" method="post" class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4" id="pageUploadForm">
     {% csrf_token %}
     <div class="space-y-6">
         {% for field in form.visible_fields %}
@@ -23,6 +23,18 @@
         </div>
         {% endfor %}
     </div>
-    <button type="submit" class="btn btn-primary w-full">Upload</button>
+    <button type="submit" class="btn btn-primary w-full" id="uploadBtn" disabled>Upload</button>
 </form>
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.querySelector('#pageUploadForm input[type="file"]');
+        const uploadBtn = document.getElementById('uploadBtn');
+        if (fileInput && uploadBtn) {
+            const toggle = () => uploadBtn.disabled = !fileInput.files.length;
+            fileInput.addEventListener('change', toggle);
+            toggle();
+        }
+    });
+</script>
 {% endblock content %}
