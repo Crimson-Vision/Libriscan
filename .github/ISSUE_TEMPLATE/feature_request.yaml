@@ -1,0 +1,59 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for the LibriScan project.
+title: "[Feature]: "
+labels: ["enhancement"]
+projects: ["CrimsonVision/LibriScan"]
+assignees:
+  - crimson-vision-lead
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature for LibriScan! Please provide detailed information to help us understand your idea and its value to the project.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we reach you if we need more information (optional)?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Provide a clear and concise description of the proposed feature.
+      placeholder: e.g., Add a bulk upload option for processing multiple documents at once.
+      value: "A new feature is needed!"
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Explain why this feature is needed and how it aligns with LibriScan’s goals (e.g., improving transcription, usability, or integration).
+      placeholder: e.g., As a librarian, I want to upload multiple documents simultaneously to save time during batch processing.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your suggested implementation or behavior for the feature (e.g., UI changes, new API integration, compatibility with Django/Tailwind).
+      placeholder: e.g., Add a "Bulk Upload" button to the Document Upload page that processes all selected files in parallel.
+    validations:
+      required: false
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+      description: List the expected benefits (e.g., time savings, improved accuracy, enhanced patron access).
+      placeholder: e.g., Reduces processing time by 50% for large collections; improves staff efficiency.
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other details, such as examples from other systems, mockups, or references to the LibriScan User Manual.
+      placeholder: e.g., Similar feature seen in Omeka’s batch upload tool.
