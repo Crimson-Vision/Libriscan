@@ -119,7 +119,7 @@ admin.site.register(User, CustomUserAdmin)
 
 
 class TextAdmin(admin.ModelAdmin):
-    search_fields = ("document", "page")
+    search_fields = ("text",)
     list_display = ["text", "page__document", "page"]
     list_filter = ["page__document", "page"]
 
