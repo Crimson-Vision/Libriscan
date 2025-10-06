@@ -1,12 +1,18 @@
+<script>
+// Disable Extract button on HTMX request
+document.addEventListener('htmx:beforeRequest', e => {
+  if (e.target?.id === 'extractBtn') e.target.disabled = true;
+});
+</script>
 {% extends "biblios/base.html" %}
 {% block content %}
 <div class="container mx-auto p-4">
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Left Column: Page Image & Actions -->
-    <div class="w-full flex flex-col items-center">
+    <!-- Left: Page Image & Actions -->
+    <div class="flex flex-col items-center">
       <div class="card bg-base-100 shadow-sm w-full max-w-md">
         <div class="card-body p-4">
-          <h5 class="card-title text-xl font-bold mb-2">Page {{ page.number }}</h5>
+          <h2 class="card-title text-xl font-bold mb-2">Page {{ page.number }}</h2>
           <figure class="mb-4 flex justify-center">
             {% if page.image %}
               <img src="{{ page.image.url }}" alt="Page Image" class="rounded-lg object-contain max-h-96 w-full border border-base-300" />
@@ -14,19 +20,20 @@
               <div class="bg-base-200 rounded-lg h-96 w-full flex items-center justify-center text-base-content/60">No image available</div>
             {% endif %}
           </figure>
-          <button hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
-                  hx-target="#extraction"
-                  hx-swap="outerHTML"
-                  class="btn btn-primary w-full"
-                  {% if page.has_extraction %}disabled{% endif %}>
+          <button
+            hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
+            hx-target="#extraction"
+            hx-swap="outerHTML"
+            class="btn btn-primary w-full"
+            id="extractBtn"
+            {% if page.has_extraction %}disabled{% endif %}>
             Extract
           </button>
         </div>
       </div>
     </div>
-
-    <!-- Right Column: Extracted Info or Text Display -->
-    <div class="w-full">
+    <!-- Right: Extracted Text -->
+    <div>
       {% if page.words.exists %}
         {% include "biblios/components/forms/text_display.html" with words=page.words.all %}
       {% else %}
