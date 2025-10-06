@@ -1,21 +1,50 @@
+<script>
+// Disable Extract button on HTMX request
+document.addEventListener('htmx:beforeRequest', e => {
+  if (e.target?.id === 'extractBtn') e.target.disabled = true;
+});
+</script>
 {% extends "biblios/base.html" %}
 {% block content %}
-  <h4>{{ page }} Extractor Test</h4>
-  <div>
-    <div class="card m-4 w-80">
-      <h5>Page {{ page.number }}</h5>
-      <figure>
-        {% if page.image %}<img width=auto height=auto src="{{ page.image.url }}" />{% endif %}
-      </figure>
-      <div class="card-body">
-        <button hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
-                hx-target="#extraction"
-                {% if page.has_extraction %}disabled{% endif %}>Extract</button>
+<div class="container mx-auto p-4 h-full">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+    <!-- Left: Page Image & Actions -->
+    <div class="flex flex-col items-center h-full w-full">
+      <div class="card bg-base-100 shadow-sm w-full h-full">
+        <div class="card-body p-4 h-full flex flex-col">
+          <h2 class="card-title text-xl font-bold mb-2">Page {{ page.number }}</h2>
+          <figure class="mb-4 flex justify-center">
+            {% if page.image %}
+              <img src="{{ page.image.url }}" alt="Page Image" class="rounded-lg object-cover h-full w-full border border-base-300" style="min-height:24rem;max-height:100%;" />
+            {% else %}
+              <div class="bg-base-200 rounded-lg h-96 w-full flex items-center justify-center text-base-content/60">No image available</div>
+            {% endif %}
+          </figure>
+          <button
+            hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
+            hx-target="#extractPrompt"
+            hx-swap="outerHTML"
+            class="btn btn-primary w-full"
+            id="extractBtn"
+            {% if page.has_extraction %}disabled{% endif %}>
+            Extract
+          </button>
+        </div>
       </div>
     </div>
-    <div id="extraction" class="card m-4 w-80">
-      <h3>Extracted Text</h3>
-      <p>{{ page.words.all|join:' ' }}</p>
+  <!-- Right: Extracted Text -->
+  <div id="rightColumn" class="h-full w-full">
+      {% if page.words.exists %}
+        {% include "biblios/components/forms/text_display.html" with words=page.words.all %}
+      {% else %}
+       <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
+        <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
+          <h2 class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
+          <p class="mb-4">Click <span class="font-bold">Extract</span> for intelligent extraction.</p>
+        </div>  
+      </div>
+      {% endif %}
     </div>
   </div>
+</div>
 {% endblock %}

@@ -13,9 +13,16 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <div id="wordContainer" class="flex flex-wrap gap-4 p-4">
-            <!-- Words will be dynamically inserted here -->
+          <div class="flex flex-wrap gap-4 p-4">
+            {% if words %}
+              {% for word in words %}
+                <span>{{ word }}</span>
+              {% endfor %}
+            {% else %}
+              <p class="text-base-content/60">No text extracted yet.</p>
+            {% endif %}
           </div>
+          <div id="wordContainer" class="flex flex-wrap gap-4 p-4"></div>
           {% include 'biblios/components/forms/word_details.html' %}
         </div>
       </div>
