@@ -10,7 +10,7 @@
             {% if field.field.widget.input_type == "number" %}
                 <input type="number" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="input input-bordered input-lg rounded-lg w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150 placeholder:text-base-content/60" value="{{ field.value|default_if_none:'' }}" placeholder="Enter page number" {% if field.field.required %}required{% endif %}>
             {% elif field.field.widget.input_type == "file" %}
-                <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="file-input file-input-bordered w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150" {% if field.field.required %}required{% endif %}>
+                <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept=".jpeg,.jpg,.png,.tiff,image/jpeg,image/png,image/tiff" class="file-input file-input-bordered w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150" {% if field.field.required %}required{% endif %}>
             {% else %}
                 {{ field }}
             {% endif %}
