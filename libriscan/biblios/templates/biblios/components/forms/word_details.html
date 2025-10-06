@@ -58,8 +58,8 @@ function updateWordDetails(wordInfo) {
       div.innerHTML = `
         <span class="font-medium">${suggestion.word}</span>
         <div class="flex items-center gap-3">
-          <span class="text-sm">${suggestion.confidence}%</span>
-          <progress class="${getProgressClass(suggestion.confidence)} w-24" value="${suggestion.confidence}" max="100"></progress>
+          <span class="text-sm">Frequency count: ${suggestion.confidence}</span>
+          <input type="range" min="0" max="100" value="${suggestion.confidence}" class="range w-24" disabled />
         </div>
       `;
       suggestionsList.appendChild(div);

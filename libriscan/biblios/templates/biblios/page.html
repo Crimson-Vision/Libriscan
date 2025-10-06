@@ -22,7 +22,7 @@ document.addEventListener('htmx:beforeRequest', e => {
           </figure>
           <button
             hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
-            hx-target="#extraction"
+            hx-target="#extractPrompt"
             hx-swap="outerHTML"
             class="btn btn-primary w-full"
             id="extractBtn"
@@ -33,16 +33,16 @@ document.addEventListener('htmx:beforeRequest', e => {
       </div>
     </div>
     <!-- Right: Extracted Text -->
-    <div>
+    <div id="rightColumn" class="w-full">
       {% if page.words.exists %}
         {% include "biblios/components/forms/text_display.html" with words=page.words.all %}
       {% else %}
-        <div id="extraction" class="card bg-base-100 shadow-sm w-full">
-          <div class="card-body p-6">
-            <h3 class="card-title text-2xl mb-4">Extracted Text</h3>
-            <p class="text-base-content/60">No text extracted yet.</p>
-          </div>
-        </div>
+       <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
+        <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
+          <h2 class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
+          <p class="mb-4">Click <span class="font-bold">Extract</span> for intelligent extraction.</p>
+        </div>  
+      </div>
       {% endif %}
     </div>
   </div>
