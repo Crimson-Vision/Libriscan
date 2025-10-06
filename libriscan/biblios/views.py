@@ -239,7 +239,7 @@ def extract_text(request, short_name, collection_slug, identifier, number):
 
     context = {"words": extractor.get_words()}
 
-    return render(request, "biblios/words.html", context)
+    return render(request, "biblios/components/forms/text_display.html", context)
 
 
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
