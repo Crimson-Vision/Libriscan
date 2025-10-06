@@ -65,12 +65,10 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        role = None
         if self.request.user.is_authenticated:
-            from .models import UserRole
-            role = UserRole.objects.filter(user=self.request.user, organization=self.object).first()
-            context["user_role"] = UserRole.ROLE_CHOICES.get(getattr(role, "role", None), None)
-        else:
-            context["user_role"] = None
+            role = self.request.user.userrole_set.filter(organization=self.object).first()
+        context["user_role"] = role.get_role_display() if role else None
         return context
 
 
