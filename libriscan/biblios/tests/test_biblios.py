@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
@@ -55,6 +55,16 @@ class BibliosTests(TestCase):
             passes = False
 
         self.assertTrue(passes)
+
+    def test_login_is_reachable(self):
+        # Checking that the login required middleware doesn't cause redirect loops when logging in
+        from libriscan.settings import LOGIN_URL
+        response = self.client.get(LOGIN_URL, follow=True)
+        # The redirect should only be one hop
+        self.assertEqual(len(response.redirect_chain), 1)
+        # The page can be successfully reached
+        self.assertEqual(response.status_code, 200)
+
 
 
 # This is not the right place for this.
