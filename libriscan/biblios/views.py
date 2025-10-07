@@ -1,16 +1,15 @@
 import logging
 import os
 from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_not_required
 from django.urls import reverse_lazy
-from django.db import models
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
@@ -26,7 +25,6 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-@login_required
 def scan(request):
     context = {
         "allowed_upload_types": settings.ALLOWED_UPLOAD_TYPES,
@@ -166,7 +164,6 @@ class PageCreateView(AutoPermissionRequiredMixin, CreateView):
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
 
-@login_required
 @require_http_methods(["POST"])
 def handle_upload(request):
     """Handle file uploads from FilePond."""
