@@ -48,7 +48,8 @@ class BaseExtractor(object):
             "geo_y_1": None,
         }
 
-    # Ideally, don't override this
+    # Ideally, don't override this.
+    # This can take a while because of the spellchecking. Best to call it through tasks.queue_extraction().
     def get_words(self):
         response = self.__get_extraction__()
         words = [self.__create_text_block__(w) for w in self.__filter__(response)]
@@ -56,17 +57,6 @@ class BaseExtractor(object):
         TextBlock.objects.bulk_create(words)
 
         return words
-
-    def process_image(self, image):
-        try:
-            image = Image.open(image)
-        except OSError as e:
-            return HttpResponse(f"Error: {e}", status=400)
-        except Exception as e:
-            return HttpResponse(f"Something went wrong: {e}", status=500)
-        else:
-            self.image = image
-            return HttpResponse("Image saved", status=200)
 
 
 class TestExtractor(BaseExtractor):

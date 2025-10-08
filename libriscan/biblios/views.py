@@ -65,7 +65,9 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         role = None
         if self.request.user.is_authenticated:
-            role = self.request.user.userrole_set.filter(organization=self.object).first()
+            role = self.request.user.userrole_set.filter(
+                organization=self.object
+            ).first()
         context["user_role"] = role.get_role_display() if role else None
         return context
 
@@ -168,28 +170,28 @@ class PageCreateView(AutoPermissionRequiredMixin, CreateView):
 def handle_upload(request):
     """Handle file uploads from FilePond."""
     form = FilePondUploadForm(request.POST, request.FILES)
-    
+
     if not form.is_valid():
-        error_msg = form.errors.get('image', ['Upload failed.'])[0]
+        error_msg = form.errors.get("image", ["Upload failed."])[0]
         return HttpResponse(error_msg, status=400)
-    
+
     try:
-        upload_file = form.cleaned_data['image']
-        file_path = os.path.join('uploads', upload_file.name)
+        upload_file = form.cleaned_data["image"]
+        file_path = os.path.join("uploads", upload_file.name)
         saved_path = default_storage.save(file_path, ContentFile(upload_file.read()))
-        
+
         # Store file info in session
-        request.session['filepond_last_upload'] = {
-            'path': saved_path,
-            'name': upload_file.name,
-            'size': upload_file.size
+        request.session["filepond_last_upload"] = {
+            "path": saved_path,
+            "name": upload_file.name,
+            "size": upload_file.size,
         }
 
         return HttpResponse(saved_path)
-        
+
     except OSError as e:
         logger.error("File upload error: %s", e)
-        return HttpResponse('An error occurred while processing your file.', status=500)
+        return HttpResponse("An error occurred while processing your file.", status=500)
 
 
 class PageDetail(AutoPermissionRequiredMixin, DetailView):
@@ -230,11 +232,10 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         document__identifier=identifier,
         number=number,
     )
-    org = page.document.series.collection.owner
 
-    extractor = org.cloudservice.get_extractor(page)
+    words = page.generate_extraction()
 
-    context = {"words": extractor.get_words()}
+    context = {"words": words}
 
     return render(request, "biblios/components/forms/text_display.html", context)
 

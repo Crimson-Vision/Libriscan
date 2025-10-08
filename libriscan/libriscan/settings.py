@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "biblios",
     "localflavor",
     "django_htmx",
+    'huey.contrib.djhuey',
     "rules",
 ]
 
@@ -163,6 +164,14 @@ LOGGING = {
             "propagate": True,
         },
     },
+}
+
+# Task queuing
+HUEY = {
+    'name': 'libriscan',
+    'huey_class': 'huey.SqliteHuey',
+    'filename': LOCAL_DIR / 'task_queue.db',
+    'immediate': False,
 }
 
 

@@ -14,6 +14,7 @@ from localflavor.us.models import USStateField
 
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
+from biblios.tasks import queue_extraction
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -78,10 +79,11 @@ class CloudService(models.Model):
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
 
-    def get_extractor(self, page):
+    @cached_property
+    def extractor(self):
         from .services.extractors import EXTRACTORS
 
-        return EXTRACTORS[self.service](page)
+        return EXTRACTORS[self.service]
 
 
 class Consortium(BibliosModel):
@@ -245,6 +247,10 @@ class Page(BibliosModel):
     @property
     def has_extraction(self):
         return self.words.exists()
+
+    # Hand off this work to the Huey background task
+    def generate_extraction(self):
+        queue_extraction(self)
 
 
 class TextBlock(BibliosModel):
