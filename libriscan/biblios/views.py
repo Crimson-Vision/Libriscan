@@ -19,6 +19,16 @@ from .forms import FilePondUploadForm
 logger = logging.getLogger(__name__)
 
 
+# Most permissions in this app depend on Organization. This mixin overrides get_permission_object
+# so various class-based views will automatically check perms against their owner org instead of
+# their own model instance.
+# Safe to use in any view that lives under an org-based URL.
+# Strictly speaking this belongs in access_rules.py, but it causes a circular import with models.py
+class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
+    def get_permission_object(self):
+        return Organization.objects.get(short_name=self.kwargs.get("short_name"))
+
+
 def index(request):
     orgs = Organization.objects.all()
     context = {"app_name": "Libriscan", "orgs": orgs}
@@ -55,7 +65,8 @@ def organization_list(request):
 # This is the easy way to handle RBAC. All the models have permissions
 # specified in models.py. This AutoPermissionRequiredMixin figures
 # out how to check them for each request user.
-class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
+# But note that any class views below the Org need to have get_permission_object overridden.
+class OrganizationDetail(OrgPermissionRequiredMixin, DetailView):
     model = Organization
     context_object_name = "org"
     slug_field = "short_name"
@@ -91,17 +102,17 @@ def collection_detail(request, short_name, collection_slug):
     return render(request, "biblios/collection_detail.html", context)
 
 
-class SeriesDetail(AutoPermissionRequiredMixin, DetailView):
+class SeriesDetail(OrgPermissionRequiredMixin, DetailView):
     model = Series
     context_object_name = "series"
     slug_url_kwarg = "series_slug"
 
 
-class DocumentList(AutoPermissionRequiredMixin, ListView):
+class DocumentList(OrgPermissionRequiredMixin, ListView):
     model = Document
 
 
-class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
+class DocumentDetail(OrgPermissionRequiredMixin, DetailView):
     model = Document
     slug_field = "identifier"
     slug_url_kwarg = "identifier"
@@ -117,22 +128,21 @@ class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
         return context
 
 
-class DocumentCreateView(AutoPermissionRequiredMixin, CreateView):
+class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Document
     fields = ["series", "identifier", "use_long_s_detection"]
 
 
-class DocumentUpdateView(AutoPermissionRequiredMixin, UpdateView):
+class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     model = Document
 
 
-class DocumentDeleteView(AutoPermissionRequiredMixin, DeleteView):
+class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Document
     success_url = reverse_lazy("index")
-    # success_url = reverse_lazy("org_slug", kwargs={"slug":})
 
 
-class PageCreateView(AutoPermissionRequiredMixin, CreateView):
+class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Page
     fields = ("number", "image")
 
@@ -194,7 +204,7 @@ def handle_upload(request):
         return HttpResponse("An error occurred while processing your file.", status=500)
 
 
-class PageDetail(AutoPermissionRequiredMixin, DetailView):
+class PageDetail(OrgPermissionRequiredMixin, DetailView):
     model = Page
     template_name = "biblios/page.html"
     context_name = "pages"
