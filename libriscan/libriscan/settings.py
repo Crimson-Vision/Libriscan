@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOCAL_DIR = BASE_DIR / "mnt"
 
 # Load env variables from the .env file in the mounted directory
-load_dotenv(dotenv_path=LOCAL_DIR / '.env')
+load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -36,7 +36,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = os.environ.get("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_TRUSTED_ORIGINS", "http://localhost").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "DJANGO_TRUSTED_ORIGINS", "http://localhost"
+).split(",")
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
 
@@ -54,6 +56,7 @@ INSTALLED_APPS = [
     "django_htmx",
     'huey.contrib.djhuey',
     "rules",
+    "simple_history",
 ]
 
 MIDDLEWARE = [
@@ -61,6 +64,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",

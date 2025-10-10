@@ -12,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
 
+from simple_history.models import HistoricalRecords
+
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
 from biblios.tasks import queue_extraction
@@ -23,6 +25,7 @@ class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    history = HistoricalRecords()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -46,6 +49,7 @@ class Organization(BibliosModel):
     short_name = models.SlugField(max_length=10)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -75,6 +79,7 @@ class CloudService(models.Model):
     service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
     client_id = models.CharField(max_length=100)
     client_secret = models.CharField(max_length=100)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
@@ -107,6 +112,7 @@ class Collection(BibliosModel):
     )
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -133,6 +139,7 @@ class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -164,6 +171,7 @@ class Document(BibliosModel):
         Series, on_delete=models.CASCADE, related_name="documents"
     )
     identifier = models.SlugField(max_length=25)
+    history = HistoricalRecords()
 
     # Spelling suggestion rules
     use_long_s_detection = models.BooleanField(default=True)
@@ -220,6 +228,7 @@ class Page(BibliosModel):
     )
     number = models.SmallIntegerField(default=1)
     image = models.ImageField(blank=True, upload_to="pages")
+    history = HistoricalRecords()
 
     class Meta:
         constraints = [
@@ -272,9 +281,6 @@ class TextBlock(BibliosModel):
     # Extraction ID refers to a single element on the page that is identified as a text block.
     extraction_id = models.CharField(max_length=50, blank=True)
 
-    # As the text contained in the text block changes, the sequence increments to track a version history
-    sequence = models.SmallIntegerField(default=1)
-
     text = models.CharField(max_length=255)
     text_type = models.CharField(max_length=1, choices=TEXT_TYPE_CHOICES)
     confidence = models.DecimalField(
@@ -315,17 +321,9 @@ class TextBlock(BibliosModel):
     )
 
     suggestions = models.JSONField(blank=True, default=dict)
+    history = HistoricalRecords()
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["page", "extraction_id", "sequence"],
-                name="unique_textblock_sequence",
-            )
-        ]
-        indexes = [
-            models.Index(fields=["geo_x_0", "geo_y_0"]),
-        ]
         rules_permissions = {
             "add": is_org_editor,
             "view": is_org_viewer,
@@ -377,6 +375,7 @@ class UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+    history = HistoricalRecords()
 
     class Meta:
         constraints = [
