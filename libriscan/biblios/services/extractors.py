@@ -1,9 +1,10 @@
 import json
-from django.http import HttpResponse
-from PIL import Image
+import logging
 
 from biblios.models import CloudService, TextBlock
 from biblios.services.suggestions import generate_suggestions
+
+logger = logging.getLogger(__name__)
 
 
 class BaseExtractor(object):
@@ -19,7 +20,6 @@ class BaseExtractor(object):
     service = None
 
     def __init__(self, page):
-        self.image = None
         self.page = page
 
     def __str__(self):
@@ -51,6 +51,7 @@ class BaseExtractor(object):
     # Ideally, don't override this.
     # This can take a while because of the spellchecking. Best to call it through tasks.queue_extraction().
     def get_words(self):
+        logger.info(f"Extracting {self.page} with {self.service}")
         response = self.__get_extraction__()
         words = [self.__create_text_block__(w) for w in self.__filter__(response)]
 
@@ -98,7 +99,6 @@ class AWSExtractor(BaseExtractor):
         import boto3
 
         service = self.page.document.series.collection.owner.cloudservice
-
         client = boto3.client(
             "textract",
             region_name="us-east-1",
@@ -109,9 +109,12 @@ class AWSExtractor(BaseExtractor):
         # Get the bytes of the page image to send to Textract
         image = self.page.image.file.file.read()
 
+        logger.info("Submitting Textract request")
+
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/textract/client/detect_document_text.html
         extracted_page = client.detect_document_text(Document={"Bytes": image})
 
+        logger.info("Textract response received")
         return extracted_page["Blocks"]
 
     def __filter__(self, res):

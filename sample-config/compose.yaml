@@ -28,3 +28,13 @@ services:
       - TZ=America/New_York
     ports:
       - 8000:8000
+
+  huey:
+    container_name: huey
+    image: ghcr.io/crimson-vision/libriscan:main
+    command: python manage.py run_huey
+    user: 1000:1000
+    volumes:
+      - /opt/appdata/libriscan/:/app/mnt
+    environment:
+      - TZ=America/New_York

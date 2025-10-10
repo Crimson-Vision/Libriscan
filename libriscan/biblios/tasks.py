@@ -6,8 +6,5 @@ from huey.contrib.djhuey import db_task
 
 
 @db_task()
-def queue_extraction(page):
-    # This is a little circular, seeing it all as a one-liner
-    extractor = page.document.series.collection.owner.cloudservice.extractor(page)
-
+def queue_extraction(extractor):
     return extractor.get_words()
