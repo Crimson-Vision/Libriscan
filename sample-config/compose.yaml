@@ -12,9 +12,9 @@ services:
       - 443:443
       - 443:443/udp
     volumes:
-      - ~/appdata/caddy/caddy:/etc/caddy:z
-      - ~/appdata/caddy/data:/data:z
-      - ~/appdata/caddy/config:/config:z
+      - ~/appdata/caddy/caddy:/etc/caddy
+      - ~/appdata/caddy/data:/data
+      - ~/appdata/caddy/config:/config
     environment:
       - TZ=America/New_York
 
@@ -23,8 +23,18 @@ services:
     image: ghcr.io/crimson-vision/libriscan:main
     user: 1000:1000
     volumes:
-      - /opt/appdata/libriscan/:/app/mnt
+      - ~/appdata/libriscan/:/app/mnt
     environment:
       - TZ=America/New_York
     ports:
       - 8000:8000
+
+  huey:
+    container_name: huey
+    image: ghcr.io/crimson-vision/libriscan:main
+    command: python manage.py run_huey
+    user: 1000:1000
+    volumes:
+      - ~/appdata/libriscan/:/app/mnt
+    environment:
+      - TZ=America/New_York

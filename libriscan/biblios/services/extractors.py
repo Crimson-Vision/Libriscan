@@ -1,9 +1,10 @@
 import json
-from django.http import HttpResponse
-from PIL import Image
+import logging
 
 from biblios.models import CloudService, TextBlock
 from biblios.services.suggestions import generate_suggestions
+
+logger = logging.getLogger(__name__)
 
 
 class BaseExtractor(object):
@@ -19,7 +20,6 @@ class BaseExtractor(object):
     service = None
 
     def __init__(self, page):
-        self.image = None
         self.page = page
 
     def __str__(self):
@@ -48,25 +48,16 @@ class BaseExtractor(object):
             "geo_y_1": None,
         }
 
-    # Ideally, don't override this
+    # Ideally, don't override this.
+    # This can take a while because of the spellchecking. Best to call it through tasks.queue_extraction().
     def get_words(self):
+        logger.info(f"Extracting {self.page} with {self.service}")
         response = self.__get_extraction__()
         words = [self.__create_text_block__(w) for w in self.__filter__(response)]
 
         TextBlock.objects.bulk_create(words)
 
         return words
-
-    def process_image(self, image):
-        try:
-            image = Image.open(image)
-        except OSError as e:
-            return HttpResponse(f"Error: {e}", status=400)
-        except Exception as e:
-            return HttpResponse(f"Something went wrong: {e}", status=500)
-        else:
-            self.image = image
-            return HttpResponse("Image saved", status=200)
 
 
 class TestExtractor(BaseExtractor):
@@ -108,7 +99,6 @@ class AWSExtractor(BaseExtractor):
         import boto3
 
         service = self.page.document.series.collection.owner.cloudservice
-
         client = boto3.client(
             "textract",
             region_name="us-east-1",
@@ -119,9 +109,12 @@ class AWSExtractor(BaseExtractor):
         # Get the bytes of the page image to send to Textract
         image = self.page.image.file.file.read()
 
+        logger.info("Submitting Textract request")
+
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/textract/client/detect_document_text.html
         extracted_page = client.detect_document_text(Document={"Bytes": image})
 
+        logger.info("Textract response received")
         return extracted_page["Blocks"]
 
     def __filter__(self, res):

@@ -1,3 +1,5 @@
+import logging
+
 import rules
 from rules.contrib.models import RulesModelMixin, RulesModelBase
 
@@ -16,6 +18,9 @@ from simple_history.models import HistoricalRecords
 
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
+from biblios.tasks import queue_extraction
+
+logger = logging.getLogger(__name__)
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -83,10 +88,11 @@ class CloudService(models.Model):
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
 
-    def get_extractor(self, page):
+    @cached_property
+    def extractor(self):
         from .services.extractors import EXTRACTORS
 
-        return EXTRACTORS[self.service](page)
+        return EXTRACTORS[self.service]
 
 
 class Consortium(BibliosModel):
@@ -254,6 +260,12 @@ class Page(BibliosModel):
     @property
     def has_extraction(self):
         return self.words.exists()
+
+    # Hand off this work to the Huey background task
+    def generate_extraction(self):
+        extractor = self.document.series.collection.owner.cloudservice.extractor
+        q = queue_extraction(extractor(self))
+        logger.info(f"Queuing {q}")
 
 
 class TextBlock(BibliosModel):

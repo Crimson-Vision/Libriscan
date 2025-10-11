@@ -242,11 +242,10 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         document__identifier=identifier,
         number=number,
     )
-    org = page.document.series.collection.owner
 
-    extractor = org.cloudservice.get_extractor(page)
+    words = page.generate_extraction()
 
-    context = {"words": extractor.get_words()}
+    context = {"words": words}
 
     return render(request, "biblios/components/forms/text_display.html", context)
 
