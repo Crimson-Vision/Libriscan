@@ -63,7 +63,7 @@ def organization_list(request):
 
 
 # This is the easy way to handle RBAC. All the models have permissions
-# specified in models.py. This AutoPermissionRequiredMixin figures
+# specified in models.py. This OrgPermissionRequiredMixin figures
 # out how to check them for each request user.
 # But note that any class views below the Org need to have get_permission_object overridden.
 class OrganizationDetail(OrgPermissionRequiredMixin, DetailView):
@@ -81,6 +81,48 @@ class OrganizationDetail(OrgPermissionRequiredMixin, DetailView):
             ).first()
         context["user_role"] = role.get_role_display() if role else None
         return context
+
+
+class OrganizationUpdate(OrgPermissionRequiredMixin, UpdateView):
+    model = Organization
+    fields = ["name", "short_name", "city", "state"]
+    slug_field = "short_name"
+    slug_url_kwarg = "short_name"
+
+
+class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
+    model = Collection
+    fields = ["name", "slug"]
+    slug_field = "short_name"
+    slug_url_kwarg = "short_name"
+    template_name = "test_form.html"
+
+    def post(self, request, **kwargs):
+        from biblios.forms import CollectionForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Document to it
+        # Users shouldn't set this directly in the form -- it's based on the doc they're working from
+        post = request.POST.copy()
+        post.update(
+            {
+                "owner": Organization.objects.get(
+                    short_name=self.kwargs.get("short_name")
+                )
+            }
+        )
+
+        # Bind the image file to the form data when we instatiate it
+        form = CollectionForm(post)
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
+
+class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
+    model = Collection
+    fields = ["name", "slug"]
+    slug_url_kwarg = "collection_slug"
 
 
 # This is a verbose way of handling RBAC on a collections page
