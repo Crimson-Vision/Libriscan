@@ -36,9 +36,9 @@ SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 DEBUG = os.environ.get("LB_DEBUG", False)
 
 ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "DJANGO_TRUSTED_ORIGINS", "http://localhost"
-).split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
+    ","
+)
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
 
