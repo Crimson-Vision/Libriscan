@@ -24,26 +24,19 @@ def export_text(doc):
     # Don't use vertical position though -- too many false positives from variation in the exact Y positions
     lines = []
     words = []
-    current_x = 0
+    current_line = 0
 
     # Create a buffer that can be returned as a file download
     output = io.BytesIO()
 
-    for page in doc.pages.order_by("number"):
-        # skip pages that don't have an image yet (even if we're not printing them)
-        if not page.image:
-            pass
-
+    for page in doc.pages.all():
         for word in page.words.filter(print_control=TextBlock.INCLUDE):
-            # Since the typography can get fairly ornate, track the midpoint of this word
-            x = (word.geo_x_0 + word.geo_x_1) / 2
-            # If the position of this word is less than the last word's lower-right X, start a new line
-            if x < current_x:
+            # Compare the word's line number to the last one, and start a new line if appropriate
+            if word.line > current_line:
                 lines.append(f"{' '.join(words)}\n")
                 words = []
 
-            # Update the current line to the word's *right* X value. Not the midpoint this time.
-            current_x = word.geo_x_1
+            current_line = word.line
             words.append(word.text)
         lines.append(f"{' '.join(words)}\n")
         words = []

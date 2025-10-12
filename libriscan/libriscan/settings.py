@@ -30,15 +30,15 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", False)
+DEBUG = os.environ.get("LB_DEBUG", False)
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "DJANGO_TRUSTED_ORIGINS", "http://localhost"
-).split(",")
+ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
+    ","
+)
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
 
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "biblios",
     "localflavor",
     "django_htmx",
-    'huey.contrib.djhuey',
+    "huey.contrib.djhuey",
     "rules",
     "simple_history",
 ]
@@ -172,10 +172,10 @@ LOGGING = {
 
 # Task queuing
 HUEY = {
-    'name': 'libriscan',
-    'huey_class': 'huey.SqliteHuey',
-    'filename': LOCAL_DIR / 'task_queue.db',
-    'immediate': False,
+    "name": "libriscan",
+    "huey_class": "huey.SqliteHuey",
+    "filename": LOCAL_DIR / "task_queue.db",
+    "immediate": False,
 }
 
 
