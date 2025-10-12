@@ -30,15 +30,15 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", False)
+DEBUG = os.environ.get("LB_DEBUG", False)
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "DJANGO_TRUSTED_ORIGINS", "http://localhost"
-).split(",")
+ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
+    ","
+)
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
 
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     "biblios",
     "localflavor",
     "django_htmx",
-    'huey.contrib.djhuey',
+    "huey.contrib.djhuey",
     "rules",
     "simple_history",
 ]
@@ -91,6 +91,20 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "libriscan.wsgi.application"
+
+
+# Email Settings
+# Not all of these are necessarily required, depending on your SMPT setup.
+EMAIL_HOST = os.environ.get("LB_EMAIL_HOST", None)
+EMAIL_PORT = os.environ.get("LB_EMAIL_PORT", None)
+EMAIL_HOST_USER = os.environ.get("LB_EMAIL_HOST_USER", None)
+EMAIL_HOST_PASSWORD = os.environ.get("LB_EMAIL_HOST_PASSWORD", None)
+EMAIL_USE_TLS = os.environ.get("LB_EMAIL_USE_TLS", None)
+EMAIL_USE_SSL = os.environ.get("LB_EMAIL_USE_SSL", None)
+EMAIL_TIMEOUT = os.environ.get("LB_EMAIL_TIMEOUT", None)
+# If these are used, they should be file paths
+EMAIL_SSL_KEYFILE = os.environ.get("LB_EMAIL_SSL_KEYFILE", None)
+EMAIL_SSL_CERTFILE = os.environ.get("LB_EMAIL_CERTFILE", None)
 
 
 # Database
@@ -172,10 +186,10 @@ LOGGING = {
 
 # Task queuing
 HUEY = {
-    'name': 'libriscan',
-    'huey_class': 'huey.SqliteHuey',
-    'filename': LOCAL_DIR / 'task_queue.db',
-    'immediate': False,
+    "name": "libriscan",
+    "huey_class": "huey.SqliteHuey",
+    "filename": LOCAL_DIR / "task_queue.db",
+    "immediate": False,
 }
 
 
