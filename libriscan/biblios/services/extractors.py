@@ -30,10 +30,25 @@ class BaseExtractor(object):
 
     def __filter__(self, res):
         """
-        Method to remove non-word items from the extraction response.
-        `res` is a list from json.loads(), and this method should return a subset of items from it
+        Method to split word and non-word items from the extraction response.
+        `res` is a list from json.loads().
+        This method should return three subsets of items from it: words, lines, and then the remainder
         """
-        return res
+        words = res
+        lines = []
+        others = []
+        return words, lines, others
+
+    def _process_lines__(self, lines):
+        return lines
+
+    def __process_others__(self, others):
+        return others
+
+    def __generate_line_numbers__(self, lines):
+        return [
+            0,
+        ]
 
     def __create_text_block__(self, word):
         return {
@@ -53,43 +68,16 @@ class BaseExtractor(object):
     def get_words(self):
         logger.info(f"Extracting {self.page} with {self.service}")
         response = self.__get_extraction__()
-        words = [self.__create_text_block__(w) for w in self.__filter__(response)]
+
+        words, lines, others = self.__filter__(response)
+        self.lines = self.__process_lines__(lines)
+        self.others = self.__process_others__(others)
+        self.line_numbers = self.__generate_line_numbers__(self.lines)
+        words = [self.__create_text_block__(w) for w in words]
 
         TextBlock.objects.bulk_create(words)
 
         return words
-
-
-class TestExtractor(BaseExtractor):
-    service = "Test Service"
-
-    def __get_extraction__(self):
-        with open("biblios/tests/textract_response.json") as j:
-            response = json.load(j)
-        return response["Blocks"]
-
-    def __create_text_block__(self, word):
-        text_type = (
-            TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
-        )
-        return TextBlock(
-            extraction_id=word["Id"],
-            page=self.page,
-            text=word["Text"],
-            text_type=text_type,
-            confidence=word["Confidence"],
-            # TextBlock does this on save(), but the bulk create process bypasses its method override
-            suggestions=generate_suggestions(
-                word["Text"], self.page.document.use_long_s_detection
-            ),
-            geo_x_0=word["Geometry"]["Polygon"][0]["X"],
-            geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
-            geo_x_1=word["Geometry"]["Polygon"][2]["X"],
-            geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
-        )
-
-    def __filter__(self, res):
-        return [r for r in res if r["BlockType"] == "WORD"]
 
 
 class AWSExtractor(BaseExtractor):
@@ -121,20 +109,56 @@ class AWSExtractor(BaseExtractor):
         """
         Filter the Textract response to just word blocks.
         """
-        return [r for r in res if r["BlockType"] == "WORD"]
+        words = []
+        lines = []
+        others = []
+        for block in res:
+            if block["BlockType"] == "WORD":
+                words.append(block)
+            elif block["BlockType"] == "LINE":
+                lines.append(block)
+            else:
+                others.append(block)
+
+        return words, lines, others
+
+    def __process_lines__(self, lines):
+        relationships = {}
+        for block in lines:
+            # For lines, record each child as a key in that dict.
+            # Using the line's top point and its index as the value gives us sortability.
+            # All lines *should* have Relationships but it's not clear whether that's a guarantee.
+            rel = block.get("Relationships", [])
+            top = block["Geometry"]["BoundingBox"]["Top"]
+            children = rel.pop()
+            for child in children["Ids"]:
+                relationships[child] = (top, children["Ids"].index(child))
+        return relationships
+
+    def __generate_line_numbers__(self, lines):
+        numbers = []
+        for line in lines.values():
+            if line[0] not in numbers:
+                numbers.append(line[0])
+        numbers.sort()
+        return numbers
 
     def __create_text_block__(self, word):
         text_type = (
             TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
         )
 
+        position = self.lines[word["Id"]]
+
         return TextBlock(
             extraction_id=word["Id"],
             page=self.page,
             text=word["Text"],
             text_type=text_type,
+            line=self.line_numbers.index(position[0]),
+            number=position[1],
             confidence=word["Confidence"],
-            # TextBlock does this on save(), but the bulk create process bypasses its method override
+            # TextBlock does this on save(), but the bulk create process bypasses that
             suggestions=generate_suggestions(
                 word["Text"], self.page.document.use_long_s_detection
             ),
@@ -143,6 +167,15 @@ class AWSExtractor(BaseExtractor):
             geo_x_1=word["Geometry"]["Polygon"][2]["X"],
             geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
         )
+
+
+class TestExtractor(AWSExtractor):
+    service = "Dummy Service"
+
+    def __get_extraction__(self):
+        with open("biblios/tests/textract_response.json") as j:
+            response = json.load(j)
+        return response["Blocks"]
 
 
 EXTRACTORS = {CloudService.TEST: TestExtractor, CloudService.AWS: AWSExtractor}

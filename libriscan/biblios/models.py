@@ -244,6 +244,7 @@ class Page(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        ordering = ["number"]
 
     def __str__(self):
         return f"{self.document} page {self.number}"
@@ -289,6 +290,11 @@ class TextBlock(BibliosModel):
 
     text = models.CharField(max_length=255)
     text_type = models.CharField(max_length=1, choices=TEXT_TYPE_CHOICES)
+
+    # The word's position on the page: line, and word number on that line
+    line = models.IntegerField()
+    number = models.IntegerField()
+
     confidence = models.DecimalField(
         max_digits=5,
         decimal_places=3,
@@ -336,6 +342,7 @@ class TextBlock(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        ordering = ["line", "number"]
 
     def __str__(self):
         return self.text
