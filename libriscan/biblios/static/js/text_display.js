@@ -51,6 +51,7 @@ class WordBlockHandler {
     return {
       word: wordBlock.dataset.wordText,
       confidence: parseFloat(wordBlock.dataset.wordConfidence),
+      confidence_level: wordBlock.dataset.wordConfidenceLevel,
       id: wordBlock.dataset.wordId,
       line: parseInt(wordBlock.dataset.wordLine),
       number: parseInt(wordBlock.dataset.wordNumber),

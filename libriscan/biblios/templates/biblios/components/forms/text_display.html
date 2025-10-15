@@ -23,11 +23,11 @@
                 <!-- Word block with confidence indicators -->
                 <button 
                   class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm
-                         {% if word.confidence < 50 %}confidence-low
-                         {% elif word.confidence < 80 %}confidence-medium{% endif %}"
+                         {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
                   data-word-id="{{ word.id }}"
                   data-word-text="{{ word.text }}"
                   data-word-confidence="{{ word.confidence }}"
+                  data-word-confidence-level="{{ word.confidence_level }}"
                   data-word-line="{{ word.line }}"
                   data-word-number="{{ word.number }}"
                   data-word-type="{{ word.text_type }}"

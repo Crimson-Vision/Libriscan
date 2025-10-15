@@ -11,6 +11,7 @@ class WordDetails {
     this.progressBar = document.getElementById('confidenceBar');
     this.wordMetadata = document.getElementById('wordMetadata');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
+    this.confidenceLevelSpan = document.getElementById('confidenceLevel');
 
     // Initialize event listeners
     this.initializeEventListeners();
@@ -62,11 +63,10 @@ class WordDetails {
     this.revertButton.classList.add('hidden');
   }
 
-  getProgressClass(confidence) {
-    if (confidence < 50) return 'progress progress-error';
-    if (confidence < 80) return 'progress progress-warning';
-    if (confidence >= 90) return 'progress progress-success';
-    return 'progress';
+  getProgressClass(confidence_level) {
+    if (confidence_level === 'high') return 'progress progress-success';
+    if (confidence_level === 'medium') return 'progress progress-warning';
+    if (confidence_level === 'low' || confidence_level === 'none') return 'progress progress-error';
   }
 
   updateWordDetails(wordInfo) {
@@ -81,7 +81,18 @@ class WordDetails {
     const confidenceValue = parseFloat(wordInfo.confidence).toFixed(3);
     this.scoreElement.textContent = `${confidenceValue}%`;
     this.progressBar.value = confidenceValue;
-    this.progressBar.className = this.getProgressClass(confidenceValue);
+    this.progressBar.className = this.getProgressClass(wordInfo.confidence_level)
+    if (this.confidenceLevelSpan) {
+      const map = {
+        accepted: 'Accepted',
+        high: 'High',
+        medium: 'Medium',
+        low: 'Low',
+        none: 'None'
+      };
+      const level = (wordInfo.confidence_level.toLowerCase() || none);
+      this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? none;
+    }
     
     // Update metadata
     this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
