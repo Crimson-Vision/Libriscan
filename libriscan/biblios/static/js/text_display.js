@@ -1,0 +1,73 @@
+/**
+ * Text Display Component JavaScript
+ * Handles word block click events and word detail display
+ */
+
+class WordBlockHandler {
+  constructor() {
+    this.initializeWordBlocks();
+  }
+
+  /**
+   * Initialize click handlers for all word blocks
+   */
+  initializeWordBlocks() {
+    const wordBlocks = document.querySelectorAll('.word-block');
+    wordBlocks.forEach(wordBlock => {
+      wordBlock.addEventListener('click', (event) => this.handleWordClick(event));
+    });
+  }
+
+  /**
+   * Handle click event on word block
+   */
+  handleWordClick(event) {
+    try {
+      const wordBlock = event.currentTarget;
+      const wordInfo = this.extractWordInfo(wordBlock);
+      this.dispatchWordSelectedEvent(wordInfo);
+    } catch (error) {
+      console.error('Error handling word click:', error);
+    }
+  }
+
+  /**
+   * Extract word information from data attributes
+   * @param {HTMLElement} wordBlock - Word block element
+   * @returns {Object} Word information object
+   */
+  extractWordInfo(wordBlock) {
+    return {
+      word: wordBlock.dataset.wordText,
+      confidence: parseFloat(wordBlock.dataset.wordConfidence),
+      id: wordBlock.dataset.wordId,
+      line: parseInt(wordBlock.dataset.wordLine),
+      number: parseInt(wordBlock.dataset.wordNumber),
+      text_type: wordBlock.dataset.wordType,
+      print_control: wordBlock.dataset.wordPrintControl,
+      extraction_id: wordBlock.dataset.wordExtractionId,
+      geometry: {
+        x0: parseFloat(wordBlock.dataset.wordGeoX0),
+        y0: parseFloat(wordBlock.dataset.wordGeoY0),
+        x1: parseFloat(wordBlock.dataset.wordGeoX1),
+        y1: parseFloat(wordBlock.dataset.wordGeoY1)
+      }
+    };
+  }
+
+  /**
+   * Dispatch custom event with word information
+   * @param {Object} wordInfo - Word information object
+   */
+  dispatchWordSelectedEvent(wordInfo) {
+    const event = new CustomEvent('wordSelected', {
+      detail: wordInfo
+    });
+    document.dispatchEvent(event);
+  }
+}
+
+// Initialize word block handler when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new WordBlockHandler();
+});

@@ -1,19 +1,7 @@
 {% load static %}
 
-<style>
-.word-block {
-  text-decoration: none;
-  border-bottom: 2px transparent;
-}
-
-.word-block.confidence-medium {
-  border-bottom: 2px dotted #ffd700; /* Yellow dotted underline */
-}
-
-.word-block.confidence-low {
-  border-bottom: 2px dashed #ff0000; /* Red dashed underline */
-}
-</style>
+<!-- Text Display Component Template -->
+<!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
 <div class="card bg-base-100 shadow-sm h-full">
   <div class="card-body p-0">
@@ -31,8 +19,11 @@
           <div class="flex flex-wrap gap-4 p-4">
             {% if words %}
               {% for word in words %}
+                <!-- Word block with confidence indicators -->
                 <span 
-                  class="word-block cursor-pointer hover:bg-base-200 px-1 rounded transition-colors {% if word.confidence < 50 %}confidence-low{% elif word.confidence < 80 %}confidence-medium{% endif %}"
+                  class="word-block cursor-pointer hover:bg-base-200 px-1 rounded transition-colors
+                         {% if word.confidence < 50 %}confidence-low
+                         {% elif word.confidence < 80 %}confidence-medium{% endif %}"
                   data-word-id="{{ word.id }}"
                   data-word-text="{{ word.text }}"
                   data-word-confidence="{{ word.confidence }}"
@@ -94,35 +85,6 @@
   </div>
 </div>
 
-<script>
-// Add click handlers to word blocks to show word details
-document.addEventListener('DOMContentLoaded', function() {
-  const wordBlocks = document.querySelectorAll('.word-block');
-  wordBlocks.forEach(wordBlock => {
-    wordBlock.addEventListener('click', function() {
-      // Create the word info object
-      const wordInfo = {
-        word: this.dataset.wordText,
-        confidence: parseFloat(this.dataset.wordConfidence),
-        id: this.dataset.wordId,
-        line: parseInt(this.dataset.wordLine),
-        number: parseInt(this.dataset.wordNumber),
-        text_type: this.dataset.wordType,
-        print_control: this.dataset.wordPrintControl,
-        extraction_id: this.dataset.wordExtractionId,
-        geometry: {
-          x0: parseFloat(this.dataset.wordGeoX0),
-          y0: parseFloat(this.dataset.wordGeoY0),
-          x1: parseFloat(this.dataset.wordGeoX1),
-          y1: parseFloat(this.dataset.wordGeoY1)
-        }
-      };
-      
-      // Dispatch the wordSelected event with the formatted data
-      document.dispatchEvent(new CustomEvent('wordSelected', {
-        detail: wordInfo
-      }));
-    });
-  });
-});
-</script>
+<!-- Link to external CSS and JavaScript files -->
+<link rel="stylesheet" href="{% static 'css/text_display.css' %}">
+<script src="{% static 'js/text_display.js' %}"></script>
