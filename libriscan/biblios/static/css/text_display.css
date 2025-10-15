@@ -1,10 +1,3 @@
-/* Word block base styles */
-.word-block {
-  text-decoration: none;
-  border-bottom: 2px transparent;
-  transition: background-color 0.2s ease;
-}
-
 /* Confidence level indicators */
 .word-block.confidence-medium {
   border-bottom: 2px dotted #ffd700; /* Yellow dotted underline */
@@ -12,10 +5,4 @@
 
 .word-block.confidence-low {
   border-bottom: 2px dashed #ff0000; /* Red dashed underline */
-}
-
-/* Hover state */
-.word-block:hover {
-  background-color: var(--base-200);
-  border-radius: 0.25rem;
 }

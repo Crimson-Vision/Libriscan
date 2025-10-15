@@ -5,6 +5,7 @@
 
 class WordBlockHandler {
   constructor() {
+    this.selectedBlock = null;
     this.initializeWordBlocks();
   }
 
@@ -23,7 +24,17 @@ class WordBlockHandler {
    */
   handleWordClick(event) {
     try {
+      // Remove active state from previous button
+      if (this.selectedBlock) {
+        this.selectedBlock.classList.remove('btn-active');
+      }
+      
+      // Add active state to clicked button
       const wordBlock = event.currentTarget;
+      wordBlock.classList.add('btn-active');
+      this.selectedBlock = wordBlock;
+      
+      // Extract and dispatch word info
       const wordInfo = this.extractWordInfo(wordBlock);
       this.dispatchWordSelectedEvent(wordInfo);
     } catch (error) {

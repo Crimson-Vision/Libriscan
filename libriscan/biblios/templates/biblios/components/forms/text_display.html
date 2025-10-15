@@ -16,12 +16,12 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <div class="flex flex-wrap gap-4 p-4">
+          <div class="flex flex-wrap">
             {% if words %}
               {% for word in words %}
                 <!-- Word block with confidence indicators -->
-                <span 
-                  class="word-block cursor-pointer hover:bg-base-200 px-1 rounded transition-colors
+                <button 
+                  class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm
                          {% if word.confidence < 50 %}confidence-low
                          {% elif word.confidence < 80 %}confidence-medium{% endif %}"
                   data-word-id="{{ word.id }}"
@@ -38,7 +38,7 @@
                   data-word-geo-y1="{{ word.geo_y_1 }}"
                   title="Click to view details">
                   {{ word.text }}
-                </span>
+                </button>
               {% endfor %}
             {% else %}
               <p class="text-base-content/60">No text extracted yet.</p>
