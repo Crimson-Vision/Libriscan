@@ -1,4 +1,7 @@
+{% load static %}
 <!-- Word Details Component -->
+<link rel="stylesheet" href="{% static 'css/word_details.css' %}">
+
 <div id="clickedWordsContainer" class="mt-8 hidden">
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
@@ -54,128 +57,5 @@
   </div>
 </div>
 
-<script>
-function getProgressClass(confidence) {
-  if (confidence < 50) return 'progress progress-error';
-  if (confidence < 80) return 'progress progress-warning';
-  if (confidence >= 90) return 'progress progress-success';
-  return 'progress';
-}
-
-function updateWordDetails(wordInfo) {
-  const container = document.getElementById('clickedWordsContainer');
-  const wordElement = document.getElementById('clickedWord');
-  const wordInput = document.getElementById('wordInput');
-  const editButton = document.getElementById('editButton');
-  const saveButton = document.getElementById('saveButton');
-  const revertButton = document.getElementById('revertButton');
-  
-  // Store the original word
-  const originalWord = wordInfo.word;
-  const scoreElement = document.getElementById('confidenceScore');
-  const progressBar = document.getElementById('confidenceBar');
-  const wordMetadata = document.getElementById('wordMetadata');
-
-  // Initialize edit functionality
-  editButton.onclick = () => {
-    wordElement.classList.add('hidden');
-    wordInput.classList.remove('hidden');
-    editButton.classList.add('hidden');
-    saveButton.classList.remove('hidden');
-    revertButton.classList.remove('hidden');
-    wordInput.value = wordElement.textContent;
-    wordInput.focus();
-  };
-
-  saveButton.onclick = () => {
-    const newText = wordInput.value.trim();
-    if (newText) {
-      wordElement.textContent = newText;
-      wordInfo.word = newText;
-    }
-    wordElement.classList.remove('hidden');
-    wordInput.classList.add('hidden');
-    editButton.classList.remove('hidden');
-    saveButton.classList.add('hidden');
-    revertButton.classList.add('hidden');
-  };
-
-  // Handle Enter key in input
-  wordInput.onkeypress = (e) => {
-    if (e.key === 'Enter') {
-      saveButton.click();
-    }
-  };
-
-  // Revert button functionality
-  revertButton.onclick = () => {
-    wordElement.textContent = originalWord;
-    wordInfo.word = originalWord;
-    wordElement.classList.remove('hidden');
-    wordInput.classList.add('hidden');
-    editButton.classList.remove('hidden');
-    saveButton.classList.add('hidden');
-    revertButton.classList.add('hidden');
-  };
-  // const wordPosition = document.getElementById('wordPosition');
-  const wordGeometry = document.getElementById('wordGeometry');
-  
-  // Show container and update basic word info
-  container.classList.remove('hidden');
-  wordElement.textContent = wordInfo.word;
-  
-  // Update confidence score and progress bar
-  const confidenceValue = parseFloat(wordInfo.confidence).toFixed(3);
-  scoreElement.textContent = `${confidenceValue}%`;
-  progressBar.value = confidenceValue;
-  progressBar.className = getProgressClass(confidenceValue);
-  
-  // Update metadata
-  wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
-  
-  // Update position information
-  // wordPosition.textContent = `Line ${wordInfo.line}, Word ${wordInfo.number}`;
-  // const formatXY = (value) => value.toFixed(4);
-  // const { x0, x1, y0, y1 } = wordInfo.geometry;
-  // wordGeometry.textContent = `X: ${formatXY(x0)} - ${formatXY(x1)} | Y: ${formatXY(y0)} - ${formatXY(y1)}`;
-
-  // Update suggestions
-  const suggestionsContainer = document.getElementById('wordSuggestions');
-  suggestionsContainer.innerHTML = ''; // Clear existing suggestions
-  
-  if (wordInfo.suggestions && Object.entries(wordInfo.suggestions).length > 0) {
-    const suggestionsList = document.createElement('ul');
-    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
-    
-    Object.entries(wordInfo.suggestions).forEach(([suggestion, frequency]) => {
-      const item = document.createElement('li');
-      const link = document.createElement('a');
-      link.className = 'flex justify-between items-center';
-      link.innerHTML = `
-        <span>${suggestion}</span>
-        <span class="badge badge-neutral">${frequency}</span>
-      `;
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        wordInfo.text = suggestion;
-        wordElement.textContent = suggestion;
-        // Remove active state from other items
-        suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-        // Add active state to clicked item
-        link.classList.add('active');
-      });
-      item.appendChild(link);
-      suggestionsList.appendChild(item);
-    });
-    
-    suggestionsContainer.appendChild(suggestionsList);
-  } else {
-    suggestionsContainer.textContent = 'No suggestions available';
-  }
-}
-
-// Listen for word selection events
-document.addEventListener('wordSelected', event => {
-  updateWordDetails(event.detail);
-});
-</script>
+<!-- Include external JavaScript -->
+<script src="{% static 'js/word_details.js' %}"></script>

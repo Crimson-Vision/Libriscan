@@ -1,0 +1,138 @@
+class WordDetails {
+  constructor() {
+    // Cache DOM elements
+    this.container = document.getElementById('clickedWordsContainer');
+    this.wordElement = document.getElementById('clickedWord');
+    this.wordInput = document.getElementById('wordInput');
+    this.editButton = document.getElementById('editButton');
+    this.saveButton = document.getElementById('saveButton');
+    this.revertButton = document.getElementById('revertButton');
+    this.scoreElement = document.getElementById('confidenceScore');
+    this.progressBar = document.getElementById('confidenceBar');
+    this.wordMetadata = document.getElementById('wordMetadata');
+    this.suggestionsContainer = document.getElementById('wordSuggestions');
+
+    // Initialize event listeners
+    this.initializeEventListeners();
+  }
+
+  initializeEventListeners() {
+    // Word selection event
+    document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
+
+    // Edit functionality
+    this.editButton.onclick = () => this.startEditing();
+    this.saveButton.onclick = () => this.saveEdit();
+    this.revertButton.onclick = () => this.revertEdit();
+    this.wordInput.onkeypress = (e) => {
+      if (e.key === 'Enter') this.saveButton.click();
+    };
+  }
+
+  startEditing() {
+    this.wordElement.classList.add('hidden');
+    this.wordInput.classList.remove('hidden');
+    this.editButton.classList.add('hidden');
+    this.saveButton.classList.remove('hidden');
+    this.revertButton.classList.remove('hidden');
+    this.wordInput.value = this.wordElement.textContent;
+    this.wordInput.focus();
+  }
+
+  saveEdit() {
+    const newText = this.wordInput.value.trim();
+    if (newText) {
+      this.wordElement.textContent = newText;
+      this.currentWordInfo.word = newText;
+    }
+    this.exitEditMode();
+  }
+
+  revertEdit() {
+    this.wordElement.textContent = this.originalWord;
+    this.currentWordInfo.word = this.originalWord;
+    this.exitEditMode();
+  }
+
+  exitEditMode() {
+    this.wordElement.classList.remove('hidden');
+    this.wordInput.classList.add('hidden');
+    this.editButton.classList.remove('hidden');
+    this.saveButton.classList.add('hidden');
+    this.revertButton.classList.add('hidden');
+  }
+
+  getProgressClass(confidence) {
+    if (confidence < 50) return 'progress progress-error';
+    if (confidence < 80) return 'progress progress-warning';
+    if (confidence >= 90) return 'progress progress-success';
+    return 'progress';
+  }
+
+  updateWordDetails(wordInfo) {
+    this.currentWordInfo = wordInfo;
+    this.originalWord = wordInfo.word;
+
+    // Show container and update basic word info
+    this.container.classList.remove('hidden');
+    this.wordElement.textContent = wordInfo.word;
+    
+    // Update confidence score and progress bar
+    const confidenceValue = parseFloat(wordInfo.confidence).toFixed(3);
+    this.scoreElement.textContent = `${confidenceValue}%`;
+    this.progressBar.value = confidenceValue;
+    this.progressBar.className = this.getProgressClass(confidenceValue);
+    
+    // Update metadata
+    this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
+    
+    this.updateSuggestions(wordInfo);
+  }
+
+  updateSuggestions(wordInfo) {
+    this.suggestionsContainer.innerHTML = '';
+    
+    if (wordInfo.suggestions && Object.entries(wordInfo.suggestions).length > 0) {
+      const suggestionsList = document.createElement('ul');
+      suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
+      
+      Object.entries(wordInfo.suggestions).forEach(([suggestion, frequency]) => {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.className = 'flex justify-between items-center';
+        link.innerHTML = `
+          <span>${suggestion}</span>
+          <span class="badge badge-neutral">${frequency}</span>
+        `;
+
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.applySuggestion(suggestion, suggestionsList);
+        });
+
+        item.appendChild(link);
+        suggestionsList.appendChild(item);
+      });
+      
+      this.suggestionsContainer.appendChild(suggestionsList);
+    } else {
+      this.suggestionsContainer.textContent = 'No suggestions available';
+    }
+  }
+
+  applySuggestion(suggestion, suggestionsList) {
+    this.currentWordInfo.text = suggestion;
+    this.wordElement.textContent = suggestion;
+    // Remove active state from other items
+    suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+    // Add active state to clicked item
+    event.currentTarget.classList.add('active');
+  }
+
+
+}
+
+// Initialize the WordDetails component when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new WordDetails();
+});

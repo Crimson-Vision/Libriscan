@@ -1,0 +1,55 @@
+/* Word Details Container */
+#clickedWordsContainer {
+  margin-top: 2rem;
+}
+
+/* Word Value Section */
+#clickedWord {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/* Word Input Field */
+#wordInput.hidden {
+  display: none;
+}
+
+/* Suggestions Section */
+.suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Suggestions List */
+.suggestions-list {
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+.suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  z-index: 1;
+  width: 13rem;
+}
+
+/* Progress Bar Colors */
+.progress-error {
+  --progress-color: hsl(var(--er));
+}
+
+.progress-warning {
+  --progress-color: hsl(var(--wa));
+}
+
+.progress-success {
+  --progress-color: hsl(var(--su));
+}
