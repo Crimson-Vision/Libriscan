@@ -1,0 +1,8 @@
+{% extends "biblios/base.html" %}
+
+{% block content %}
+    <h4>{{metadata}}</h4>
+    <p>{{ metadata.title}}</p>
+    <p>{{ metadata.description}}</p>
+    <p>{{ metadata.subject}}</p>
+{% endblock %}

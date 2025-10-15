@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .models import User, UserRole, Organization, Consortium, Membership, CloudService
-from .models import Collection, Series, Document, Page, TextBlock
+from .models import Collection, Series, Document, Page, TextBlock, DublinCoreMetadata
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
@@ -34,6 +34,11 @@ class CloudServiceInline(admin.StackedInline):
     extra = 1
 
 
+class MetadataInline(admin.StackedInline):
+    model = DublinCoreMetadata
+    extra = 1
+
+
 @admin.register(Organization)
 class OrgAdmin(admin.ModelAdmin):
     inlines = [MembershipInline, CloudServiceInline]
@@ -55,7 +60,7 @@ class CollectionAdmin(admin.ModelAdmin):
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ["identifier", "series", "series__collection"]
-    inlines = [PagesInline]
+    inlines = [PagesInline, MetadataInline]
 
 
 @admin.register(Page)
