@@ -6,7 +6,25 @@
       <div class="stats stats-vertical lg:stats-horizontal shadow">
         <div class="stat">
           <div class="stat-title">Word</div>
-          <div id="clickedWord" class="stat-value text-2xl"></div>
+          <div class="flex items-center gap-2">
+            <div id="clickedWord" class="stat-value text-2xl"></div>
+            <input type="text" id="wordInput" class="input input-bordered w-full max-w-xs hidden" />
+            <button id="editButton" class="btn btn-ghost btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+              </svg>
+            </button>
+            <button id="saveButton" class="btn btn-ghost btn-sm hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </button>
+            <button id="revertButton" class="btn btn-ghost btn-sm hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+              </svg>
+            </button>
+          </div>
           <div class="stat-desc" id="wordMetadata"></div>
         </div>
         <div class="stat">
@@ -47,9 +65,58 @@ function getProgressClass(confidence) {
 function updateWordDetails(wordInfo) {
   const container = document.getElementById('clickedWordsContainer');
   const wordElement = document.getElementById('clickedWord');
+  const wordInput = document.getElementById('wordInput');
+  const editButton = document.getElementById('editButton');
+  const saveButton = document.getElementById('saveButton');
+  const revertButton = document.getElementById('revertButton');
+  
+  // Store the original word
+  const originalWord = wordInfo.word;
   const scoreElement = document.getElementById('confidenceScore');
   const progressBar = document.getElementById('confidenceBar');
   const wordMetadata = document.getElementById('wordMetadata');
+
+  // Initialize edit functionality
+  editButton.onclick = () => {
+    wordElement.classList.add('hidden');
+    wordInput.classList.remove('hidden');
+    editButton.classList.add('hidden');
+    saveButton.classList.remove('hidden');
+    revertButton.classList.remove('hidden');
+    wordInput.value = wordElement.textContent;
+    wordInput.focus();
+  };
+
+  saveButton.onclick = () => {
+    const newText = wordInput.value.trim();
+    if (newText) {
+      wordElement.textContent = newText;
+      wordInfo.word = newText;
+    }
+    wordElement.classList.remove('hidden');
+    wordInput.classList.add('hidden');
+    editButton.classList.remove('hidden');
+    saveButton.classList.add('hidden');
+    revertButton.classList.add('hidden');
+  };
+
+  // Handle Enter key in input
+  wordInput.onkeypress = (e) => {
+    if (e.key === 'Enter') {
+      saveButton.click();
+    }
+  };
+
+  // Revert button functionality
+  revertButton.onclick = () => {
+    wordElement.textContent = originalWord;
+    wordInfo.word = originalWord;
+    wordElement.classList.remove('hidden');
+    wordInput.classList.add('hidden');
+    editButton.classList.remove('hidden');
+    saveButton.classList.add('hidden');
+    revertButton.classList.add('hidden');
+  };
   // const wordPosition = document.getElementById('wordPosition');
   const wordGeometry = document.getElementById('wordGeometry');
   
