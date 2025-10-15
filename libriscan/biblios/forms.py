@@ -2,7 +2,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from biblios.models import User, Collection, Document, Page
+from biblios.models import User, Collection, Series, Document, Page
 
 
 # Custom user forms from https://testdriven.io/blog/django-custom-user-model/
@@ -22,6 +22,12 @@ class CollectionForm(forms.ModelForm):
     class Meta:
         model = Collection
         fields = ("owner", "name", "slug")
+
+
+class SeriesForm(forms.ModelForm):
+    class Meta:
+        model = Series
+        fields = ("collection", "name", "slug")
 
 
 class DocumentForm(forms.ModelForm):

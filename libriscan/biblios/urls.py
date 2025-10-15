@@ -47,6 +47,11 @@ urlpatterns = [
                                 name="document_create",
                             ),
                             path(
+                                "new-series/",
+                                views.SeriesCreateView.as_view(),
+                                name="series_create",
+                            ),
+                            path(
                                 "<slug:series_slug>-series/",
                                 views.SeriesDetail.as_view(),
                                 name="series",
