@@ -17,13 +17,13 @@
           </div>
         </div>
       </div>
-      <div class="stats stats-vertical lg:stats-horizontal shadow">
+      <!-- <div class="stats stats-vertical lg:stats-horizontal shadow">
         <div class="stat">
           <div class="stat-title">Position</div>
           <div id="wordPosition" class="stat-value text-lg"></div>
           <div class="stat-desc" id="wordGeometry"></div>
         </div>
-      </div>
+      </div> -->
       <div class="stats stats-vertical lg:stats-horizontal shadow">
         <div class="stat">
           <div class="stat-title mb-2">Suggestions</div>
@@ -50,7 +50,7 @@ function updateWordDetails(wordInfo) {
   const scoreElement = document.getElementById('confidenceScore');
   const progressBar = document.getElementById('confidenceBar');
   const wordMetadata = document.getElementById('wordMetadata');
-  const wordPosition = document.getElementById('wordPosition');
+  // const wordPosition = document.getElementById('wordPosition');
   const wordGeometry = document.getElementById('wordGeometry');
   
   // Show container and update basic word info
@@ -67,10 +67,10 @@ function updateWordDetails(wordInfo) {
   wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
   
   // Update position information
-  wordPosition.textContent = `Line ${wordInfo.line}, Word ${wordInfo.number}`;
-  const formatXY = (value) => value.toFixed(4);
-  const { x0, x1, y0, y1 } = wordInfo.geometry;
-  wordGeometry.textContent = `X: ${formatXY(x0)} - ${formatXY(x1)} | Y: ${formatXY(y0)} - ${formatXY(y1)}`;
+  // wordPosition.textContent = `Line ${wordInfo.line}, Word ${wordInfo.number}`;
+  // const formatXY = (value) => value.toFixed(4);
+  // const { x0, x1, y0, y1 } = wordInfo.geometry;
+  // wordGeometry.textContent = `X: ${formatXY(x0)} - ${formatXY(x1)} | Y: ${formatXY(y0)} - ${formatXY(y1)}`;
 
   // Update suggestions
   const suggestionsContainer = document.getElementById('wordSuggestions');
