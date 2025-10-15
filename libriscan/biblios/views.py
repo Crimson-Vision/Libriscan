@@ -159,6 +159,40 @@ class SeriesDetail(OrgPermissionRequiredMixin, DetailView):
     slug_url_kwarg = "series_slug"
 
 
+class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
+    model = Series
+    fields = ["name", "slug"]
+    template_name = "biblios/series_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["collection_slug"] = self.kwargs.get("collection_slug")
+        return context
+
+    def post(self, request, **kwargs):
+        from biblios.forms import SeriesForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Collection to it
+        # Users shouldn't set this directly in the form -- it's based on the collection they're working from
+        post = request.POST.copy()
+        post.update(
+            {
+                "collection": Collection.objects.get(
+                    owner__short_name=self.kwargs.get("short_name"),
+                    slug=self.kwargs.get("collection_slug")
+                )
+            }
+        )
+
+        # Bind the form data when we instantiate it
+        form = SeriesForm(post)
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
+
 class DocumentList(OrgPermissionRequiredMixin, ListView):
     model = Document
 
