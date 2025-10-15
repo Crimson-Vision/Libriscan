@@ -104,7 +104,6 @@ class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
     fields = ["name", "slug"]
     slug_field = "short_name"
     slug_url_kwarg = "short_name"
-    template_name = "test_form.html"
 
     def post(self, request, **kwargs):
         from biblios.forms import CollectionForm
@@ -182,7 +181,7 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
             {
                 "collection": Collection.objects.get(
                     owner__short_name=self.kwargs.get("short_name"),
-                    slug=self.kwargs.get("collection_slug")
+                    slug=self.kwargs.get("collection_slug"),
                 )
             }
         )
@@ -339,7 +338,7 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
     context_name = "pages"
 
     def get_queryset(self):
-        return super().get_queryset().select_related('document')
+        return super().get_queryset().select_related("document")
 
     def get_context_data(self, **kwargs):
         # Insert some of the URL parameters into the context
@@ -349,25 +348,27 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         collection = self.kwargs.get("collection_slug")
         doc = self.kwargs.get("identifier")
         context["keys"] = {"owner": owner, "collection_slug": collection, "doc": doc}
-        
+
         # Add pagination context
         page = self.object
         current_number = page.number
-        
+
         # Get all page numbers for dropdown
-        all_page_numbers = list(
-            page.document.pages.values_list('number', flat=True)
-        )
-        
+        all_page_numbers = list(page.document.pages.values_list("number", flat=True))
+
         # Get prev/next page numbers
         current_index = all_page_numbers.index(current_number)
         prev_page = all_page_numbers[current_index - 1] if current_index > 0 else None
-        next_page = all_page_numbers[current_index + 1] if current_index < len(all_page_numbers) - 1 else None
-        
+        next_page = (
+            all_page_numbers[current_index + 1]
+            if current_index < len(all_page_numbers) - 1
+            else None
+        )
+
         context["all_pages"] = all_page_numbers
         context["prev_page"] = prev_page
         context["next_page"] = next_page
-        
+
         return context
 
     def get_object(self, **kwargs):
