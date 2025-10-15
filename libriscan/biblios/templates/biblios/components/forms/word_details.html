@@ -24,10 +24,10 @@
           <div class="stat-desc" id="wordGeometry"></div>
         </div>
       </div>
-      <div class="stats stats-vertical shadow mt-2">
+      <div class="stats stats-vertical lg:stats-horizontal shadow">
         <div class="stat">
-          <div class="stat-title">Suggestions</div>
-          <div id="wordSuggestions" class="stat-desc">
+          <div class="stat-title mb-2">Suggestions</div>
+          <div id="wordSuggestions" class="stat-desc p-0">
             <!-- Suggestions will be populated here -->
           </div>
         </div>
@@ -77,16 +77,27 @@ function updateWordDetails(wordInfo) {
   suggestionsContainer.innerHTML = ''; // Clear existing suggestions
   
   if (wordInfo.suggestions && Object.entries(wordInfo.suggestions).length > 0) {
-    const suggestionsList = document.createElement('div');
-    suggestionsList.className = 'flex flex-col gap-1';
+    const suggestionsList = document.createElement('ul');
+    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
     
     Object.entries(wordInfo.suggestions).forEach(([suggestion, frequency]) => {
-      const item = document.createElement('div');
-      item.className = 'flex justify-between items-center';
-      item.innerHTML = `
-        <span class="text-base-content">${suggestion}</span>
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'flex justify-between items-center';
+      link.innerHTML = `
+        <span>${suggestion}</span>
         <span class="badge badge-neutral">${frequency}</span>
       `;
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        wordInfo.text = suggestion;
+        wordElement.textContent = suggestion;
+        // Remove active state from other items
+        suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+        // Add active state to clicked item
+        link.classList.add('active');
+      });
+      item.appendChild(link);
       suggestionsList.appendChild(item);
     });
     
