@@ -106,7 +106,7 @@ EMAIL_TIMEOUT = os.environ.get("LB_EMAIL_TIMEOUT", None)
 EMAIL_SSL_KEYFILE = os.environ.get("LB_EMAIL_SSL_KEYFILE", None)
 EMAIL_SSL_CERTFILE = os.environ.get("LB_EMAIL_CERTFILE", None)
 
-DEFAULT_FROM_EMAIL = os.environ.get("LB_DEFAULT_FROM_EMAIL", f"noreply@{EMAIL_HOST}")
+DEFAULT_FROM_EMAIL = os.environ.get("LB_DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
