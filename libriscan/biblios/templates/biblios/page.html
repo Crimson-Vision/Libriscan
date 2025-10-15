@@ -12,7 +12,43 @@ document.addEventListener('htmx:beforeRequest', e => {
     <div class="flex flex-col items-center h-full w-full">
       <div class="card bg-base-100 shadow-sm w-full h-full">
         <div class="card-body p-4 h-full flex flex-col">
-          <h2 class="card-title text-xl font-bold mb-2">Page {{ page.number }}</h2>
+          <div class="flex items-center justify-center mb-2">
+            <!-- Page Navigation -->
+            <div class="join">
+              <!-- Previous Button -->
+              {% if prev_page %}
+              <a href="{% url 'page' keys.owner keys.collection_slug keys.doc prev_page %}" class="join-item btn btn-sm">«</a>
+              {% else %}
+              <button class="join-item btn btn-sm btn-disabled">«</button>
+              {% endif %}
+              
+              <!-- Current Page Dropdown -->
+              <div class="dropdown dropdown-hover">
+                <div tabindex="0" role="button" class="join-item btn btn-sm">Page {{ page.number }}</div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-40 p-2 shadow max-h-60 overflow-y-auto">
+                  {% for page_num in all_pages %}
+                    {% if page_num == page.number %}
+                      <li><a class="active flex justify-between">
+                        <span>Page {{ page_num }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                      </a></li>
+                    {% else %}
+                      <li><a href="{% url 'page' keys.owner keys.collection_slug keys.doc page_num %}">Page {{ page_num }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+              
+              <!-- Next Button -->
+              {% if next_page %}
+              <a href="{% url 'page' keys.owner keys.collection_slug keys.doc next_page %}" class="join-item btn btn-sm">»</a>
+              {% else %}
+              <button class="join-item btn btn-sm btn-disabled">»</button>
+              {% endif %}
+            </div>
+          </div>
           <figure class="mb-4 flex justify-center">
             {% if page.image %}
               <img src="{{ page.image.url }}" alt="Page Image" class="rounded-lg object-cover h-full w-full border border-base-300" style="min-height:24rem;max-height:100%;" />
