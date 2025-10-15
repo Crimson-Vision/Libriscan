@@ -24,6 +24,14 @@
           <div class="stat-desc" id="wordGeometry"></div>
         </div>
       </div>
+      <div class="stats stats-vertical shadow mt-2">
+        <div class="stat">
+          <div class="stat-title">Suggestions</div>
+          <div id="wordSuggestions" class="stat-desc">
+            <!-- Suggestions will be populated here -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -64,6 +72,28 @@ function updateWordDetails(wordInfo) {
   const { x0, x1, y0, y1 } = wordInfo.geometry;
   wordGeometry.textContent = `X: ${formatXY(x0)} - ${formatXY(x1)} | Y: ${formatXY(y0)} - ${formatXY(y1)}`;
 
+  // Update suggestions
+  const suggestionsContainer = document.getElementById('wordSuggestions');
+  suggestionsContainer.innerHTML = ''; // Clear existing suggestions
+  
+  if (wordInfo.suggestions && Object.entries(wordInfo.suggestions).length > 0) {
+    const suggestionsList = document.createElement('div');
+    suggestionsList.className = 'flex flex-col gap-1';
+    
+    Object.entries(wordInfo.suggestions).forEach(([suggestion, frequency]) => {
+      const item = document.createElement('div');
+      item.className = 'flex justify-between items-center';
+      item.innerHTML = `
+        <span class="text-base-content">${suggestion}</span>
+        <span class="badge badge-neutral">${frequency}</span>
+      `;
+      suggestionsList.appendChild(item);
+    });
+    
+    suggestionsContainer.appendChild(suggestionsList);
+  } else {
+    suggestionsContainer.textContent = 'No suggestions available';
+  }
 }
 
 // Listen for word selection events

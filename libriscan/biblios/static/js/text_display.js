@@ -57,6 +57,18 @@ class WordBlockHandler {
       text_type: wordBlock.dataset.wordType,
       print_control: wordBlock.dataset.wordPrintControl,
       extraction_id: wordBlock.dataset.wordExtractionId,
+      suggestions: (() => {
+        try {
+          const suggestionsStr = wordBlock.dataset.wordSuggestions;
+          // Convert string "[['word', count], ...]" to array
+          const suggestionsArray = eval(suggestionsStr);
+          // Convert array to object format {word: count, ...}
+          return Object.fromEntries(suggestionsArray);
+        } catch (error) {
+          console.error('Error parsing suggestions:', error);
+          return {};
+        }
+      })(),
       geometry: {
         x0: parseFloat(wordBlock.dataset.wordGeoX0),
         y0: parseFloat(wordBlock.dataset.wordGeoY0),
