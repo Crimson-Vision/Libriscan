@@ -304,6 +304,9 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
     template_name = "biblios/page.html"
     context_name = "pages"
 
+    def get_queryset(self):
+        return super().get_queryset().select_related('document')
+
     def get_context_data(self, **kwargs):
         # Insert some of the URL parameters into the context
         # Probably something does this out of the box...
@@ -312,6 +315,25 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         collection = self.kwargs.get("collection_slug")
         doc = self.kwargs.get("identifier")
         context["keys"] = {"owner": owner, "collection_slug": collection, "doc": doc}
+        
+        # Add pagination context
+        page = self.object
+        current_number = page.number
+        
+        # Get all page numbers for dropdown
+        all_page_numbers = list(
+            page.document.pages.values_list('number', flat=True)
+        )
+        
+        # Get prev/next page numbers
+        current_index = all_page_numbers.index(current_number)
+        prev_page = all_page_numbers[current_index - 1] if current_index > 0 else None
+        next_page = all_page_numbers[current_index + 1] if current_index < len(all_page_numbers) - 1 else None
+        
+        context["all_pages"] = all_page_numbers
+        context["prev_page"] = prev_page
+        context["next_page"] = next_page
+        
         return context
 
     def get_object(self, **kwargs):
