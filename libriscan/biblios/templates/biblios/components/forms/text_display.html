@@ -16,7 +16,8 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <div class="flex flex-wrap">
+          <div class="h-[50vh] overflow-y-auto">
+            <div class="flex flex-wrap gap-2">
             {% if words %}
               {% for word in words %}
                 <!-- Word block with confidence indicators -->
@@ -43,6 +44,7 @@
             {% else %}
               <p class="text-base-content/60">No text extracted yet.</p>
             {% endif %}
+            </div>
           </div>
           {% include 'biblios/components/forms/word_details.html' %}
         </div>
