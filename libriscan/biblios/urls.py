@@ -62,6 +62,16 @@ urlpatterns = [
                                             name="document",
                                         ),
                                         path(
+                                            "metadata/",
+                                            views.MetadataDetail.as_view(),
+                                            name="metadata",
+                                        ),
+                                        path(
+                                            "metadata/update",
+                                            views.MetadataUpdateView.as_view(),
+                                            name="metadata_update",
+                                        ),
+                                        path(
                                             "pdf/",
                                             views.export_pdf,
                                             {"use_image": True},
@@ -77,6 +87,11 @@ urlpatterns = [
                                             "text/",
                                             views.export_text,
                                             name="export_text",
+                                        ),
+                                        path(
+                                            "xml/",
+                                            views.export_xml,
+                                            name="export_xml",
                                         ),
                                         # page URLs
                                         path(

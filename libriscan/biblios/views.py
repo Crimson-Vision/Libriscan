@@ -1,7 +1,7 @@
 import logging
 import os
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -9,11 +9,20 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_not_required
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
-from .models import Organization, Consortium, Document, Collection, Series, Page
+from .models import (
+    Organization,
+    Consortium,
+    Document,
+    Collection,
+    Series,
+    Page,
+    DublinCoreMetadata,
+)
 from .forms import FilePondUploadForm
 
 logger = logging.getLogger(__name__)
@@ -184,6 +193,50 @@ class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     success_url = reverse_lazy("index")
 
 
+class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
+    model = DublinCoreMetadata
+    template_name = "biblios/metadata_detail.html"
+    context_object_name = "metadata"
+
+    def get_object(self, queryset=None):
+        # The org owner and collection are part of the URL, so make sure the request is for a valid combo
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_slug")
+        identifier = self.kwargs.get("identifier")
+
+        try:
+            doc = Document.objects.get(
+                series__collection__owner__short_name=owner,
+                series__collection__slug=collection,
+                identifier=identifier,
+            )
+            return doc.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            return Http404("No such document metadata found")
+
+
+class MetadataUpdateView(OrgPermissionRequiredMixin, UpdateView):
+    model = DublinCoreMetadata
+    template_name = "biblios/metadata_update.html"
+    context_object_name = "metadata"
+
+    def get_object(self, queryset=None):
+        # The org owner and collection are part of the URL, so make sure the request is for a valid combo
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_slug")
+        identifier = self.kwargs.get("identifier")
+
+        try:
+            doc = Document.objects.get(
+                series__collection__owner__short_name=owner,
+                series__collection__slug=collection,
+                identifier=identifier,
+            )
+            return doc.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            return Http404("No such document metadata found")
+
+
 class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Page
     fields = ("number", "image")
@@ -317,3 +370,15 @@ def export_text(request, short_name, collection_slug, identifier):
         identifier=identifier,
     )
     return doc.export_text()
+
+
+def export_xml(request, short_name, collection_slug, identifier):
+    """
+    Generates a text file of a given doc ID.
+    """
+    doc = Document.objects.get(
+        series__collection__owner__short_name=short_name,
+        series__collection__slug=collection_slug,
+        identifier=identifier,
+    )
+    return doc.export_xml()

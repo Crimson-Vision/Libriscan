@@ -197,6 +197,16 @@ class Document(BibliosModel):
     def __str__(self):
         return self.identifier
 
+    def save(self, *args, **kwargs):
+        """Save the document, and create its metadata record if necessary."""
+        s = super(Document, self).save(*args, **kwargs)
+        try:
+            m = self.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            m = DublinCoreMetadata.objects.create(document=self)
+            m.save()
+        return s
+
     def get_absolute_url(self):
         keys = {
             "short_name": self.series.collection.owner.short_name,
@@ -224,6 +234,65 @@ class Document(BibliosModel):
         from biblios.services.exporters import export_text
 
         return export_text(self)
+
+    def export_xml(self):
+        """
+        Provides an XML file of the document's metadata.
+        """
+        from biblios.services.exporters import export_metadata_dc
+
+        return export_metadata_dc(self)
+
+
+# An implementation of Dublin Core metadata:
+# https://www.dublincore.org/specifications/dublin-core/dcmi-terms/
+class DublinCoreMetadata(BibliosModel):
+    FIELDS = (
+        "title",
+        "description",
+        "creator",
+        "subject",
+        "publisher",
+        "contributor",
+        "date",
+        "type",
+        "format",
+        "identifier",
+        "source",
+        "language",
+        "relation",
+        "coverage",
+        "rights",
+    )
+    document = models.OneToOneField(
+        Document, on_delete=models.CASCADE, related_name="metadata"
+    )
+    title = models.JSONField(blank=True, default=list)
+    description = models.JSONField(blank=True, default=list)
+    creator = models.JSONField(blank=True, default=list)
+    subject = models.JSONField(blank=True, default=list)
+    publisher = models.JSONField(blank=True, default=list)
+    contributor = models.JSONField(blank=True, default=list)
+    date = models.JSONField(blank=True, default=list)
+    type = models.JSONField(blank=True, default=list)
+    format = models.JSONField(blank=True, default=list)
+    identifier = models.JSONField(blank=True, default=list)
+    source = models.JSONField(blank=True, default=list)
+    language = models.JSONField(blank=True, default=list)
+    relation = models.JSONField(blank=True, default=list)
+    coverage = models.JSONField(blank=True, default=list)
+    rights = models.JSONField(blank=True, default=list)
+
+    class Meta:
+        rules_permissions = {
+            "add": is_org_editor,
+            "view": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor,
+        }
+
+    def __str__(self):
+        return f"{self.document} Metadata"
 
 
 class Page(BibliosModel):

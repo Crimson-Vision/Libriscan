@@ -115,3 +115,40 @@ def export_pdf(doc, use_image=True):
     new_pdf.save(output)
     output.seek(0)
     return FileResponse(output, as_attachment=True, filename=f"{doc.identifier}.pdf")
+
+
+def export_metadata_dc(document):
+    """Exports an XML file with the document's Dublin Core metadata"""
+    import xml.etree.ElementTree as ET
+
+    # This format is largely based on the output of https://nsteffel.github.io/dublin_core_generator/generator_nq.html
+
+    # It's safe to assume the metadata exists -- documents creates it on save if it's missing.
+    m = document.metadata
+
+    # This creates the root metadata node
+    root = ET.Element("metadata")
+
+    # Add namespaces. XSI is the generic XML one, DC is DublinCore
+    root.attrib["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+    root.attrib["xmlns:dc"] = "http://purl.org/dc/elements/1.1/"
+
+    # Loop through every field, and add each value individually to the root
+    # Doesn't seem to be any complex relationships here fortunately
+    for field in m.FIELDS:
+        values = getattr(m, field)
+
+        for val in values:
+            t = ET.SubElement(root, f"dc:{field}")
+            t.text = val
+
+    # Wrap the root in a tree -- seems like we need to do this here rather than the start
+    tree = ET.ElementTree(root)
+
+    # Write the tree into a file buffer to return as the response
+    output = io.BytesIO()
+    tree.write(output, xml_declaration=True, encoding="utf-8")
+    output.seek(0)
+    return FileResponse(
+        output, as_attachment=True, filename=f"{document.identifier}.xml"
+    )
