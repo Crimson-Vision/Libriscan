@@ -1,7 +1,7 @@
 import logging
 import os
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -22,6 +22,7 @@ from .models import (
     Series,
     Page,
     DublinCoreMetadata,
+    TextBlock,
 )
 from .forms import FilePondUploadForm
 
@@ -439,3 +440,32 @@ def export_xml(request, short_name, collection_slug, identifier):
         identifier=identifier,
     )
     return doc.export_xml()
+
+
+def get_org_by_page(request, short_name, collection_slug, identifier, number):
+    return Organization.objects.get(short_name=short_name)
+
+
+@permission_required(
+    "biblios.view_organization", fn=get_org_by_page, raise_exception=True
+)
+def check_words(request, short_name, collection_slug, identifier, number):
+    """Respond to the textblock polling request."""
+    # HTMX's polling trigger will stop polling when it receives status code 286
+    # If the text blocks don't exist yet, return 204 No Content
+    page = get_object_or_404(
+        Page,
+        number=number,
+        document__identifier=identifier,
+        document__series__collection__slug=collection_slug,
+        document__series__collection__owner__short_name=short_name,
+    )
+
+    if page.words.exists():
+        context = {"words": page.words.all()}
+        return render(
+            request, "biblios/components/forms/text_display.html", context, status=286
+        )
+
+    else:
+        return HttpResponse("Processing text extraction.")
