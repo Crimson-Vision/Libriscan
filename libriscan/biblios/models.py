@@ -352,6 +352,13 @@ class TextBlock(BibliosModel):
         OMIT: "Omit",
     }
 
+    # Confidence level thresholds
+    CONF_ACCEPTED = 99.99
+    CONF_HIGH = 90.0
+    CONF_MEDIUM = 80.0
+    CONF_LOW = 50.0
+    CONF_NONE = 0.0
+
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="words")
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
@@ -432,16 +439,16 @@ class TextBlock(BibliosModel):
             kwargs["update_fields"] = {"suggestions"}.union(update_fields)
         super().save(**kwargs)
 
-    @cached_property
+    @property
     def confidence_level(self):
         """Provides a scale rating of the word's confidence level"""
-        if self.confidence >= 99.9:
+        if self.confidence >= TextBlock.CONF_ACCEPTED:
             return "accepted"
-        elif self.confidence >= 90:
+        elif self.confidence >= TextBlock.CONF_HIGH:
             return "high"
-        elif self.confidence >= 80:
+        elif self.confidence >= TextBlock.CONF_MEDIUM:
             return "medium"
-        elif self.confidence >= 50:
+        elif self.confidence >= TextBlock.CONF_LOW:
             return "low"
         else:
             return "none"
