@@ -328,7 +328,7 @@ class Page(BibliosModel):
         return reverse("page", kwargs=keys)
 
     @property
-    def is_extractable(self):
+    def can_extract(self):
         return (
             not self.has_extraction
             and CloudService.objects.filter(
