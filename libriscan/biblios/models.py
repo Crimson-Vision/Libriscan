@@ -328,6 +328,15 @@ class Page(BibliosModel):
         return reverse("page", kwargs=keys)
 
     @property
+    def is_extractable(self):
+        return (
+            not self.has_extraction
+            and CloudService.objects.filter(
+                organization=self.document.series.collection.owner
+            ).exists()
+        )
+
+    @property
     def has_extraction(self):
         return self.words.exists()
 

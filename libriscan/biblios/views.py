@@ -451,8 +451,6 @@ def get_org_by_page(request, short_name, collection_slug, identifier, number):
 )
 def check_words(request, short_name, collection_slug, identifier, number):
     """Respond to the textblock polling request."""
-    # HTMX's polling trigger will stop polling when it receives status code 286
-    # If the text blocks don't exist yet, return 204 No Content
     page = get_object_or_404(
         Page,
         number=number,
@@ -462,10 +460,12 @@ def check_words(request, short_name, collection_slug, identifier, number):
     )
 
     if page.words.exists():
+        # HTMX's polling trigger will stop polling when it receives status code 286
         context = {"words": page.words.all()}
         return render(
             request, "biblios/components/forms/text_display.html", context, status=286
         )
-
     else:
-        return HttpResponse("Processing text extraction.")
+        # If the text blocks don't exist yet, return 204 No Content
+        # Or whatever HTML should get swapped in while extraction is running
+        return HttpResponse(status=204)
