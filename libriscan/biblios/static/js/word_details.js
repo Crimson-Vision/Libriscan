@@ -28,6 +28,13 @@ class WordDetails {
     this.wordInput.onkeypress = (e) => {
       if (e.key === 'Enter') this.saveButton.click();
     };
+
+    // Double-click to edit word directly
+    this.wordElement.addEventListener('dblclick', () => this.startEditing());
+    
+    // Visual feedback for clickable word
+    this.wordElement.style.cursor = 'pointer';
+    this.wordElement.title = 'Double-click to edit';
   }
 
   startEditing() {
@@ -116,9 +123,9 @@ class WordDetails {
           <span class="badge badge-neutral">${frequency}</span>
         `;
 
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.applySuggestion(suggestion, suggestionsList);
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          this.applySuggestion(suggestion, suggestionsList, event);
         });
 
         item.appendChild(link);
@@ -131,7 +138,7 @@ class WordDetails {
     }
   }
 
-  applySuggestion(suggestion, suggestionsList) {
+  applySuggestion(suggestion, suggestionsList, event) {
     this.currentWordInfo.text = suggestion;
     this.wordElement.textContent = suggestion;
     // Remove active state from other items
