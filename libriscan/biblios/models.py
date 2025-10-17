@@ -209,7 +209,7 @@ class Document(BibliosModel):
         }
 
     @property
-    def is_exportable(self):
+    def can_export(self):
         """Checks if the document has at least one page with extracted text."""
         return TextBlock.objects.filter(page__document=self).exists()
 
