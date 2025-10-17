@@ -141,7 +141,29 @@
   document.addEventListener('htmx:beforeRequest', e => {
     if (e.target?.id === 'extractBtn') e.target.disabled = true;
   });
+
+  // Reinitialize word block handlers after HTMX content swaps
+  document.addEventListener('htmx:afterSettle', function(event) {
+    // Check if the swapped content contains word blocks
+    if (event.target.querySelector && event.target.querySelector('.word-block')) {
+      console.log('HTMX content swap detected, reinitializing word handlers...');
+      
+      // Reinitialize word block handlers if WordBlockHandler class exists
+      if (typeof WordBlockHandler !== 'undefined') {
+        new WordBlockHandler();
+      }
+      
+      // Reinitialize word details if WordDetails class exists
+      if (typeof WordDetails !== 'undefined') {
+        new WordDetails();
+      }
+    }
+  });
 </script>
+
+<!-- Load JavaScript files globally for HTMX compatibility -->
+<script src="{% static 'js/text_display.js' %}"></script>
+<script src="{% static 'js/word_details.js' %}"></script>
 
 <!-- OpenSeadragon Initialization Script -->
 <script src="{% static 'js/openseadragon-viewer.js' %}"></script>

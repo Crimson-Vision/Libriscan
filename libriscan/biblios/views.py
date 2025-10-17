@@ -396,11 +396,20 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
-    words = page.generate_extraction()
+    # Start the extraction process in the background
+    page.generate_extraction()
 
-    context = {"words": words}
+    # Prepare context with URL parameters for the loading template
+    context = {
+        'short_name': short_name,
+        'collection_slug': collection_slug,
+        'identifier': identifier,
+        'number': number,
+    }
 
-    return render(request, "biblios/components/forms/text_display.html", context)
+    # Return the loading template immediately
+    # The client will poll check_words endpoint which returns text_display.html when ready
+    return render(request, "biblios/components/forms/extraction_loading.html", context)
 
 
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):

@@ -1,0 +1,22 @@
+<!-- Extraction Loading Animation Component -->
+<div id="extractPrompt" 
+     class="card bg-base-100 shadow-sm h-full"
+     hx-get="{% url 'page_words' short_name collection_slug identifier number %}"
+     hx-trigger="load, every 2s"
+     hx-swap="outerHTML">
+  <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
+    <h2 class="card-title text-2xl mb-4">Extracting Text...</h2>
+    
+    <!-- DaisyUI Loading Spinner -->
+    <div class="flex flex-col items-center gap-4 mb-6">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+    
+    <p class="text-base-content/70">
+      Using AI to extract text from the page image.
+    </p>
+    <p class="text-sm text-base-content/50 mt-2">
+      This may take a few moments...
+    </p>
+  </div>
+</div>
