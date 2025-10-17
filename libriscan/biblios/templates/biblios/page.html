@@ -137,40 +137,49 @@
 </div>
 
 <script>
-  // Disable Extract button on HTMX request
-  document.addEventListener('htmx:beforeRequest', e => {
-    if (e.target?.id === 'extractBtn') e.target.disabled = true;
-  });
-</script>
-
-<!-- OpenSeadragon Initialization Script -->
-<script src="{% static 'js/openseadragon-viewer.js' %}"></script>
-<script>
-  // Initialize viewer on page load
+  // Page-specific JavaScript initialization
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize OpenSeadragon viewer
     const viewer = document.getElementById('openseadragon-viewer');
-    if (viewer) {
-      const imageUrl = viewer.dataset.imageUrl;
-      if (imageUrl) {
-        initializeViewer(imageUrl);
-      }
+    if (viewer && viewer.dataset.imageUrl) {
+      initializeViewer(viewer.dataset.imageUrl);
     }
   });
 
-  // Reinitialize viewer after HTMX navigation (page swaps)
-  document.body.addEventListener('htmx:afterSettle', function(event) {
-    const viewer = document.getElementById('openseadragon-viewer');
-    if (viewer) {
-      const imageUrl = viewer.dataset.imageUrl;
-      if (imageUrl) {
-        console.log('HTMX navigation detected, reinitializing viewer...');
-        reinitializeViewer(imageUrl);
-      }
+  // HTMX Event Handlers
+  document.addEventListener('htmx:beforeRequest', function(event) {
+    // Disable Extract button during request
+    if (event.target?.id === 'extractBtn') {
+      event.target.disabled = true;
     }
   });
 
-  // Clean up viewer before HTMX swap to prevent memory leaks
-  document.body.addEventListener('htmx:beforeSwap', function(event) {
+  document.addEventListener('htmx:afterSettle', function(event) {
+    // Reinitialize components after HTMX content swaps
+    
+    // Check for word blocks and reinitialize handlers
+    if (event.target.querySelector && event.target.querySelector('.word-block')) {
+      console.log('HTMX content swap detected, reinitializing word handlers...');
+      
+      if (typeof WordBlockHandler !== 'undefined') {
+        new WordBlockHandler();
+      }
+      
+      if (typeof WordDetails !== 'undefined') {
+        new WordDetails();
+      }
+    }
+    
+    // Reinitialize OpenSeadragon viewer after navigation
+    const viewer = document.getElementById('openseadragon-viewer');
+    if (viewer && viewer.dataset.imageUrl) {
+      console.log('HTMX navigation detected, reinitializing viewer...');
+      reinitializeViewer(viewer.dataset.imageUrl);
+    }
+  });
+
+  document.addEventListener('htmx:beforeSwap', function(event) {
+    // Clean up OpenSeadragon viewer to prevent memory leaks
     if (window.viewerInstance) {
       destroyViewer();
     }
