@@ -1,3 +1,4 @@
+{% load static %}
 <!-- Extraction Loading Animation Component -->
 <div id="extractPrompt" 
      class="card bg-base-100 shadow-sm h-full"
@@ -7,16 +8,45 @@
   <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
     <h2 class="card-title text-2xl mb-4">Extracting Text...</h2>
     
-    <!-- DaisyUI Loading Spinner -->
+    <!-- n3r4zzurr0/svg-spinners Loading Animation -->
+    <!-- https://github.com/n3r4zzurr0/svg-spinners/blob/main/svg-css/gooey-balls-2.svg -->
     <div class="flex flex-col items-center gap-4 mb-6">
-      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <img src="{% static 'svg/loading.svg' %}" alt="Loading..." class="w-16 h-16">
     </div>
-    
-    <p class="text-base-content/70">
+    <p id="rotatingText" style="transition: opacity 0.3s ease-in-out;">
       Using AI to extract text from the page image.
-    </p>
-    <p class="text-sm text-base-content/50 mt-2">
-      This may take a few moments...
     </p>
   </div>
 </div>
+
+<script>
+(() => {
+  const phrases = [
+    "Using AI to extract text from the page image.",
+    "Analyzing document structure and layout...",
+    "Processing optical character recognition...",
+    "Identifying words and formatting...",
+    "Applying machine learning algorithms...",
+    "Extracting text with confidence scores...",
+    "Detecting historical typography patterns...",
+    "Building searchable text representation..."
+  ];
+  
+  let index = 0;
+  
+  function rotateText() {
+    const el = document.getElementById('rotatingText');
+    if (!el) return;
+    
+    el.style.opacity = '0';
+    setTimeout(() => {
+      index = (index + 1) % phrases.length;
+      el.textContent = phrases[index];
+      el.style.opacity = '1';
+    }, 300);
+  }
+  
+  // Start rotation after 1 second, then every 2.5 seconds
+  setTimeout(() => setInterval(rotateText, 2500), 1000);
+})();
+</script>
