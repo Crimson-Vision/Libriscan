@@ -1,9 +1,9 @@
 /**
- * Text Display Component JavaScript
- * Handles word block click events and word detail display
+ * Word Selector Component JavaScript
+ * Handles word block click events and dispatches word selection events
  */
 
-class WordBlockHandler {
+class WordSelector {
   constructor() {
     this.selectedBlock = null;
     this.initializeWordBlocks();
@@ -91,7 +91,7 @@ class WordBlockHandler {
   }
 }
 
-// Initialize word block handler when DOM is loaded
+// Initialize word selector when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new WordBlockHandler();
+  new WordSelector();
 });

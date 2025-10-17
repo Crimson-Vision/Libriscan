@@ -161,8 +161,8 @@
     if (event.target.querySelector && event.target.querySelector('.word-block')) {
       console.log('HTMX content swap detected, reinitializing word handlers...');
       
-      if (typeof WordBlockHandler !== 'undefined') {
-        new WordBlockHandler();
+      if (typeof WordSelector !== 'undefined') {
+        new WordSelector();
       }
       
       if (typeof WordDetails !== 'undefined') {
