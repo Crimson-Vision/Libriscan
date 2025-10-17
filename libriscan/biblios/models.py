@@ -211,7 +211,9 @@ class Document(BibliosModel):
     @property
     def can_export(self):
         """Checks if the document has at least one page with extracted text."""
-        return TextBlock.objects.filter(page__document=self).exists()
+        return TextBlock.objects.filter(
+            page__document=self, print_control=TextBlock.INCLUDE
+        ).exists()
 
     def __str__(self):
         return self.identifier
