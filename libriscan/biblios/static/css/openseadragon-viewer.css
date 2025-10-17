@@ -1,0 +1,55 @@
+#openseadragon-viewer {
+  position: relative;
+  background-color: hsl(var(--b2));
+  transition: all 0.3s ease;
+  cursor: grab;
+}
+
+#openseadragon-viewer:active {
+  cursor: grabbing;
+}
+
+#openseadragon-viewer:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.openseadragon-container .navigator {
+  border: 1px solid hsl(var(--bc) / 0.2);
+  background-color: hsl(var(--b1) / 0.9);
+  border-radius: 0.5rem;
+}
+
+/* Zoom controls */
+.openseadragon-container .zoom-in,
+.openseadragon-container .zoom-out,
+.openseadragon-container .home,
+.openseadragon-container .full-page {
+  background-color: hsl(var(--b1));
+  border: 1px solid hsl(var(--bc) / 0.2);
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.openseadragon-container .zoom-in:hover,
+.openseadragon-container .zoom-out:hover,
+.openseadragon-container .home:hover,
+.openseadragon-container .full-page:hover {
+  background-color: hsl(var(--b2));
+  border-color: hsl(var(--bc) / 0.3);
+}
+
+.openseadragon-container .openseadragon-message {
+  background-color: hsl(var(--b1) / 0.95);
+  color: hsl(var(--bc));
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+/* Draggable cursor for canvas */
+.openseadragon-container canvas {
+  cursor: grab !important;
+}
+
+.openseadragon-container canvas:active {
+  cursor: grabbing !important;
+}

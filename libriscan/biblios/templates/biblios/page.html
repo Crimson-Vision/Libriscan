@@ -1,10 +1,6 @@
-<script>
-// Disable Extract button on HTMX request
-document.addEventListener('htmx:beforeRequest', e => {
-  if (e.target?.id === 'extractBtn') e.target.disabled = true;
-});
-</script>
 {% extends "biblios/base.html" %}
+{% load static %}
+
 {% block content %}
 <nav class="mb-6 text-sm breadcrumbs">
   <ul>
@@ -102,20 +98,16 @@ document.addEventListener('htmx:beforeRequest', e => {
           </div>
           <figure class="mb-4 flex justify-center">
             {% if page.image %}
-              <img src="{{ page.image.url }}" alt="Page Image" class="rounded-lg object-cover h-full w-full border border-base-300" style="min-height:24rem;max-height:100%;" />
+              <!-- OpenSeadragon Viewer Container -->
+              <div id="openseadragon-viewer" 
+                   class="rounded-lg border border-base-300 w-full"
+                   style="min-height:32rem; width:100%;"
+                   data-image-url="{{ page.image.url }}">
+              </div>
             {% else %}
               <div class="bg-base-200 rounded-lg h-96 w-full flex items-center justify-center text-base-content/60">No image available</div>
             {% endif %}
           </figure>
-          <button
-            hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
-            hx-target="#extractPrompt"
-            hx-swap="outerHTML"
-            class="btn btn-primary w-full"
-            id="extractBtn"
-            {% if page.has_extraction %}disabled{% endif %}>
-            Extract
-          </button>
         </div>
       </div>
     </div>
@@ -127,6 +119,15 @@ document.addEventListener('htmx:beforeRequest', e => {
        <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
         <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
           <h2 class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
+          <button
+            hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
+            hx-target="#extractPrompt"
+            hx-swap="outerHTML"
+            class="btn btn-primary w-full"
+            id="extractBtn"
+            {% if page.has_extraction %}disabled{% endif %}>
+            Extract
+          </button>
           <p class="mb-4">Click <span class="font-bold">Extract</span> for intelligent extraction.</p>
         </div>  
       </div>
@@ -134,4 +135,45 @@ document.addEventListener('htmx:beforeRequest', e => {
     </div>
   </div>
 </div>
+
+<script>
+  // Disable Extract button on HTMX request
+  document.addEventListener('htmx:beforeRequest', e => {
+    if (e.target?.id === 'extractBtn') e.target.disabled = true;
+  });
+</script>
+
+<!-- OpenSeadragon Initialization Script -->
+<script src="{% static 'js/openseadragon-viewer.js' %}"></script>
+<script>
+  // Initialize viewer on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const viewer = document.getElementById('openseadragon-viewer');
+    if (viewer) {
+      const imageUrl = viewer.dataset.imageUrl;
+      if (imageUrl) {
+        initializeViewer(imageUrl);
+      }
+    }
+  });
+
+  // Reinitialize viewer after HTMX navigation (page swaps)
+  document.body.addEventListener('htmx:afterSettle', function(event) {
+    const viewer = document.getElementById('openseadragon-viewer');
+    if (viewer) {
+      const imageUrl = viewer.dataset.imageUrl;
+      if (imageUrl) {
+        console.log('HTMX navigation detected, reinitializing viewer...');
+        reinitializeViewer(imageUrl);
+      }
+    }
+  });
+
+  // Clean up viewer before HTMX swap to prevent memory leaks
+  document.body.addEventListener('htmx:beforeSwap', function(event) {
+    if (window.viewerInstance) {
+      destroyViewer();
+    }
+  });
+</script>
 {% endblock %}
