@@ -29,56 +29,33 @@ class WordDetails {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
 
     // Edit functionality
-    this.editButton.onclick = () => this.startEditing();
+    this.editButton.onclick = () => this._setEditMode(true);
     this.saveButton.onclick = () => this.saveEdit();
     this.revertButton.onclick = () => this.revertEdit();
-    this.wordInput.onkeypress = (e) => {
-      if (e.key === 'Enter') this.saveButton.click();
-    };
+    this.wordInput.onkeypress = (e) => { if (e.key === 'Enter') this.saveButton.click(); };
 
     // Word navigation
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
 
-    // Keyboard navigation: left/right arrows to go previous/next
-    // Ignore when typing in inputs/textareas or when editing the word input
-    this._keydownHandler = (e) => {
-      // Don't intercept if focus is on an input, textarea, or contentEditable element
-      const active = document.activeElement;
-      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
-        return;
-      }
-
-      // If the word input is visible (we're editing), don't navigate
-      if (this.wordInput && !this.wordInput.classList.contains('hidden')) return;
-
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        this.goToPrevWord();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        this.goToNextWord();
-      }
-    };
-
-    document.addEventListener('keydown', this._keydownHandler);
-
     // Double-click to edit word directly
-    this.wordElement.addEventListener('dblclick', () => this.startEditing());
+    this.wordElement.addEventListener('dblclick', () => this._setEditMode(true));
 
     // Visual feedback for clickable word
     this.wordElement.style.cursor = 'pointer';
     this.wordElement.title = 'Double-click to edit';
+
+    // Keyboard navigation: left/right arrows navigate when not typing/editing
+    this._keydownHandler = (e) => {
+      if (this._isTyping() || this._isEditing()) return;
+      if (e.key === 'ArrowLeft') { e.preventDefault(); this.goToPrevWord(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); this.goToNextWord(); }
+    };
+    document.addEventListener('keydown', this._keydownHandler);
   }
 
   startEditing() {
-    this.wordElement.classList.add('hidden');
-    this.wordInput.classList.remove('hidden');
-    this.editButton.classList.add('hidden');
-    this.saveButton.classList.remove('hidden');
-    this.revertButton.classList.remove('hidden');
-    this.wordInput.value = this.wordElement.textContent;
-    this.wordInput.focus();
+    this._setEditMode(true);
   }
 
   saveEdit() {
@@ -97,17 +74,42 @@ class WordDetails {
   }
 
   exitEditMode() {
-    this.wordElement.classList.remove('hidden');
-    this.wordInput.classList.add('hidden');
-    this.editButton.classList.remove('hidden');
-    this.saveButton.classList.add('hidden');
-    this.revertButton.classList.add('hidden');
+    this._setEditMode(false);
+  }
+
+  // Toggle edit UI
+  _setEditMode(enabled) {
+    if (enabled) {
+      this.wordElement.classList.add('hidden');
+      this.wordInput.classList.remove('hidden');
+      this.editButton.classList.add('hidden');
+      this.saveButton.classList.remove('hidden');
+      this.revertButton.classList.remove('hidden');
+      this.wordInput.value = this.wordElement.textContent;
+      this.wordInput.focus();
+    } else {
+      this.wordElement.classList.remove('hidden');
+      this.wordInput.classList.add('hidden');
+      this.editButton.classList.remove('hidden');
+      this.saveButton.classList.add('hidden');
+      this.revertButton.classList.add('hidden');
+    }
+  }
+
+  _isTyping() {
+    const active = document.activeElement;
+    return !!(active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable));
+  }
+
+  _isEditing() {
+    return this.wordInput && !this.wordInput.classList.contains('hidden');
   }
 
   getProgressClass(confidence_level) {
-    if (confidence_level === 'high') return 'progress progress-success';
-    if (confidence_level === 'medium') return 'progress progress-warning';
-    if (confidence_level === 'low' || confidence_level === 'none') return 'progress progress-error';
+    const lvl = (confidence_level || '').toLowerCase();
+    if (lvl === 'high') return 'progress progress-success';
+    if (lvl === 'medium') return 'progress progress-warning';
+    return 'progress progress-error';
   }
 
   updateWordDetails(wordInfo) {
@@ -123,21 +125,7 @@ class WordDetails {
     this.updateNavigationState();
 
     // Update confidence score and progress bar
-    const confidenceValue = parseFloat(wordInfo.confidence).toFixed(3);
-    this.scoreElement.textContent = `${confidenceValue}%`;
-    this.progressBar.value = confidenceValue;
-    this.progressBar.className = this.getProgressClass(wordInfo.confidence_level)
-    if (this.confidenceLevelSpan) {
-      const map = {
-        accepted: 'Accepted',
-        high: 'High',
-        medium: 'Medium',
-        low: 'Low',
-        none: 'None'
-      };
-      const level = (wordInfo.confidence_level.toLowerCase() || none);
-      this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? none;
-    }
+    this._updateConfidenceDisplay(wordInfo);
 
     // Update metadata
     this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
@@ -145,44 +133,59 @@ class WordDetails {
     this.updateSuggestions(wordInfo);
   }
 
-  updateSuggestions(wordInfo) {
-    this.suggestionsContainer.innerHTML = '';
-    
-    if (wordInfo.suggestions && Object.entries(wordInfo.suggestions).length > 0) {
-      const suggestionsList = document.createElement('ul');
-      suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
-      
-      Object.entries(wordInfo.suggestions).forEach(([suggestion, frequency]) => {
-        const item = document.createElement('li');
-        const link = document.createElement('a');
-        link.className = 'flex justify-between items-center';
-        link.innerHTML = `
-          <span>${suggestion}</span>
-          <span class="badge badge-neutral">${frequency}</span>
-        `;
+  _updateConfidenceDisplay(wordInfo) {
+    const raw = parseFloat(wordInfo.confidence) || 0;
+    const display = raw.toFixed(3);
+    if (this.scoreElement) this.scoreElement.textContent = `${display}%`;
+    if (this.progressBar) {
+      this.progressBar.value = raw;
+      this.progressBar.className = this.getProgressClass(wordInfo.confidence_level);
+    }
 
-        link.addEventListener('click', event => {
-          event.preventDefault();
-          this.applySuggestion(suggestion, suggestionsList, event);
-        });
-
-        item.appendChild(link);
-        suggestionsList.appendChild(item);
-      });
-      
-      this.suggestionsContainer.appendChild(suggestionsList);
-    } else {
-      this.suggestionsContainer.textContent = 'No suggestions available';
+    if (this.confidenceLevelSpan) {
+      const map = { accepted: 'Accepted', high: 'High', medium: 'Medium', low: 'Low', none: 'None' };
+      const level = (wordInfo.confidence_level || 'none').toLowerCase();
+      this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? 'None';
     }
   }
 
-  applySuggestion(suggestion, suggestionsList, event) {
-    this.currentWordInfo.text = suggestion;
+  updateSuggestions(wordInfo) {
+    this.suggestionsContainer.innerHTML = '';
+    const suggestions = wordInfo.suggestions || {};
+    const entries = Object.entries(suggestions);
+    if (entries.length === 0) {
+      this.suggestionsContainer.textContent = 'No suggestions available';
+      return;
+    }
+
+    const suggestionsList = document.createElement('ul');
+    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
+    const frag = document.createDocumentFragment();
+
+    entries.forEach(([suggestion, frequency]) => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.className = 'flex justify-between items-center';
+      link.innerHTML = `<span>${suggestion}</span><span class="badge badge-neutral">${frequency}</span>`;
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        this.applySuggestion(suggestion, suggestionsList, link);
+      });
+      item.appendChild(link);
+      frag.appendChild(item);
+    });
+
+    suggestionsList.appendChild(frag);
+    this.suggestionsContainer.appendChild(suggestionsList);
+  }
+
+  applySuggestion(suggestion, suggestionsList, clickedLink) {
+    this.currentWordInfo.word = suggestion;
     this.wordElement.textContent = suggestion;
     // Remove active state from other items
     suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
     // Add active state to clicked item
-    event.currentTarget.classList.add('active');
+    clickedLink.classList.add('active');
   }
 
   goToPrevWord() {
