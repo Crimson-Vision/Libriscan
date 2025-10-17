@@ -12,6 +12,13 @@ class WordDetails {
     this.wordMetadata = document.getElementById('wordMetadata');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
     this.confidenceLevelSpan = document.getElementById('confidenceLevel');
+    this.prevWordBtn = document.getElementById('prevWordBtn');
+    this.nextWordBtn = document.getElementById('nextWordBtn');
+    this.wordPosition = document.getElementById('wordPosition');
+
+    // Initialize data
+    this.currentWordId = null;
+    this.totalWords = document.querySelectorAll('.word-block').length;
 
     // Initialize event listeners
     this.initializeEventListeners();
@@ -29,9 +36,13 @@ class WordDetails {
       if (e.key === 'Enter') this.saveButton.click();
     };
 
+    // Word navigation
+    this.prevWordBtn.onclick = () => this.goToPrevWord();
+    this.nextWordBtn.onclick = () => this.goToNextWord();
+
     // Double-click to edit word directly
     this.wordElement.addEventListener('dblclick', () => this.startEditing());
-    
+
     // Visual feedback for clickable word
     this.wordElement.style.cursor = 'pointer';
     this.wordElement.title = 'Double-click to edit';
@@ -79,11 +90,15 @@ class WordDetails {
   updateWordDetails(wordInfo) {
     this.currentWordInfo = wordInfo;
     this.originalWord = wordInfo.word;
+    this.currentWordId = wordInfo.id;
 
     // Show container and update basic word info
     this.container.classList.remove('hidden');
     this.wordElement.textContent = wordInfo.word;
-    
+
+    // Update navigation state
+    this.updateNavigationState();
+
     // Update confidence score and progress bar
     const confidenceValue = parseFloat(wordInfo.confidence).toFixed(3);
     this.scoreElement.textContent = `${confidenceValue}%`;
@@ -100,10 +115,10 @@ class WordDetails {
       const level = (wordInfo.confidence_level.toLowerCase() || none);
       this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? none;
     }
-    
+
     // Update metadata
     this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
-    
+
     this.updateSuggestions(wordInfo);
   }
 
@@ -145,6 +160,42 @@ class WordDetails {
     suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
     // Add active state to clicked item
     event.currentTarget.classList.add('active');
+  }
+
+  goToPrevWord() {
+    const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+    const prevButton = currentButton?.previousElementSibling;
+    if (prevButton?.classList.contains('word-block')) {
+      prevButton.click();
+    }
+  }
+
+  goToNextWord() {
+    const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+    const nextButton = currentButton?.nextElementSibling;
+    if (nextButton?.classList.contains('word-block')) {
+      nextButton.click();
+    }
+  }
+
+  updateNavigationState() {
+    const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+    if (!currentButton) return;
+
+    // Get current position
+    let currentPosition = 1;
+    let button = currentButton;
+    while (button.previousElementSibling?.classList.contains('word-block')) {
+      currentPosition++;
+      button = button.previousElementSibling;
+    }
+
+    // Update button states
+    this.prevWordBtn.disabled = !currentButton.previousElementSibling?.classList.contains('word-block');
+    this.nextWordBtn.disabled = !currentButton.nextElementSibling?.classList.contains('word-block');
+
+    // Update position indicator
+    this.wordPosition.textContent = `${currentPosition} of ${this.totalWords}`;
   }
 
 
