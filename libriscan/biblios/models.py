@@ -7,6 +7,7 @@ from django.db import models
 from django.urls import reverse
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -53,6 +54,7 @@ class Organization(BibliosModel):
     short_name = models.SlugField(max_length=10)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
+    primary = models.BooleanField(default=False)
     history = HistoricalRecords()
 
     class Meta:
@@ -69,9 +71,23 @@ class Organization(BibliosModel):
     def __str__(self):
         return self.name
 
+    def clean(self, *args, **kwargs):
+        # If this instance is set as primary, confirm there are no others already
+        if self.primary and (prim_org := Organization.get_primary()):
+            # But it's not a problem if this already *is* the primary
+            if self is not prim_org:
+                raise ValidationError(
+                    "There can be only one primary organization at a time."
+                )
+        super().clean(*args, **kwargs)
+
     def get_absolute_url(self):
         keys = {"short_name": self.short_name}
         return reverse("organization", kwargs=keys)
+
+    def get_primary():
+        """Return the primary organization"""
+        return Organization.objects.filter(primary=True).first()
 
 
 class CloudService(models.Model):
@@ -93,21 +109,6 @@ class CloudService(models.Model):
         from .services.extractors import EXTRACTORS
 
         return EXTRACTORS[self.service]
-
-
-class Consortium(BibliosModel):
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
-
-# Using a through model for consortium membership, since there's probably additional info useful for us to track
-class Membership(BibliosModel):
-    pk = models.CompositePrimaryKey("organization_id", "consortium_id")
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    consortium = models.ForeignKey(Consortium, on_delete=models.CASCADE)
 
 
 class Collection(BibliosModel):

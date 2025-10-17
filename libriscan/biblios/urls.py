@@ -8,7 +8,6 @@ urlpatterns = [
     path("scan/", views.scan, name="scan"),
     # File handling
     path("upload/", views.handle_upload, name="handle_upload"),
-    path("consortiums/<int:pk>/", views.ConsortiumDetail.as_view(), name="consortium"),
     path("organizations", views.organization_list, name="organization-list"),
     # Organization details
     path(

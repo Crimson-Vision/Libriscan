@@ -16,7 +16,6 @@ from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
 from .models import (
     Organization,
-    Consortium,
     Document,
     Collection,
     Series,
@@ -51,11 +50,6 @@ def scan(request):
         "max_upload_size": settings.MAX_UPLOAD_SIZE,
     }
     return render(request, "biblios/scan.html", context)
-
-
-class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
-    model = Consortium
-    context_object_name = "consortium"
 
 
 # This is a basic way of handling RBAC on the user's org list.

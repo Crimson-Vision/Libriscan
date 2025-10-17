@@ -61,14 +61,9 @@ Perform the following steps to get this repo up and running on your computer:
 
 8.  **Load initial data:**
     ```bash
-    python manage.py loaddata orgs
-    python manage.py loaddata collections
-    python manage.py loaddata consortiums
-    python manage.py loaddata docs
-    python manage.py loaddata memberships
-    python manage.py loaddata series
+    python manage.py loaddata orgs collections series docs
     # ...
-    # python manage.py loaddata (for every biblios\fixtures entity/file)
+    # python manage.py loaddata (with every biblios\fixtures entity/file)
     ```
 
 9.  **Run the development server:**
