@@ -172,10 +172,23 @@ class Series(BibliosModel):
 
 
 class Document(BibliosModel):
+    NEW = "N"
+    IN_PROGRESS = "I"
+    REVIEW = "R"
+    APPROVED = "A"
+    STATUS_CHOICES = {
+        NEW: "New",
+        IN_PROGRESS: "In Progress",
+        REVIEW: "Ready for Review",
+        APPROVED: "Approved",
+    }
+
     series = models.ForeignKey(
         Series, on_delete=models.CASCADE, related_name="documents"
     )
     identifier = models.SlugField(max_length=25)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
+    published_url = models.URLField(blank=True)
     history = HistoricalRecords()
 
     # Spelling suggestion rules
@@ -194,6 +207,11 @@ class Document(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+
+    @property
+    def is_exportable(self):
+        """Checks if the document has at least one page with extracted text."""
+        return TextBlock.objects.filter(page__document=self).exists()
 
     def __str__(self):
         return self.identifier
