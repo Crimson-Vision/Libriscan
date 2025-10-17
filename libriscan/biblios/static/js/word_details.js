@@ -40,6 +40,29 @@ class WordDetails {
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
 
+    // Keyboard navigation: left/right arrows to go previous/next
+    // Ignore when typing in inputs/textareas or when editing the word input
+    this._keydownHandler = (e) => {
+      // Don't intercept if focus is on an input, textarea, or contentEditable element
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+        return;
+      }
+
+      // If the word input is visible (we're editing), don't navigate
+      if (this.wordInput && !this.wordInput.classList.contains('hidden')) return;
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.goToPrevWord();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        this.goToNextWord();
+      }
+    };
+
+    document.addEventListener('keydown', this._keydownHandler);
+
     // Double-click to edit word directly
     this.wordElement.addEventListener('dblclick', () => this.startEditing());
 
