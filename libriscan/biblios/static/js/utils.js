@@ -159,8 +159,60 @@ const LibriscanUtils = {
     setTimeout(() => {
       document.body.removeChild(toast);
     }, duration);
-  }
+  },
+
+  /**
+   * Copy text to clipboard
+   * @param {string} text - Text to copy
+   * @returns {Promise<boolean>} Success status
+   */
+  async _copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      const success = document.execCommand('copy');
+      ta.remove();
+      return success;
+    }
+  },
+
+  /**
+   * Copy visible text from an element to clipboard
+   * @param {HTMLElement} el - Element containing text to copy
+   * @returns {Promise<boolean>} Success status
+   */
+  async copyElementText(el) {
+    const text = el?.innerText?.trim();
+    if (!text) return false;
+    
+    const success = await this._copyToClipboard(text);
+    this.showToast(success ? 'Copied' : 'Copy failed', success ? 'success' : 'error');
+    return success;
+  },
+
+  /**
+   * Initialize copy buttons with click handlers
+   * @param {string} selector - CSS selector for copy buttons
+   */
+  initCopyButtons(selector = '.copy-formatted-btn') {
+    document.querySelectorAll(selector).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const content = btn.closest('.prose')?.querySelector('.formatted-text-content');
+        this.copyElementText(content);
+      });
+    });
+  },
 };
 
 // Make utils available globally
 window.LibriscanUtils = LibriscanUtils;
+
+// Initialize copy buttons if present
+if (typeof window !== 'undefined' && window.LibriscanUtils?.initCopyButtons) {
+  window.LibriscanUtils.initCopyButtons();
+}

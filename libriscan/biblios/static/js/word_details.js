@@ -141,6 +141,9 @@ class WordDetails {
     this.container.classList.remove('hidden');
     this.wordElement.textContent = wordInfo.word;
 
+    // Ensure the corresponding word button is visually active and visible
+    this._syncActiveWordButton();
+
     // Update navigation state
     this.updateNavigationState();
 
@@ -364,6 +367,31 @@ class WordDetails {
 
     // Update position indicator
     this.wordPosition.textContent = `${currentPosition} of ${this.totalWords}`;
+  }
+
+  /**
+   * Ensure the active word button matches this.currentWordId.
+   * Removes 'btn-active' from any other word-block and adds it to the current.
+   * Also scrolls the container so the active button is visible.
+   */
+  _syncActiveWordButton() {
+    // Remove any previously active button
+    const prev = document.querySelector('.word-block.btn-active');
+    if (prev) prev.classList.remove('btn-active');
+
+    // Find the current button and mark it active
+    const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+    if (!currentButton) return;
+    currentButton.classList.add('btn-active');
+
+    // Ensure it's visible. Use scrollIntoView which is simple and reliable.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
+    try {
+      currentButton.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } catch (e) {
+      // Older browsers may not support options — fallback to default
+      currentButton.scrollIntoView();
+    }
   }
 
   /**
