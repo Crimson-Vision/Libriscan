@@ -118,6 +118,11 @@ urlpatterns = [
                                             views.check_words,
                                             name="page_words",
                                         ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/update/",
+                                            views.update_word,
+                                            name="update_word",
+                                        ),
                                     ]
                                 ),
                             ),

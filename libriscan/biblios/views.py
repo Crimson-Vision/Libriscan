@@ -450,6 +450,10 @@ def get_org_by_page(request, short_name, collection_slug, identifier, number):
     return Organization.objects.get(short_name=short_name)
 
 
+def get_org_by_word(request, short_name, collection_slug, identifier, number, word_id):
+    return Organization.objects.get(short_name=short_name)
+
+
 @permission_required(
     "biblios.view_organization", fn=get_org_by_page, raise_exception=True
 )
@@ -473,3 +477,42 @@ def check_words(request, short_name, collection_slug, identifier, number):
         # If the text blocks don't exist yet, return 204 No Content
         # Or whatever HTML should get swapped in while extraction is running
         return HttpResponse(status=204)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST"])
+def update_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Update a TextBlock's text and set confidence to 99.999"""
+    try:
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        
+        # Update the word text and confidence
+        new_text = request.POST.get('text', '').strip()
+        if new_text:
+            word.text = new_text
+            word.confidence = 99.999
+            word.save(update_fields=['text', 'confidence'])
+            
+            return JsonResponse({
+                'id': word.id,
+                'text': word.text,
+                'confidence': float(word.confidence),
+                'confidence_level': word.confidence_level,
+                'suggestions': word.suggestions
+            })
+        else:
+            return JsonResponse({'error': 'Text cannot be empty'}, status=400)
+            
+    except Exception as e:
+        logger.error(f"Error updating word {word_id}: {e}")
+        return JsonResponse({'error': 'Failed to update word'}, status=500)

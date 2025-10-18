@@ -58,12 +58,93 @@ class WordDetails {
     this._setEditMode(true);
   }
 
-  saveEdit() {
+  async saveEdit() {
     const newText = this.wordInput.value.trim();
-    if (newText) {
-      this.wordElement.textContent = newText;
-      this.currentWordInfo.word = newText;
+    if (!newText) {
+      alert('Text cannot be empty');
+      return;
     }
+
+    try {
+      // Get URL parameters from the current page URL
+      const url = window.location.pathname;
+      const urlParts = url.match(/\/([^\/]+)\/([^\/]+)\/([^\/]+)\/page(\d+)\//);
+      
+      if (!urlParts) {
+        throw new Error('Could not parse page URL');
+      }
+      
+      const [, shortName, collectionSlug, identifier, pageNumber] = urlParts;
+      const updateUrl = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordInfo.id}/update/`;
+      
+      // Get CSRF token from HTMX headers or cookie
+      let csrfToken = null;
+      
+      // Try to get from HTMX body headers first
+      const htmxHeaders = document.body.getAttribute('hx-headers');
+      if (htmxHeaders) {
+        try {
+          const headers = JSON.parse(htmxHeaders);
+          csrfToken = headers['x-csrftoken'];
+        } catch (e) {
+          console.warn('Failed to parse HTMX headers');
+        }
+      }
+      
+      // Fallback to other methods
+      if (!csrfToken) {
+        csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ||
+                   getCookie('csrftoken');
+      }
+      
+      const response = await fetch(updateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken
+        },
+        body: `text=${encodeURIComponent(newText)}`
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update the current word info with server response
+        this.currentWordInfo.word = data.text;
+        this.currentWordInfo.confidence = data.confidence;
+        this.currentWordInfo.confidence_level = data.confidence_level;
+        this.currentWordInfo.suggestions = data.suggestions;
+        
+        // Update the UI
+        this.wordElement.textContent = data.text;
+        this._updateConfidenceDisplay(this.currentWordInfo);
+        this.updateSuggestions(this.currentWordInfo);
+        
+        // Update the word block in the page to reflect changes
+        const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
+        if (wordBlock) {
+          wordBlock.textContent = data.text;
+          wordBlock.dataset.wordText = data.text;
+          wordBlock.dataset.wordConfidence = data.confidence;
+          wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
+          wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
+          
+          // Update confidence level CSS class
+          wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
+          wordBlock.classList.add(`confidence-${data.confidence_level}`);
+        }
+        
+        console.log('Word updated successfully');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update word');
+      }
+    } catch (error) {
+      console.error('Error updating word:', error);
+      alert(`Error updating word: ${error.message}`);
+    }
+    
     this.exitEditMode();
   }
 
@@ -135,18 +216,53 @@ class WordDetails {
 
   _updateConfidenceDisplay(wordInfo) {
     const raw = parseFloat(wordInfo.confidence) || 0;
-    const display = raw.toFixed(3);
-    if (this.scoreElement) this.scoreElement.textContent = `${display}%`;
+    
+    // Hide score element - only use confidence level badge
+    if (this.scoreElement) {
+      this.scoreElement.style.display = 'none';
+    }
+    
+    // Hide progress bar completely - no percentage display anywhere
     if (this.progressBar) {
-      this.progressBar.value = raw;
-      this.progressBar.className = this.getProgressClass(wordInfo.confidence_level);
+      this.progressBar.style.display = 'none';
     }
+    
+    // Special handling for 99.999 confidence - only show "Accepted" badge
+    if (raw >= 99.999) {
+      if (this.confidenceLevelSpan) {
+        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Updated</span>';
+      }
+    } else {
+      // Normal display for other confidence levels - show badge only
+      if (this.confidenceLevelSpan) {
+        const level = (wordInfo.confidence_level || 'none').toLowerCase();
+        const levelText = this.getLevelText(level);
+        const badgeClass = this.getBadgeClass(level);
+        this.confidenceLevelSpan.innerHTML = `<span class="badge ${badgeClass}">${levelText}</span>`;
+      }
+    }
+  }
 
-    if (this.confidenceLevelSpan) {
-      const map = { accepted: 'Accepted', high: 'High', medium: 'Medium', low: 'Low', none: 'None' };
-      const level = (wordInfo.confidence_level || 'none').toLowerCase();
-      this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? 'None';
-    }
+  getLevelText(level) {
+    const map = { 
+      accepted: 'Accepted', 
+      high: 'High', 
+      medium: 'Medium', 
+      low: 'Low', 
+      none: 'None' 
+    };
+    return map[level] || 'None';
+  }
+
+  getBadgeClass(level) {
+    const classMap = {
+      accepted: 'badge-primary',
+      high: 'badge-success', 
+      medium: 'badge-warning',
+      low: 'badge-error',
+      none: 'badge-error'
+    };
+    return classMap[level] || 'badge-error';
   }
 
   updateSuggestions(wordInfo) {
@@ -223,8 +339,22 @@ class WordDetails {
     // Update position indicator
     this.wordPosition.textContent = `${currentPosition} of ${this.totalWords}`;
   }
+}
 
-
+// Helper function to get CSRF token from cookies
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 }
 
 // Initialize the WordDetails component when the DOM is loaded
