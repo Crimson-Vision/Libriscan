@@ -7,6 +7,9 @@ LABEL org.opencontainers.image.description="Libriscan helps extract and analyze 
 LABEL org.opencontainers.image.source="https://github.com/crimson-vision/libriscan"
 LABEL org.opencontainers.image.url="https://github.com/crimson-vision/libriscan"
 
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.3 /uv /uvx /bin/
+
 
 # Create the app directory
 RUN mkdir /app
@@ -17,15 +20,14 @@ WORKDIR /app
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
-# Upgrade pip and install dependencies
-RUN pip install --upgrade pip
+# uv doesn't need to use a venv here
+ENV UV_SYSTEM_PYTHON=1
 
 # Copy the requirements file first (better caching)
 COPY libriscan/requirements.txt /app/
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Production stage
 FROM python:3.13-slim
