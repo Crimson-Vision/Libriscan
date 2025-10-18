@@ -28,6 +28,9 @@ class WordDetails {
 
     // Initialize event listeners
     this.initializeEventListeners();
+
+    // Auto-select first word after everything is set up
+    this.selectFirstWord();
   }
 
   initializeEventListeners() {
@@ -440,16 +443,21 @@ class WordDetails {
   viewAuditLog() {
     // TODO: Implement view audit log functionality
     console.log('View Audit Log clicked');
+  }
 
-    wordBlock.textContent = text;
-    
-    // Add DaisyUI status indicator if word is accepted
-    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
-      const status = document.createElement('div');
-      status.setAttribute('aria-label', 'status');
-      status.className = 'status status-primary accepted-status';
-      wordBlock.appendChild(status);
-    }
+  /**
+   * Auto-select the first word on page load
+   * Finds the first word block and triggers its click to use existing selection system
+   */
+  selectFirstWord() {
+    // Small delay to ensure WordSelector is initialized first
+    setTimeout(() => {
+      const firstWordBlock = document.querySelector('.word-block');
+      if (!firstWordBlock) return;
+
+      // Trigger click event to use existing WordSelector flow
+      firstWordBlock.click();
+    }, 100);
   }
 }
 
