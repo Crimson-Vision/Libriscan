@@ -59,41 +59,61 @@
     <div class="flex flex-col items-center h-full w-full">
       <div class="card bg-base-100 shadow-sm w-full h-full">
         <div class="card-body p-4 h-full flex flex-col">
-          <div class="flex items-center justify-center mb-2">
-            <!-- Page Navigation -->
-            <div class="join">
+          <div class="mb-2 w-full">
+            <!-- Page Navigation: full-width grid (prev / current / next) -->
+            <div class="grid grid-cols-3 gap-2 w-full">
               <!-- Previous Button -->
-              {% if prev_page %}
-              <a href="{% url 'page' keys.owner keys.collection_slug keys.doc prev_page %}" class="join-item btn btn-sm">«</a>
-              {% else %}
-              <button class="join-item btn btn-sm btn-disabled">«</button>
-              {% endif %}
-              
-              <!-- Current Page Dropdown -->
-              <div class="dropdown dropdown-hover">
-                <div tabindex="0" role="button" class="join-item btn btn-sm">Page {{ page.number }}</div>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-40 p-2 shadow max-h-60 overflow-y-auto">
-                  {% for page_num in all_pages %}
-                    {% if page_num == page.number %}
-                      <li><a class="active flex justify-between">
-                        <span>Page {{ page_num }}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                        </svg>
-                      </a></li>
-                    {% else %}
-                      <li><a href="{% url 'page' keys.owner keys.collection_slug keys.doc page_num %}">Page {{ page_num }}</a></li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
+              <div>
+                {% if prev_page %}
+                <a href="{% url 'page' keys.owner keys.collection_slug keys.doc prev_page %}" class="btn btn-sm w-full">
+                  <span aria-hidden="true">«</span>
+                  <span class="hidden md:inline"> Previous</span>
+                </a>
+                {% else %}
+                <button class="btn btn-sm btn-disabled w-full">
+                  <span aria-hidden="true">«</span>
+                  <span class="hidden md:inline"> Previous</span>
+                </button>
+                {% endif %}
               </div>
-              
+
+              <!-- Current Page Dropdown -->
+              <div class="flex items-center justify-center">
+                <div class="w-full">
+                  <div class="dropdown dropdown-hover w-full">
+                    <div tabindex="0" role="button" class="btn btn-sm w-full">Page {{ page.number }}</div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-48 p-2 shadow max-h-60 overflow-y-auto">
+                      {% for page_num in all_pages %}
+                        {% if page_num == page.number %}
+                          <li><a class="active flex justify-between">
+                            <span>Page {{ page_num }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                            </svg>
+                          </a></li>
+                        {% else %}
+                          <li><a href="{% url 'page' keys.owner keys.collection_slug keys.doc page_num %}">Page {{ page_num }}</a></li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               <!-- Next Button -->
-              {% if next_page %}
-              <a href="{% url 'page' keys.owner keys.collection_slug keys.doc next_page %}" class="join-item btn btn-sm">»</a>
-              {% else %}
-              <button class="join-item btn btn-sm btn-disabled">»</button>
-              {% endif %}
+              <div>
+                {% if next_page %}
+                <a href="{% url 'page' keys.owner keys.collection_slug keys.doc next_page %}" class="btn btn-sm w-full">
+                  <span class="hidden md:inline">Next </span>
+                  <span aria-hidden="true">»</span>
+                </a>
+                {% else %}
+                <button class="btn btn-sm btn-disabled w-full">
+                  <span class="hidden md:inline">Next </span>
+                  <span aria-hidden="true">»</span>
+                </button>
+                {% endif %}
+              </div>
             </div>
           </div>
           <figure class="mb-4 flex justify-center">
