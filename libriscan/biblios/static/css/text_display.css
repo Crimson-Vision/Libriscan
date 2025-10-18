@@ -1,9 +1,0 @@
-/* Confidence level indicators */
-.word-block.confidence-medium {
-  border-bottom: 2px dotted #ffd700; /* Yellow dotted underline */
-}
-
-.word-block.confidence-low,
-.word-block.confidence-none {
-  border-bottom: 3px dashed #ff0000; /* Red dashed underline, thicker for low confidence */
-}
