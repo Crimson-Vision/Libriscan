@@ -412,6 +412,16 @@ class WordDetails {
   viewAuditLog() {
     // TODO: Implement view audit log functionality
     console.log('View Audit Log clicked');
+
+    wordBlock.textContent = text;
+    
+    // Add DaisyUI status indicator if word is accepted
+    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
+      const status = document.createElement('div');
+      status.setAttribute('aria-label', 'status');
+      status.className = 'status status-primary accepted-status';
+      wordBlock.appendChild(status);
+    }
   }
 }
 
