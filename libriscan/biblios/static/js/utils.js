@@ -141,6 +141,24 @@ const LibriscanUtils = {
     });
 
     return response.json();
+  },
+
+  /**
+   * Show a simple toast notification
+   * @param {string} message - Message to display
+   * @param {string} type - Toast type: 'success', 'error', 'warning', 'info'
+   * @param {number} duration - Duration in milliseconds (default: 3000)
+   */
+  showToast(message, type = 'success', duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} fixed bottom-4 right-4 z-50 shadow-lg max-w-sm`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, duration);
   }
 };
 

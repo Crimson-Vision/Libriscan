@@ -245,11 +245,11 @@ class WordDetails {
       this._updateWordUI();
       this._updateWordBlock(data);
       
-      console.log('Word updated successfully');
+      LibriscanUtils.showToast('Word updated successfully');
       onSuccessCallback?.();
     } catch (error) {
       console.error('Error updating word:', error);
-      alert(`Error updating word: ${error.message}`);
+      LibriscanUtils.showToast('Error updating word', 'error');
     }
   }
 
