@@ -238,92 +238,79 @@ class WordDetails {
    */
   async _updateWordText(newText, onSuccessCallback) {
     try {
-      // Get URL parameters from the current page URL
-      const url = window.location.pathname;
-      const urlParts = url.match(/\/([^\/]+)\/([^\/]+)\/([^\/]+)\/page(\d+)\//);
+      const updateUrl = this._buildUpdateUrl();
+      const data = await this._makeUpdateRequest(updateUrl, newText);
       
-      if (!urlParts) {
-        throw new Error('Could not parse page URL');
-      }
+      this._updateWordData(data);
+      this._updateWordUI();
+      this._updateWordBlock(data);
       
-      const [, shortName, collectionSlug, identifier, pageNumber] = urlParts;
-      const updateUrl = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordInfo.id}/update/`;
-      
-      // Get CSRF token from HTMX headers or cookie
-      let csrfToken = null;
-      
-      // Try to get from HTMX body headers first
-      const htmxHeaders = document.body.getAttribute('hx-headers');
-      if (htmxHeaders) {
-        try {
-          const headers = JSON.parse(htmxHeaders);
-          csrfToken = headers['x-csrftoken'];
-        } catch (e) {
-          console.warn('Failed to parse HTMX headers');
-        }
-      }
-      
-      // Fallback to other methods
-      if (!csrfToken) {
-        csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                   document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ||
-                   getCookie('csrftoken');
-      }
-      
-      const response = await fetch(updateUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': csrfToken
-        },
-        body: `text=${encodeURIComponent(newText)}`
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Update the current word info with server response
-        this.currentWordInfo.word = data.text;
-        this.currentWordInfo.confidence = data.confidence;
-        this.currentWordInfo.confidence_level = data.confidence_level;
-        this.currentWordInfo.suggestions = data.suggestions;
-        
-        // Update the UI
-        this.wordElement.textContent = data.text;
-        this._updateConfidenceDisplay(this.currentWordInfo);
-        this.updateSuggestions(this.currentWordInfo);
-        
-        // Update the word block in the page to reflect changes
-        const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
-        if (wordBlock) {
-          wordBlock.dataset.wordText = data.text;
-          wordBlock.dataset.wordConfidence = data.confidence;
-          wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
-          // Store suggestions in the same format as initial load (array of arrays)
-          wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
-          
-          // Update confidence level CSS class
-          wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
-          wordBlock.classList.add(`confidence-${data.confidence_level}`);
-          
-          // Update the word block content with badge handling to indicate accepted words
-          this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
-        }
-        
-        console.log('Word updated successfully');
-        
-        // Execute the success callback if provided
-        if (onSuccessCallback) {
-          onSuccessCallback();
-        }
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update word');
-      }
+      console.log('Word updated successfully');
+      onSuccessCallback?.();
     } catch (error) {
       console.error('Error updating word:', error);
       alert(`Error updating word: ${error.message}`);
     }
+  }
+
+  /**
+   * Build the update URL from current page URL
+   * @returns {string} Update URL for the current word
+   */
+  _buildUpdateUrl() {
+    return LibriscanUtils.buildWordUpdateURL(this.currentWordInfo.id);
+  }
+
+  /**
+   * Make the HTTP request to update word text
+   * @param {string} updateUrl - URL to send request to
+   * @param {string} newText - New text for the word
+   * @returns {Promise<Object>} Server response data
+   */
+  async _makeUpdateRequest(updateUrl, newText) {
+    return LibriscanUtils.postFormData(updateUrl, { text: newText });
+  }
+
+  /**
+   * Update the current word info with server response data
+   * @param {Object} data - Server response data
+   */
+  _updateWordData(data) {
+    this.currentWordInfo.word = data.text;
+    this.currentWordInfo.confidence = data.confidence;
+    this.currentWordInfo.confidence_level = data.confidence_level;
+    this.currentWordInfo.suggestions = data.suggestions;
+  }
+
+  /**
+   * Update the UI elements with new word data
+   */
+  _updateWordUI() {
+    this.wordElement.textContent = this.currentWordInfo.word;
+    this._updateConfidenceDisplay(this.currentWordInfo);
+    this.updateSuggestions(this.currentWordInfo);
+  }
+
+  /**
+   * Update the word block in the page with new data
+   * @param {Object} data - Server response data
+   */
+  _updateWordBlock(data) {
+    const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
+    if (!wordBlock) return;
+
+    // Update data attributes
+    wordBlock.dataset.wordText = data.text;
+    wordBlock.dataset.wordConfidence = data.confidence;
+    wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
+    wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
+    
+    // Update CSS classes
+    wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
+    wordBlock.classList.add(`confidence-${data.confidence_level}`);
+    
+    // Update content and visual indicators
+    this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
   }
 
   goToPrevWord() {
@@ -382,22 +369,6 @@ class WordDetails {
       wordBlock.appendChild(status);
     }
   }
-}
-
-// Helper function to get CSRF token from cookies
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
 }
 
 // Initialize the WordDetails component when the DOM is loaded
