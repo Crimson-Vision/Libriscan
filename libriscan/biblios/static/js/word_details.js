@@ -58,13 +58,16 @@ class WordDetails {
     this._setEditMode(true);
   }
 
-  saveEdit() {
+  async saveEdit() {
     const newText = this.wordInput.value.trim();
-    if (newText) {
-      this.wordElement.textContent = newText;
-      this.currentWordInfo.word = newText;
+    if (!newText) {
+      alert('Text cannot be empty');
+      return;
     }
-    this.exitEditMode();
+
+    await this._updateWordText(newText, () => {
+      this.exitEditMode();
+    });
   }
 
   revertEdit() {
@@ -135,18 +138,53 @@ class WordDetails {
 
   _updateConfidenceDisplay(wordInfo) {
     const raw = parseFloat(wordInfo.confidence) || 0;
-    const display = raw.toFixed(3);
-    if (this.scoreElement) this.scoreElement.textContent = `${display}%`;
+    
+    // Hide score element - only use confidence level badge
+    if (this.scoreElement) {
+      this.scoreElement.style.display = 'none';
+    }
+    
+    // Hide progress bar completely - no percentage display anywhere
     if (this.progressBar) {
-      this.progressBar.value = raw;
-      this.progressBar.className = this.getProgressClass(wordInfo.confidence_level);
+      this.progressBar.style.display = 'none';
     }
+    
+    // Special handling for 99.999 confidence - only show "Modified" badge aka accepted
+    if (raw >= 99.999) {
+      if (this.confidenceLevelSpan) {
+        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Modified</span>';
+      }
+    } else {
+      // Normal display for other confidence levels - show badge only
+      if (this.confidenceLevelSpan) {
+        const level = (wordInfo.confidence_level || 'none').toLowerCase();
+        const levelText = this.getLevelText(level);
+        const badgeClass = this.getBadgeClass(level);
+        this.confidenceLevelSpan.innerHTML = `<span class="badge ${badgeClass}">${levelText}</span>`;
+      }
+    }
+  }
 
-    if (this.confidenceLevelSpan) {
-      const map = { accepted: 'Accepted', high: 'High', medium: 'Medium', low: 'Low', none: 'None' };
-      const level = (wordInfo.confidence_level || 'none').toLowerCase();
-      this.confidenceLevelSpan.textContent = map[level] ?? wordInfo.confidence_level ?? 'None';
-    }
+  getLevelText(level) {
+    const map = { 
+      accepted: 'Accepted', 
+      high: 'High', 
+      medium: 'Medium', 
+      low: 'Low', 
+      none: 'None' 
+    };
+    return map[level] || 'None';
+  }
+
+  getBadgeClass(level) {
+    const classMap = {
+      accepted: 'badge-primary',
+      high: 'badge-success', 
+      medium: 'badge-warning',
+      low: 'badge-error',
+      none: 'badge-error'
+    };
+    return classMap[level] || 'badge-error';
   }
 
   updateSuggestions(wordInfo) {
@@ -179,13 +217,100 @@ class WordDetails {
     this.suggestionsContainer.appendChild(suggestionsList);
   }
 
-  applySuggestion(suggestion, suggestionsList, clickedLink) {
-    this.currentWordInfo.word = suggestion;
-    this.wordElement.textContent = suggestion;
-    // Remove active state from other items
-    suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-    // Add active state to clicked item
-    clickedLink.classList.add('active');
+  async applySuggestion(suggestion, suggestionsList, clickedLink) {
+    if (!suggestion.trim()) {
+      alert('Suggestion cannot be empty');
+      return;
+    }
+
+    await this._updateWordText(suggestion, () => {
+      // Remove active state from other items
+      suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      // Add active state to clicked item
+      clickedLink.classList.add('active');
+    });
+  }
+
+  /**
+   * Shared method to update word text on server and refresh UI
+   * @param {string} newText - The new text for the word
+   * @param {Function} onSuccessCallback - Callback to execute on successful update
+   */
+  async _updateWordText(newText, onSuccessCallback) {
+    try {
+      const updateUrl = this._buildUpdateUrl();
+      const data = await this._makeUpdateRequest(updateUrl, newText);
+      
+      this._updateWordData(data);
+      this._updateWordUI();
+      this._updateWordBlock(data);
+      
+      LibriscanUtils.showToast('Word updated successfully');
+      onSuccessCallback?.();
+    } catch (error) {
+      console.error('Error updating word:', error);
+      LibriscanUtils.showToast('Error updating word', 'error');
+    }
+  }
+
+  /**
+   * Build the update URL from current page URL
+   * @returns {string} Update URL for the current word
+   */
+  _buildUpdateUrl() {
+    return LibriscanUtils.buildWordUpdateURL(this.currentWordInfo.id);
+  }
+
+  /**
+   * Make the HTTP request to update word text
+   * @param {string} updateUrl - URL to send request to
+   * @param {string} newText - New text for the word
+   * @returns {Promise<Object>} Server response data
+   */
+  async _makeUpdateRequest(updateUrl, newText) {
+    return LibriscanUtils.postFormData(updateUrl, { text: newText });
+  }
+
+  /**
+   * Update the current word info with server response data
+   * @param {Object} data - Server response data
+   */
+  _updateWordData(data) {
+    this.currentWordInfo.word = data.text;
+    this.currentWordInfo.confidence = data.confidence;
+    this.currentWordInfo.confidence_level = data.confidence_level;
+    this.currentWordInfo.suggestions = data.suggestions;
+  }
+
+  /**
+   * Update the UI elements with new word data
+   */
+  _updateWordUI() {
+    this.wordElement.textContent = this.currentWordInfo.word;
+    this._updateConfidenceDisplay(this.currentWordInfo);
+    this.updateSuggestions(this.currentWordInfo);
+  }
+
+  /**
+   * Update the word block in the page with new data
+   * @param {Object} data - Server response data
+   */
+  _updateWordBlock(data) {
+    const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
+    if (!wordBlock) return;
+
+    // Update data attributes
+    wordBlock.dataset.wordText = data.text;
+    wordBlock.dataset.wordConfidence = data.confidence;
+    wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
+    wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
+    
+    // Update CSS classes
+    wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
+    wordBlock.classList.add(`confidence-${data.confidence_level}`);
+    
+    // Update content and visual indicators
+    this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
   }
 
   goToPrevWord() {
@@ -224,7 +349,26 @@ class WordDetails {
     this.wordPosition.textContent = `${currentPosition} of ${this.totalWords}`;
   }
 
+  /**
+   * Update word block content including badge handling
+   */
+  updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
+    // Remove existing status indicator if present
+    const existingStatus = wordBlock.querySelector('.accepted-status');
+    if (existingStatus) {
+      existingStatus.remove();
+    }
 
+    wordBlock.textContent = text;
+    
+    // Add DaisyUI status indicator if word is accepted
+    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
+      const status = document.createElement('div');
+      status.setAttribute('aria-label', 'status');
+      status.className = 'status status-primary accepted-status';
+      wordBlock.appendChild(status);
+    }
+  }
 }
 
 // Initialize the WordDetails component when the DOM is loaded

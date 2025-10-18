@@ -38,3 +38,16 @@
   .btn-active { box-shadow: 0 1px 0 rgba(0,0,0,.2); }
   [data-theme="dark"] .btn-active { box-shadow: 0 1px 0 rgba(255,255,255,.08); }
 }
+
+/* Accepted status indicator positioning */
+.accepted-status {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 10;
+}
+
+/* Ensure parent button has relative positioning */
+.word-block {
+  position: relative;
+}
