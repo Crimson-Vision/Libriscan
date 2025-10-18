@@ -127,6 +127,7 @@ class WordDetails {
           wordBlock.dataset.wordText = data.text;
           wordBlock.dataset.wordConfidence = data.confidence;
           wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
+          // Store suggestions in the same format as initial load (array of arrays)
           wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
           
           // Update confidence level CSS class

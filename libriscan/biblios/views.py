@@ -508,7 +508,7 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
                 'text': word.text,
                 'confidence': float(word.confidence),
                 'confidence_level': word.confidence_level,
-                'suggestions': word.suggestions
+                'suggestions': dict(word.suggestions) if isinstance(word.suggestions, list) else word.suggestions
             })
         else:
             return JsonResponse({'error': 'Text cannot be empty'}, status=400)
