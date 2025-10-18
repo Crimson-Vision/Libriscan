@@ -124,7 +124,6 @@ class WordDetails {
         // Update the word block in the page to reflect changes
         const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
         if (wordBlock) {
-          wordBlock.textContent = data.text;
           wordBlock.dataset.wordText = data.text;
           wordBlock.dataset.wordConfidence = data.confidence;
           wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
@@ -133,6 +132,9 @@ class WordDetails {
           // Update confidence level CSS class
           wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
           wordBlock.classList.add(`confidence-${data.confidence_level}`);
+          
+          // Update the word block content with badge handling to indicate accepted words
+          this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
         }
         
         console.log('Word updated successfully');
@@ -227,10 +229,10 @@ class WordDetails {
       this.progressBar.style.display = 'none';
     }
     
-    // Special handling for 99.999 confidence - only show "Accepted" badge
+    // Special handling for 99.999 confidence - only show "Modified" badge aka accepted
     if (raw >= 99.999) {
       if (this.confidenceLevelSpan) {
-        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Updated</span>';
+        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Modified</span>';
       }
     } else {
       // Normal display for other confidence levels - show badge only
@@ -338,6 +340,27 @@ class WordDetails {
 
     // Update position indicator
     this.wordPosition.textContent = `${currentPosition} of ${this.totalWords}`;
+  }
+
+  /**
+   * Update word block content including badge handling
+   */
+  updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
+    // Remove existing status indicator if present
+    const existingStatus = wordBlock.querySelector('.accepted-status');
+    if (existingStatus) {
+      existingStatus.remove();
+    }
+
+    wordBlock.textContent = text;
+    
+    // Add DaisyUI status indicator if word is accepted
+    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
+      const status = document.createElement('div');
+      status.setAttribute('aria-label', 'status');
+      status.className = 'status status-primary accepted-status';
+      wordBlock.appendChild(status);
+    }
   }
 }
 

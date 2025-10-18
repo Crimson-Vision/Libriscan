@@ -21,7 +21,7 @@
               {% for word in words %}
                 <!-- Word block with confidence indicators -->
                 <button 
-                  class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm
+                  class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
                          {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
                   data-word-id="{{ word.id }}"
                   data-word-text="{{ word.text }}"
@@ -39,6 +39,9 @@
                   data-word-suggestions="{{ word.suggestions|safe }}"
                   title="Click to view details">
                   {{ word.text }}
+                  {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}
+                    <div aria-label="status" class="status status-primary accepted-status"></div>
+                  {% endif %}
                 </button>
               {% endfor %}
             {% else %}
