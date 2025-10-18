@@ -15,6 +15,12 @@ class WordDetails {
     this.prevWordBtn = document.getElementById('prevWordBtn');
     this.nextWordBtn = document.getElementById('nextWordBtn');
     this.wordPosition = document.getElementById('wordPosition');
+    
+    // Dropdown elements
+    this.wordActionsDropdown = document.getElementById('wordActionsDropdown');
+    this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
+    this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
+    this.viewAuditLogAction = document.getElementById('viewAuditLogAction');
 
     // Initialize data
     this.currentWordId = null;
@@ -52,6 +58,17 @@ class WordDetails {
       else if (e.key === 'ArrowRight') { e.preventDefault(); this.goToNextWord(); }
     };
     document.addEventListener('keydown', this._keydownHandler);
+
+    // Dropdown actions
+    if (this.revertToOriginalAction) {
+      this.revertToOriginalAction.onclick = () => this.revertToOriginalWord();
+    }
+    if (this.saveToDictionaryAction) {
+      this.saveToDictionaryAction.onclick = () => this.saveToDictionary();
+    }
+    if (this.viewAuditLogAction) {
+      this.viewAuditLogAction.onclick = () => this.viewAuditLog();
+    }
   }
 
   startEditing() {
@@ -368,6 +385,33 @@ class WordDetails {
       status.className = 'status status-primary accepted-status';
       wordBlock.appendChild(status);
     }
+  }
+
+  /**
+   * Dropdown action: Revert to original word
+   * Placeholder method - functionality to be implemented
+   */
+  revertToOriginalWord() {
+    // TODO: Implement revert to original word functionality
+    console.log('Revert to Original Word clicked');
+  }
+
+  /**
+   * Dropdown action: Save to dictionary
+   * Placeholder method - functionality to be implemented
+   */
+  saveToDictionary() {
+    // TODO: Implement save to dictionary functionality
+    console.log('Save to Dictionary clicked');
+  }
+
+  /**
+   * Dropdown action: View audit log
+   * Placeholder method - functionality to be implemented
+   */
+  viewAuditLog() {
+    // TODO: Implement view audit log functionality
+    console.log('View Audit Log clicked');
   }
 }
 
