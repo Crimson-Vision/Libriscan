@@ -65,90 +65,9 @@ class WordDetails {
       return;
     }
 
-    try {
-      // Get URL parameters from the current page URL
-      const url = window.location.pathname;
-      const urlParts = url.match(/\/([^\/]+)\/([^\/]+)\/([^\/]+)\/page(\d+)\//);
-      
-      if (!urlParts) {
-        throw new Error('Could not parse page URL');
-      }
-      
-      const [, shortName, collectionSlug, identifier, pageNumber] = urlParts;
-      const updateUrl = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordInfo.id}/update/`;
-      
-      // Get CSRF token from HTMX headers or cookie
-      let csrfToken = null;
-      
-      // Try to get from HTMX body headers first
-      const htmxHeaders = document.body.getAttribute('hx-headers');
-      if (htmxHeaders) {
-        try {
-          const headers = JSON.parse(htmxHeaders);
-          csrfToken = headers['x-csrftoken'];
-        } catch (e) {
-          console.warn('Failed to parse HTMX headers');
-        }
-      }
-      
-      // Fallback to other methods
-      if (!csrfToken) {
-        csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
-                   document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ||
-                   getCookie('csrftoken');
-      }
-      
-      const response = await fetch(updateUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': csrfToken
-        },
-        body: `text=${encodeURIComponent(newText)}`
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Update the current word info with server response
-        this.currentWordInfo.word = data.text;
-        this.currentWordInfo.confidence = data.confidence;
-        this.currentWordInfo.confidence_level = data.confidence_level;
-        this.currentWordInfo.suggestions = data.suggestions;
-        
-        // Update the UI
-        this.wordElement.textContent = data.text;
-        this._updateConfidenceDisplay(this.currentWordInfo);
-        this.updateSuggestions(this.currentWordInfo);
-        
-        // Update the word block in the page to reflect changes
-        const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
-        if (wordBlock) {
-          wordBlock.dataset.wordText = data.text;
-          wordBlock.dataset.wordConfidence = data.confidence;
-          wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
-          // Store suggestions in the same format as initial load (array of arrays)
-          wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
-          
-          // Update confidence level CSS class
-          wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
-          wordBlock.classList.add(`confidence-${data.confidence_level}`);
-          
-          // Update the word block content with badge handling to indicate accepted words
-          this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
-        }
-        
-        console.log('Word updated successfully');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update word');
-      }
-    } catch (error) {
-      console.error('Error updating word:', error);
-      alert(`Error updating word: ${error.message}`);
-    }
-    
-    this.exitEditMode();
+    await this._updateWordText(newText, () => {
+      this.exitEditMode();
+    });
   }
 
   revertEdit() {
@@ -298,13 +217,113 @@ class WordDetails {
     this.suggestionsContainer.appendChild(suggestionsList);
   }
 
-  applySuggestion(suggestion, suggestionsList, clickedLink) {
-    this.currentWordInfo.word = suggestion;
-    this.wordElement.textContent = suggestion;
-    // Remove active state from other items
-    suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-    // Add active state to clicked item
-    clickedLink.classList.add('active');
+  async applySuggestion(suggestion, suggestionsList, clickedLink) {
+    if (!suggestion.trim()) {
+      alert('Suggestion cannot be empty');
+      return;
+    }
+
+    await this._updateWordText(suggestion, () => {
+      // Remove active state from other items
+      suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      // Add active state to clicked item
+      clickedLink.classList.add('active');
+    });
+  }
+
+  /**
+   * Shared method to update word text on server and refresh UI
+   * @param {string} newText - The new text for the word
+   * @param {Function} onSuccessCallback - Callback to execute on successful update
+   */
+  async _updateWordText(newText, onSuccessCallback) {
+    try {
+      // Get URL parameters from the current page URL
+      const url = window.location.pathname;
+      const urlParts = url.match(/\/([^\/]+)\/([^\/]+)\/([^\/]+)\/page(\d+)\//);
+      
+      if (!urlParts) {
+        throw new Error('Could not parse page URL');
+      }
+      
+      const [, shortName, collectionSlug, identifier, pageNumber] = urlParts;
+      const updateUrl = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordInfo.id}/update/`;
+      
+      // Get CSRF token from HTMX headers or cookie
+      let csrfToken = null;
+      
+      // Try to get from HTMX body headers first
+      const htmxHeaders = document.body.getAttribute('hx-headers');
+      if (htmxHeaders) {
+        try {
+          const headers = JSON.parse(htmxHeaders);
+          csrfToken = headers['x-csrftoken'];
+        } catch (e) {
+          console.warn('Failed to parse HTMX headers');
+        }
+      }
+      
+      // Fallback to other methods
+      if (!csrfToken) {
+        csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name=csrf-token]')?.getAttribute('content') ||
+                   getCookie('csrftoken');
+      }
+      
+      const response = await fetch(updateUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken
+        },
+        body: `text=${encodeURIComponent(newText)}`
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update the current word info with server response
+        this.currentWordInfo.word = data.text;
+        this.currentWordInfo.confidence = data.confidence;
+        this.currentWordInfo.confidence_level = data.confidence_level;
+        this.currentWordInfo.suggestions = data.suggestions;
+        
+        // Update the UI
+        this.wordElement.textContent = data.text;
+        this._updateConfidenceDisplay(this.currentWordInfo);
+        this.updateSuggestions(this.currentWordInfo);
+        
+        // Update the word block in the page to reflect changes
+        const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
+        if (wordBlock) {
+          wordBlock.dataset.wordText = data.text;
+          wordBlock.dataset.wordConfidence = data.confidence;
+          wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
+          // Store suggestions in the same format as initial load (array of arrays)
+          wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
+          
+          // Update confidence level CSS class
+          wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
+          wordBlock.classList.add(`confidence-${data.confidence_level}`);
+          
+          // Update the word block content with badge handling to indicate accepted words
+          this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
+        }
+        
+        console.log('Word updated successfully');
+        
+        // Execute the success callback if provided
+        if (onSuccessCallback) {
+          onSuccessCallback();
+        }
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update word');
+      }
+    } catch (error) {
+      console.error('Error updating word:', error);
+      alert(`Error updating word: ${error.message}`);
+    }
   }
 
   goToPrevWord() {
