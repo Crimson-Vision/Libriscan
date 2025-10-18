@@ -41,6 +41,16 @@
   width: 13rem;
 }
 
+/* Word Actions Dropdown */
+#wordActionsDropdown {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+#wordActionsDropdown:hover {
+  opacity: 1;
+}
+
 /* Progress Bar Colors */
 .progress-error {
   --progress-color: hsl(var(--er));

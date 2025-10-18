@@ -5,7 +5,27 @@
      data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.geo_x_0 }},{{ word.geo_y_0 }},{{ word.geo_x_1 }},{{ word.geo_y_1 }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}">
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h3 class="card-title">Word Details</h3>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="card-title">Word Details</h3>
+        <!-- Dropdown Menu -->
+        <div class="dropdown dropdown-right">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm" id="wordActionsDropdown">
+            <!-- Kebab (three dots) icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+            </svg>
+          </div>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+            <li><a id="revertToOriginalAction">Revert to Original</a></li>
+            <li class="opacity-50 pointer-events-none" aria-disabled="true">
+              <a id="saveToDictionaryAction" tabindex="-1">Save to Dictionary</a>
+            </li>
+            <li class="opacity-50 pointer-events-none" aria-disabled="true">
+              <a id="viewAuditLogAction" tabindex="-1">View Audit Log</a>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <!-- Word Navigation -->
       <div class="flex justify-between items-center mb-4">
