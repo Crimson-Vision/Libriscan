@@ -62,11 +62,7 @@
         Formatted
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
-        <div class="prose">
-          <h3>Document Title</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <blockquote>Ut enim ad minim veniam, quis nostrud exercitation.</blockquote>
-        </div>
+        {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
       </div>
 
       <!-- Metadata Tab -->

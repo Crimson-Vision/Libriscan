@@ -1,0 +1,13 @@
+<div class="prose">
+  <div class="h-[100vh] overflow-y-auto p-4">
+    {% if formatted_text %}
+      <p>{{ formatted_text }}</p>
+    {% elif words %}
+      <p>
+        {% for w in words %}{{ w.text }}{% if not forloop.last %} {% endif %}{% endfor %}
+      </p>
+    {% else %}
+      <p class="text-base-content/60">No formatted text available.</p>
+    {% endif %}
+  </div>
+</div>
