@@ -35,25 +35,3 @@ body:
       placeholder: e.g., As a librarian, I want to upload multiple documents simultaneously to save time during batch processing.
     validations:
       required: true
-  - type: textarea
-    id: proposed-solution
-    attributes:
-      label: Proposed Solution
-      description: Describe your suggested implementation or behavior for the feature (e.g., UI changes, new API integration, compatibility with Django/Tailwind).
-      placeholder: e.g., Add a "Bulk Upload" button to the Document Upload page that processes all selected files in parallel.
-    validations:
-      required: false
-  - type: textarea
-    id: benefits
-    attributes:
-      label: Benefits
-      description: List the expected benefits (e.g., time savings, improved accuracy, enhanced patron access).
-      placeholder: e.g., Reduces processing time by 50% for large collections; improves staff efficiency.
-    validations:
-      required: true
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Add any other details, such as examples from other systems, mockups, or references to the LibriScan User Manual.
-      placeholder: e.g., Similar feature seen in Omeka’s batch upload tool.
