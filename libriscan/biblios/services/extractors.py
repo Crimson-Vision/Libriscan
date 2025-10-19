@@ -50,7 +50,11 @@ class BaseExtractor(object):
             0,
         ]
 
+    # Override this method with specifics about how to translate an extraction service's response to a TextBlock
     def __create_text_block__(self, word):
+        """Generate a text block for cleaning."""
+
+        # Note that this method gets called indirectly via check_text
         return {
             "extraction_id": None,
             "text": word,
@@ -63,6 +67,25 @@ class BaseExtractor(object):
             "geo_y_1": None,
         }
 
+    # Don't override this; it has safety checks to keep invalid textblocks from being loaded
+    def create_block(self, word):
+        """Safely extracting a text block."""
+
+        textblock = self.__create_text_block__(word)
+
+        # A confidence score of exactly 100 causes a decimal.InvalidOperation error.
+        # Cap it to the "accepted" level.
+        textblock.confidence = min(textblock.confidence, TextBlock.CONF_ACCEPTED)
+
+        # If the text reaches the exact edge of the image, that causes a decimal.InvalidOperation error.
+        # Nudge it in just slightly.
+        for coord in ("geo_x_0", "geo_y_0", "geo_x_1", "geo_y_1"):
+            c = getattr(textblock, coord)
+            setattr(textblock, coord, max(c, 0.000000000000001))
+            setattr(textblock, coord, min(c, 0.999999999999999))
+
+        return textblock
+
     # Ideally, don't override this.
     # This can take a while because of the spellchecking. Best to call it through tasks.queue_extraction().
     def get_words(self):
@@ -73,7 +96,8 @@ class BaseExtractor(object):
         self.lines = self.__process_lines__(lines)
         self.others = self.__process_others__(others)
         self.line_numbers = self.__generate_line_numbers__(self.lines)
-        words = [self.__create_text_block__(w) for w in words]
+
+        words = [self.create_block(w) for w in words]
 
         TextBlock.objects.bulk_create(words)
 

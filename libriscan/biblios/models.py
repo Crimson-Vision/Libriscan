@@ -383,7 +383,7 @@ class TextBlock(BibliosModel):
     }
 
     # Confidence level thresholds
-    CONF_ACCEPTED = 99.99
+    CONF_ACCEPTED = 99.999
     CONF_HIGH = 90.0
     CONF_MEDIUM = 80.0
     CONF_LOW = 50.0
@@ -404,7 +404,7 @@ class TextBlock(BibliosModel):
     confidence = models.DecimalField(
         max_digits=5,
         decimal_places=3,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        validators=[MinValueValidator(0), MaxValueValidator(CONF_ACCEPTED)],
     )
 
     # Controls whether this word should be included from document exports.
@@ -461,6 +461,7 @@ class TextBlock(BibliosModel):
 
     def save(self, **kwargs):
         """Generate spellcheck suggestions on save"""
+
         self.suggestions = self.__get_suggestions__()
         # In case the word text has been specified as an update_field, include the suggestions too
         if (
