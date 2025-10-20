@@ -1,76 +1,94 @@
+{% load static %}
 <!-- Word Details Component -->
-<div id="clickedWordsContainer" class="mt-8 hidden">
+
+<div id="clickedWordsContainer" class="mt-8 hidden"
+     data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.geo_x_0 }},{{ word.geo_y_0 }},{{ word.geo_x_1 }},{{ word.geo_y_1 }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}">
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h3 class="card-title">Word Details</h3>
-      <div class="stats shadow">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="card-title">Word Details</h3>
+        <!-- Dropdown Menu -->
+        <div class="dropdown dropdown-right">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm" id="wordActionsDropdown">
+            <!-- Kebab (three dots) icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+            </svg>
+          </div>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+            <li>
+              <a id="revertToOriginalAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Revert to Original</a>
+            </li>
+            <li>
+              <a id="saveToDictionaryAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Save to Dictionary</a>
+            </li>
+            <li>
+              <a id="viewAuditLogAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">View Audit Log</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Word Navigation -->
+      <div class="flex justify-between items-center mb-4">
+        <button id="prevWordBtn" class="btn btn-outline btn-sm" disabled>
+          <span class="text-md mr-2" aria-hidden="true">«</span>
+          Previous
+        </button>
+        <span id="wordPosition" class="text-sm opacity-70">0 of 0</span>
+        <button id="nextWordBtn" class="btn btn-outline btn-sm" disabled>
+          Next
+          <span class="text-md ml-2" aria-hidden="true">»</span>
+        </button>
+      </div>
+      <div class="stats stats-vertical lg:stats-horizontal shadow">
         <div class="stat">
           <div class="stat-title">Word</div>
-          <div id="clickedWord" class="stat-value text-2xl"></div>
+          <div class="flex items-center gap-2">
+            <div id="clickedWord" class="stat-value text-2xl"></div>
+            <input type="text" id="wordInput" class="input input-bordered w-full max-w-xs hidden" />
+            <button id="editButton" class="btn btn-ghost btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+              </svg>
+            </button>
+            <button id="saveButton" class="btn btn-ghost btn-sm hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </button>
+            <button id="revertButton" class="btn btn-ghost btn-sm hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+              </svg>
+            </button>
+          </div>
+          <div class="stat-desc" id="wordMetadata"></div>
         </div>
         <div class="stat">
-          <div class="stat-title">Confidence Score</div>
+          <div class="stat-title">Confidence Level</div>
+          <span id="confidenceLevel" class="ms-2 opacity-70"></span>
           <div id="confidenceScore" class="stat-value text-2xl"></div>
           <div class="stat-desc">
             <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
           </div>
         </div>
       </div>
-      <div id="suggestionsContainer" class="hidden mt-4">
-        <div class="divider">Suggestions</div>
-        <div id="suggestionsList" class="space-y-3">
-          <!-- Suggestions will be dynamically inserted here -->
+      <!-- <div class="stats stats-vertical lg:stats-horizontal shadow">
+        <div class="stat">
+          <div class="stat-title">Position</div>
+          <div id="wordPosition" class="stat-value text-lg"></div>
+          <div class="stat-desc" id="wordGeometry"></div>
+        </div>
+      </div> -->
+      <div class="stats stats-vertical lg:stats-horizontal shadow">
+        <div class="stat">
+          <div class="stat-title mb-2">Suggestions</div>
+          <div id="wordSuggestions" class="stat-desc p-0">
+            <!-- Suggestions will be populated here -->
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-function getProgressClass(confidence) {
-  if (confidence < 50) return 'progress progress-error';
-  if (confidence < 80) return 'progress progress-warning';
-  if (confidence >= 90) return 'progress progress-success';
-  return 'progress';
-}
-
-function updateWordDetails(wordInfo) {
-  const container = document.getElementById('clickedWordsContainer');
-  const wordElement = document.getElementById('clickedWord');
-  const scoreElement = document.getElementById('confidenceScore');
-  const progressBar = document.getElementById('confidenceBar');
-  const suggestionsContainer = document.getElementById('suggestionsContainer');
-  const suggestionsList = document.getElementById('suggestionsList');
-  
-  container.classList.remove('hidden');
-  wordElement.textContent = wordInfo.word;
-  scoreElement.textContent = `${wordInfo.confidence}%`;
-  progressBar.value = wordInfo.confidence;
-  progressBar.className = getProgressClass(wordInfo.confidence);
-  
-  // Handle suggestions
-  if (wordInfo.suggestions) {
-    suggestionsContainer.classList.remove('hidden');
-    suggestionsList.innerHTML = '';
-    wordInfo.suggestions.forEach(suggestion => {
-      const div = document.createElement('div');
-      div.className = 'flex items-center justify-between p-3 bg-base-200 rounded-lg';
-      div.innerHTML = `
-        <span class="font-medium">${suggestion.word}</span>
-        <div class="flex items-center gap-3">
-          <span class="text-sm">Frequency count: ${suggestion.confidence}</span>
-          <input type="range" min="0" max="100" value="${suggestion.confidence}" class="range w-24" disabled />
-        </div>
-      `;
-      suggestionsList.appendChild(div);
-    });
-  } else {
-    suggestionsContainer.classList.add('hidden');
-  }
-}
-
-// Listen for word selection events
-document.addEventListener('wordSelected', event => {
-  updateWordDetails(event.detail);
-});
-</script>

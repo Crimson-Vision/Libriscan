@@ -1,23 +1,41 @@
 import logging
 import os
 from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_not_required
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.db import models
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
-from .models import Organization, Consortium, Document, Collection, Series, Page
+from .models import (
+    Organization,
+    Document,
+    Collection,
+    Series,
+    Page,
+    DublinCoreMetadata,
+    TextBlock,
+)
 from .forms import FilePondUploadForm
 
 logger = logging.getLogger(__name__)
+
+
+# Most permissions in this app depend on Organization. This mixin overrides get_permission_object
+# so various class-based views will automatically check perms against their owner org instead of
+# their own model instance.
+# Safe to use in any view that lives under an org-based URL.
+# Strictly speaking this belongs in access_rules.py, but it causes a circular import with models.py
+class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
+    def get_permission_object(self):
+        return Organization.objects.get(short_name=self.kwargs.get("short_name"))
 
 
 def index(request):
@@ -26,18 +44,12 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-@login_required
 def scan(request):
     context = {
         "allowed_upload_types": settings.ALLOWED_UPLOAD_TYPES,
         "max_upload_size": settings.MAX_UPLOAD_SIZE,
     }
     return render(request, "biblios/scan.html", context)
-
-
-class ConsortiumDetail(AutoPermissionRequiredMixin, DetailView):
-    model = Consortium
-    context_object_name = "consortium"
 
 
 # This is a basic way of handling RBAC on the user's org list.
@@ -55,9 +67,10 @@ def organization_list(request):
 
 
 # This is the easy way to handle RBAC. All the models have permissions
-# specified in models.py. This AutoPermissionRequiredMixin figures
+# specified in models.py. This OrgPermissionRequiredMixin figures
 # out how to check them for each request user.
-class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
+# But note that any class views below the Org need to have get_permission_object overridden.
+class OrganizationDetail(OrgPermissionRequiredMixin, DetailView):
     model = Organization
     context_object_name = "org"
     slug_field = "short_name"
@@ -67,9 +80,52 @@ class OrganizationDetail(AutoPermissionRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         role = None
         if self.request.user.is_authenticated:
-            role = self.request.user.userrole_set.filter(organization=self.object).first()
+            role = self.request.user.userrole_set.filter(
+                organization=self.object
+            ).first()
         context["user_role"] = role.get_role_display() if role else None
         return context
+
+
+class OrganizationUpdate(OrgPermissionRequiredMixin, UpdateView):
+    model = Organization
+    fields = ["name", "short_name", "city", "state"]
+    slug_field = "short_name"
+    slug_url_kwarg = "short_name"
+
+
+class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
+    model = Collection
+    fields = ["name", "slug"]
+    slug_field = "short_name"
+    slug_url_kwarg = "short_name"
+
+    def post(self, request, **kwargs):
+        from biblios.forms import CollectionForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Document to it
+        # Users shouldn't set this directly in the form -- it's based on the doc they're working from
+        post = request.POST.copy()
+        post.update(
+            {
+                "owner": Organization.objects.get(
+                    short_name=self.kwargs.get("short_name")
+                )
+            }
+        )
+
+        # Bind the image file to the form data when we instatiate it
+        form = CollectionForm(post)
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
+
+class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
+    model = Collection
+    fields = ["name", "slug"]
+    slug_url_kwarg = "collection_slug"
 
 
 # This is a verbose way of handling RBAC on a collections page
@@ -91,17 +147,51 @@ def collection_detail(request, short_name, collection_slug):
     return render(request, "biblios/collection_detail.html", context)
 
 
-class SeriesDetail(AutoPermissionRequiredMixin, DetailView):
+class SeriesDetail(OrgPermissionRequiredMixin, DetailView):
     model = Series
     context_object_name = "series"
     slug_url_kwarg = "series_slug"
 
 
-class DocumentList(AutoPermissionRequiredMixin, ListView):
+class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
+    model = Series
+    fields = ["name", "slug"]
+    template_name = "biblios/series_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["collection_slug"] = self.kwargs.get("collection_slug")
+        return context
+
+    def post(self, request, **kwargs):
+        from biblios.forms import SeriesForm
+
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Collection to it
+        # Users shouldn't set this directly in the form -- it's based on the collection they're working from
+        post = request.POST.copy()
+        post.update(
+            {
+                "collection": Collection.objects.get(
+                    owner__short_name=self.kwargs.get("short_name"),
+                    slug=self.kwargs.get("collection_slug"),
+                )
+            }
+        )
+
+        # Bind the form data when we instantiate it
+        form = SeriesForm(post)
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
+
+class DocumentList(OrgPermissionRequiredMixin, ListView):
     model = Document
 
 
-class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
+class DocumentDetail(OrgPermissionRequiredMixin, DetailView):
     model = Document
     slug_field = "identifier"
     slug_url_kwarg = "identifier"
@@ -117,22 +207,65 @@ class DocumentDetail(AutoPermissionRequiredMixin, DetailView):
         return context
 
 
-class DocumentCreateView(AutoPermissionRequiredMixin, CreateView):
+class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Document
     fields = ["series", "identifier", "use_long_s_detection"]
 
 
-class DocumentUpdateView(AutoPermissionRequiredMixin, UpdateView):
+class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     model = Document
 
 
-class DocumentDeleteView(AutoPermissionRequiredMixin, DeleteView):
+class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Document
     success_url = reverse_lazy("index")
-    # success_url = reverse_lazy("org_slug", kwargs={"slug":})
 
 
-class PageCreateView(AutoPermissionRequiredMixin, CreateView):
+class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
+    model = DublinCoreMetadata
+    template_name = "biblios/metadata_detail.html"
+    context_object_name = "metadata"
+
+    def get_object(self, queryset=None):
+        # The org owner and collection are part of the URL, so make sure the request is for a valid combo
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_slug")
+        identifier = self.kwargs.get("identifier")
+
+        try:
+            doc = Document.objects.get(
+                series__collection__owner__short_name=owner,
+                series__collection__slug=collection,
+                identifier=identifier,
+            )
+            return doc.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            return Http404("No such document metadata found")
+
+
+class MetadataUpdateView(OrgPermissionRequiredMixin, UpdateView):
+    model = DublinCoreMetadata
+    template_name = "biblios/metadata_update.html"
+    context_object_name = "metadata"
+
+    def get_object(self, queryset=None):
+        # The org owner and collection are part of the URL, so make sure the request is for a valid combo
+        owner = self.kwargs.get("short_name")
+        collection = self.kwargs.get("collection_slug")
+        identifier = self.kwargs.get("identifier")
+
+        try:
+            doc = Document.objects.get(
+                series__collection__owner__short_name=owner,
+                series__collection__slug=collection,
+                identifier=identifier,
+            )
+            return doc.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            return Http404("No such document metadata found")
+
+
+class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Page
     fields = ("number", "image")
 
@@ -166,39 +299,41 @@ class PageCreateView(AutoPermissionRequiredMixin, CreateView):
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
 
-@login_required
 @require_http_methods(["POST"])
 def handle_upload(request):
     """Handle file uploads from FilePond."""
     form = FilePondUploadForm(request.POST, request.FILES)
-    
+
     if not form.is_valid():
-        error_msg = form.errors.get('image', ['Upload failed.'])[0]
+        error_msg = form.errors.get("image", ["Upload failed."])[0]
         return HttpResponse(error_msg, status=400)
-    
+
     try:
-        upload_file = form.cleaned_data['image']
-        file_path = os.path.join('uploads', upload_file.name)
+        upload_file = form.cleaned_data["image"]
+        file_path = os.path.join("uploads", upload_file.name)
         saved_path = default_storage.save(file_path, ContentFile(upload_file.read()))
-        
+
         # Store file info in session
-        request.session['filepond_last_upload'] = {
-            'path': saved_path,
-            'name': upload_file.name,
-            'size': upload_file.size
+        request.session["filepond_last_upload"] = {
+            "path": saved_path,
+            "name": upload_file.name,
+            "size": upload_file.size,
         }
 
         return HttpResponse(saved_path)
-        
+
     except OSError as e:
         logger.error("File upload error: %s", e)
-        return HttpResponse('An error occurred while processing your file.', status=500)
+        return HttpResponse("An error occurred while processing your file.", status=500)
 
 
-class PageDetail(AutoPermissionRequiredMixin, DetailView):
+class PageDetail(OrgPermissionRequiredMixin, DetailView):
     model = Page
     template_name = "biblios/page.html"
     context_name = "pages"
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("document")
 
     def get_context_data(self, **kwargs):
         # Insert some of the URL parameters into the context
@@ -208,6 +343,27 @@ class PageDetail(AutoPermissionRequiredMixin, DetailView):
         collection = self.kwargs.get("collection_slug")
         doc = self.kwargs.get("identifier")
         context["keys"] = {"owner": owner, "collection_slug": collection, "doc": doc}
+
+        # Add pagination context
+        page = self.object
+        current_number = page.number
+
+        # Get all page numbers for dropdown
+        all_page_numbers = list(page.document.pages.values_list("number", flat=True))
+
+        # Get prev/next page numbers
+        current_index = all_page_numbers.index(current_number)
+        prev_page = all_page_numbers[current_index - 1] if current_index > 0 else None
+        next_page = (
+            all_page_numbers[current_index + 1]
+            if current_index < len(all_page_numbers) - 1
+            else None
+        )
+
+        context["all_pages"] = all_page_numbers
+        context["prev_page"] = prev_page
+        context["next_page"] = next_page
+
         return context
 
     def get_object(self, **kwargs):
@@ -233,13 +389,22 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         document__identifier=identifier,
         number=number,
     )
-    org = page.document.series.collection.owner
 
-    extractor = org.cloudservice.get_extractor(page)
+    # Start the extraction process in the background
+    page.generate_extraction()
 
-    context = {"words": extractor.get_words()}
+    # Prepare context with URL parameters for the loading template
+    context = {
+        "short_name": short_name,
+        "collection_slug": collection_slug,
+        "identifier": identifier,
+        "number": number,
+        "owner": page.document.series.collection.owner,
+    }
 
-    return render(request, "biblios/components/forms/text_display.html", context)
+    # Return the loading template immediately
+    # The client will poll check_words endpoint which returns text_display.html when ready
+    return render(request, "biblios/components/forms/extraction_loading.html", context)
 
 
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
@@ -267,3 +432,91 @@ def export_text(request, short_name, collection_slug, identifier):
         identifier=identifier,
     )
     return doc.export_text()
+
+
+def export_xml(request, short_name, collection_slug, identifier):
+    """
+    Generates a text file of a given doc ID.
+    """
+    doc = Document.objects.get(
+        series__collection__owner__short_name=short_name,
+        series__collection__slug=collection_slug,
+        identifier=identifier,
+    )
+    return doc.export_xml()
+
+
+def get_org_by_page(request, short_name, collection_slug, identifier, number):
+    return Organization.objects.get(short_name=short_name)
+
+
+def get_org_by_word(request, short_name, collection_slug, identifier, number, word_id):
+    return Organization.objects.get(short_name=short_name)
+
+
+@permission_required(
+    "biblios.view_organization", fn=get_org_by_page, raise_exception=True
+)
+def check_words(request, short_name, collection_slug, identifier, number):
+    """Respond to the textblock polling request."""
+    page = get_object_or_404(
+        Page,
+        number=number,
+        document__identifier=identifier,
+        document__series__collection__slug=collection_slug,
+        document__series__collection__owner__short_name=short_name,
+    )
+
+    if page.words.exists():
+        # HTMX's polling trigger will stop polling when it receives status code 286
+        context = {"words": page.words.all()}
+        return render(
+            request, "biblios/components/forms/text_display.html", context, status=286
+        )
+    else:
+        # If the text blocks don't exist yet, return 204 No Content
+        # Or whatever HTML should get swapped in while extraction is running
+        return HttpResponse(status=204)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST"])
+def update_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Update a TextBlock's text and set confidence to 99.999"""
+    try:
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+
+        # Update the word text and confidence
+        new_text = request.POST.get("text", "").strip()
+        if new_text:
+            word.text = new_text
+            word.confidence = 99.999
+            word.save(update_fields=["text", "confidence"])
+
+            return JsonResponse(
+                {
+                    "id": word.id,
+                    "text": word.text,
+                    "confidence": float(word.confidence),
+                    "confidence_level": word.confidence_level,
+                    "suggestions": dict(word.suggestions)
+                    if isinstance(word.suggestions, list)
+                    else word.suggestions,
+                }
+            )
+        else:
+            return JsonResponse({"error": "Text cannot be empty"}, status=400)
+
+    except Exception as e:
+        logger.error(f"Error updating word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to update word"}, status=500)

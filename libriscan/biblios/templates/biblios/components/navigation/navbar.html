@@ -2,8 +2,15 @@
 
 <div class="navbar bg-base-100">
   <!-- Brand -->
-  <div class="flex-1">
+  <div class="flex-none">
     <a href="{% url 'index' %}" class="text-xl font-semibold">LibriScan</a>
+  </div>
+
+  <!-- Center: welcome message (centered) -->
+  <div class="flex-1 flex items-center justify-center">
+    {% if user.is_authenticated %}
+      <p class="font-semibold text-base-content/80 text-sm md:text-base">Welcome, {{ user.get_full_name|default:user.username }}! 👋</p>
+    {% endif %}
   </div>
 
   <!-- Navigation Links -->
@@ -25,16 +32,30 @@
     <ul class="menu menu-horizontal px-1">
       <li><a href="{% url 'index' %}" class="hover:bg-base-200">Home</a></li>
       <li><a href="{% url 'organization-list' %}" class="hover:bg-base-200">Organizations</a></li>
-      <li><a href="#" class="hover:bg-base-200">Search</a></li>
+      <li>
+        <div class="tooltip tooltip-bottom" data-tip="Feature under development">
+          <a href="#" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Search</a>
+        </div>
+      </li>
       <li>
         {% if user.is_authenticated %}
-        <a href="#" onclick="document.getElementById('logout-form').submit();" class="hover:bg-base-200">Logout</a>
+        <a href="#" onclick="document.getElementById('logout-form').submit();" class="hover:bg-base-200 inline-flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+          </svg>
+          <span>Logout</span>
+        </a>
         <form id="logout-form" method="post" action="/account/logout/" class="hidden">
           {% csrf_token %}
           <input type="hidden" name="next" value="{% url 'index' %}">
         </form>
         {% else %}
-        <a href="/login">Login</a>
+        <a href="/login" class="hover:bg-base-200 inline-flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+          </svg>
+          <span>Login</span>
+        </a>
         {% endif %}
       </li>
     </ul>

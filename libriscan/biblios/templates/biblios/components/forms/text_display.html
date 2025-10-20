@@ -1,4 +1,6 @@
 {% load static %}
+<!-- Text Display Component Template -->
+<!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
 <div class="card bg-base-100 shadow-sm h-full">
   <div class="card-body p-0">
@@ -13,17 +15,41 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <div class="flex flex-wrap gap-4 p-4">
+          <div class="h-[45vh] overflow-y-auto">
+            <div class="flex flex-wrap">
             {% if words %}
               {% for word in words %}
-                <span>{{ word }}</span>
+                <!-- Word block with confidence indicators -->
+                <button 
+                  class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
+                         {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
+                  data-word-id="{{ word.id }}"
+                  data-word-text="{{ word.text }}"
+                  data-word-confidence="{{ word.confidence }}"
+                  data-word-confidence-level="{{ word.confidence_level }}"
+                  data-word-line="{{ word.line }}"
+                  data-word-number="{{ word.number }}"
+                  data-word-type="{{ word.text_type }}"
+                  data-word-print-control="{{ word.print_control }}"
+                  data-word-extraction-id="{{ word.extraction_id }}"
+                  data-word-geo-x0="{{ word.geo_x_0 }}"
+                  data-word-geo-y0="{{ word.geo_y_0 }}"
+                  data-word-geo-x1="{{ word.geo_x_1 }}"
+                  data-word-geo-y1="{{ word.geo_y_1 }}"
+                  data-word-suggestions="{{ word.suggestions|safe }}"
+                  title="Click to view details">
+                  {{ word.text }}
+                  {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}
+                    <div aria-label="status" class="status status-primary accepted-status"></div>
+                  {% endif %}
+                </button>
               {% endfor %}
             {% else %}
               <p class="text-base-content/60">No text extracted yet.</p>
             {% endif %}
+            </div>
           </div>
-          <div id="wordContainer" class="flex flex-wrap gap-4 p-4"></div>
-          {% include 'biblios/components/forms/word_details.html' %}
+          {% include 'biblios/components/forms/word_details.html' with words=words %}
         </div>
       </div>
 
@@ -36,11 +62,7 @@
         Formatted
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
-        <div class="prose">
-          <h3>Document Title</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <blockquote>Ut enim ad minim veniam, quis nostrud exercitation.</blockquote>
-        </div>
+        {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
       </div>
 
       <!-- Metadata Tab -->
@@ -63,58 +85,3 @@
     </div>
   </div>
 </div>
-
-<script>
-let wordData = null;
-let activeButton = null;
-
-// TODO: Remove after fetch is implemented
-// Load word data from JSON file
-fetch('{% static "js/word-data.json" %}')
-  .then(response => response.json())
-  .then(data => {
-    wordData = data;
-    renderWords();
-  })
-  .catch(error => console.error('Error loading word data:', error));
-
-function getConfidenceClass(confidence) {
-  if (confidence >= 90) return 'btn-outline';
-  if (confidence < 50) return 'btn-outline btn-error';
-  if (confidence < 80) return 'btn-outline btn-warning';
-  return 'btn-outline btn-primary';
-}
-
-function renderWords() {
-  const container = document.getElementById('wordContainer');
-  wordData.words.forEach(wordInfo => {
-    const button = document.createElement('button');
-    button.className = `btn ${getConfidenceClass(wordInfo.confidence)} px-6`;
-    button.textContent = wordInfo.word;
-    button.onclick = () => handleWordClick(wordInfo, button);
-    container.appendChild(button);
-  });
-}
-
-function handleWordClick(wordInfo, button) {
-  // Remove active state and restore outline to previous button
-  if (activeButton) {
-    activeButton.classList.remove('btn-active');
-    // Add outline back to previous button
-    if (activeButton.confidence >= 90) activeButton.classList.add('btn-outline');
-    else if (activeButton.confidence < 80) activeButton.classList.add('btn-outline', 'btn-warning');
-    else if (activeButton.confidence < 50) activeButton.classList.add('btn-outline', 'btn-error');
-    else activeButton.classList.add('btn-outline', 'btn-primary');
-  }
-  
-  // Remove outline from clicked button
-  button.classList.remove('btn-outline');
-  activeButton = button;
-  activeButton.confidence = wordInfo.confidence; // Store confidence for later use
-
-  // Dispatch event for word details component
-  document.dispatchEvent(new CustomEvent('wordSelected', {
-    detail: wordInfo
-  }));
-}
-</script>

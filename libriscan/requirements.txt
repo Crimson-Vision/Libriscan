@@ -1,4 +1,4 @@
-boto3==1.40.40
+boto3==1.40.50
 Django==5.2.7
 django_localflavor==5.0
 Pillow==11.3.0
@@ -8,4 +8,6 @@ rules==3.5
 gunicorn==23.0.0
 whitenoise==6.11.0
 pyspellchecker==0.8.3
-pymupdf==1.26.4
+pymupdf==1.26.5
+django-_simple_history==3.10.1
+huey==2.5.3

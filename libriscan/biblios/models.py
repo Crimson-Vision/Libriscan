@@ -1,3 +1,5 @@
+import logging
+
 import rules
 from rules.contrib.models import RulesModelMixin, RulesModelBase
 
@@ -5,6 +7,7 @@ from django.db import models
 from django.urls import reverse
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -12,8 +15,13 @@ from django.utils.translation import gettext_lazy as _
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
 
+from simple_history.models import HistoricalRecords
+
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
 from biblios.managers import CustomUserManager
+from biblios.tasks import queue_extraction
+
+logger = logging.getLogger(__name__)
 
 
 # Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
@@ -22,6 +30,7 @@ class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    history = HistoricalRecords()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -45,6 +54,8 @@ class Organization(BibliosModel):
     short_name = models.SlugField(max_length=10)
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
+    primary = models.BooleanField(default=False)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -60,9 +71,23 @@ class Organization(BibliosModel):
     def __str__(self):
         return self.name
 
+    def clean(self, *args, **kwargs):
+        # If this instance is set as primary, confirm there are no others already
+        if self.primary and (prim_org := Organization.get_primary()):
+            # But it's not a problem if this already *is* the primary
+            if self is not prim_org:
+                raise ValidationError(
+                    "There can be only one primary organization at a time."
+                )
+        super().clean(*args, **kwargs)
+
     def get_absolute_url(self):
         keys = {"short_name": self.short_name}
         return reverse("organization", kwargs=keys)
+
+    def get_primary():
+        """Return the primary organization"""
+        return Organization.objects.filter(primary=True).first()
 
 
 class CloudService(models.Model):
@@ -74,29 +99,16 @@ class CloudService(models.Model):
     service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
     client_id = models.CharField(max_length=100)
     client_secret = models.CharField(max_length=100)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.SERVICE_CHOICES[self.service]
 
-    def get_extractor(self, page):
+    @cached_property
+    def extractor(self):
         from .services.extractors import EXTRACTORS
 
-        return EXTRACTORS[self.service](page)
-
-
-class Consortium(BibliosModel):
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
-
-# Using a through model for consortium membership, since there's probably additional info useful for us to track
-class Membership(BibliosModel):
-    pk = models.CompositePrimaryKey("organization_id", "consortium_id")
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    consortium = models.ForeignKey(Consortium, on_delete=models.CASCADE)
+        return EXTRACTORS[self.service]
 
 
 class Collection(BibliosModel):
@@ -105,6 +117,7 @@ class Collection(BibliosModel):
     )
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -131,6 +144,7 @@ class Series(BibliosModel):
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     slug = models.SlugField(max_length=50)
+    history = HistoricalRecords()
 
     class Meta:
         rules_permissions = {
@@ -158,10 +172,24 @@ class Series(BibliosModel):
 
 
 class Document(BibliosModel):
+    NEW = "N"
+    IN_PROGRESS = "I"
+    REVIEW = "R"
+    APPROVED = "A"
+    STATUS_CHOICES = {
+        NEW: "New",
+        IN_PROGRESS: "In Progress",
+        REVIEW: "Ready for Review",
+        APPROVED: "Approved",
+    }
+
     series = models.ForeignKey(
         Series, on_delete=models.CASCADE, related_name="documents"
     )
     identifier = models.SlugField(max_length=25)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
+    published_url = models.URLField(blank=True)
+    history = HistoricalRecords()
 
     # Spelling suggestion rules
     use_long_s_detection = models.BooleanField(default=True)
@@ -180,8 +208,25 @@ class Document(BibliosModel):
             "delete": is_org_editor,
         }
 
+    @property
+    def can_export(self):
+        """Checks if the document has at least one page with extracted text."""
+        return TextBlock.objects.filter(
+            page__document=self, print_control=TextBlock.INCLUDE
+        ).exists()
+
     def __str__(self):
         return self.identifier
+
+    def save(self, *args, **kwargs):
+        """Save the document, and create its metadata record if necessary."""
+        s = super(Document, self).save(*args, **kwargs)
+        try:
+            m = self.metadata
+        except Document.metadata.RelatedObjectDoesNotExist:
+            m = DublinCoreMetadata.objects.create(document=self)
+            m.save()
+        return s
 
     def get_absolute_url(self):
         keys = {
@@ -211,6 +256,65 @@ class Document(BibliosModel):
 
         return export_text(self)
 
+    def export_xml(self):
+        """
+        Provides an XML file of the document's metadata.
+        """
+        from biblios.services.exporters import export_metadata_dc
+
+        return export_metadata_dc(self)
+
+
+# An implementation of Dublin Core metadata:
+# https://www.dublincore.org/specifications/dublin-core/dcmi-terms/
+class DublinCoreMetadata(BibliosModel):
+    FIELDS = (
+        "title",
+        "description",
+        "creator",
+        "subject",
+        "publisher",
+        "contributor",
+        "date",
+        "type",
+        "format",
+        "identifier",
+        "source",
+        "language",
+        "relation",
+        "coverage",
+        "rights",
+    )
+    document = models.OneToOneField(
+        Document, on_delete=models.CASCADE, related_name="metadata"
+    )
+    title = models.JSONField(blank=True, default=list)
+    description = models.JSONField(blank=True, default=list)
+    creator = models.JSONField(blank=True, default=list)
+    subject = models.JSONField(blank=True, default=list)
+    publisher = models.JSONField(blank=True, default=list)
+    contributor = models.JSONField(blank=True, default=list)
+    date = models.JSONField(blank=True, default=list)
+    type = models.JSONField(blank=True, default=list)
+    format = models.JSONField(blank=True, default=list)
+    identifier = models.JSONField(blank=True, default=list)
+    source = models.JSONField(blank=True, default=list)
+    language = models.JSONField(blank=True, default=list)
+    relation = models.JSONField(blank=True, default=list)
+    coverage = models.JSONField(blank=True, default=list)
+    rights = models.JSONField(blank=True, default=list)
+
+    class Meta:
+        rules_permissions = {
+            "add": is_org_editor,
+            "view": is_org_viewer,
+            "change": is_org_editor,
+            "delete": is_org_editor,
+        }
+
+    def __str__(self):
+        return f"{self.document} Metadata"
+
 
 class Page(BibliosModel):
     document = models.ForeignKey(
@@ -218,6 +322,7 @@ class Page(BibliosModel):
     )
     number = models.SmallIntegerField(default=1)
     image = models.ImageField(blank=True, upload_to="pages")
+    history = HistoricalRecords()
 
     class Meta:
         constraints = [
@@ -229,6 +334,7 @@ class Page(BibliosModel):
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        ordering = ["number"]
 
     def __str__(self):
         return f"{self.document} page {self.number}"
@@ -243,8 +349,23 @@ class Page(BibliosModel):
         return reverse("page", kwargs=keys)
 
     @property
+    def can_extract(self):
+        return (
+            not self.has_extraction
+            and CloudService.objects.filter(
+                organization=self.document.series.collection.owner
+            ).exists()
+        )
+
+    @property
     def has_extraction(self):
         return self.words.exists()
+
+    # Hand off this work to the Huey background task
+    def generate_extraction(self):
+        extractor = self.document.series.collection.owner.cloudservice.extractor
+        q = queue_extraction(extractor(self))
+        logger.info(f"Queuing {q}")
 
 
 class TextBlock(BibliosModel):
@@ -261,20 +382,29 @@ class TextBlock(BibliosModel):
         OMIT: "Omit",
     }
 
+    # Confidence level thresholds
+    CONF_ACCEPTED = 99.999
+    CONF_HIGH = 90.0
+    CONF_MEDIUM = 80.0
+    CONF_LOW = 50.0
+    CONF_NONE = 0.0
+
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="words")
 
     # Extraction ID refers to a single element on the page that is identified as a text block.
     extraction_id = models.CharField(max_length=50, blank=True)
 
-    # As the text contained in the text block changes, the sequence increments to track a version history
-    sequence = models.SmallIntegerField(default=1)
-
     text = models.CharField(max_length=255)
     text_type = models.CharField(max_length=1, choices=TEXT_TYPE_CHOICES)
+
+    # The word's position on the page: line, and word number on that line
+    line = models.IntegerField()
+    number = models.IntegerField()
+
     confidence = models.DecimalField(
         max_digits=5,
         decimal_places=3,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        validators=[MinValueValidator(0), MaxValueValidator(CONF_ACCEPTED)],
     )
 
     # Controls whether this word should be included from document exports.
@@ -309,23 +439,16 @@ class TextBlock(BibliosModel):
     )
 
     suggestions = models.JSONField(blank=True, default=dict)
+    history = HistoricalRecords()
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["page", "extraction_id", "sequence"],
-                name="unique_textblock_sequence",
-            )
-        ]
-        indexes = [
-            models.Index(fields=["geo_x_0", "geo_y_0"]),
-        ]
         rules_permissions = {
             "add": is_org_editor,
             "view": is_org_viewer,
             "change": is_org_editor,
             "delete": is_org_editor,
         }
+        ordering = ["line", "number"]
 
     def __str__(self):
         return self.text
@@ -338,6 +461,7 @@ class TextBlock(BibliosModel):
 
     def save(self, **kwargs):
         """Generate spellcheck suggestions on save"""
+
         self.suggestions = self.__get_suggestions__()
         # In case the word text has been specified as an update_field, include the suggestions too
         if (
@@ -346,16 +470,16 @@ class TextBlock(BibliosModel):
             kwargs["update_fields"] = {"suggestions"}.union(update_fields)
         super().save(**kwargs)
 
-    @cached_property
+    @property
     def confidence_level(self):
         """Provides a scale rating of the word's confidence level"""
-        if self.confidence >= 99.9:
+        if self.confidence >= TextBlock.CONF_ACCEPTED:
             return "accepted"
-        elif self.confidence >= 90:
+        elif self.confidence >= TextBlock.CONF_HIGH:
             return "high"
-        elif self.confidence >= 80:
+        elif self.confidence >= TextBlock.CONF_MEDIUM:
             return "medium"
-        elif self.confidence >= 50:
+        elif self.confidence >= TextBlock.CONF_LOW:
             return "low"
         else:
             return "none"
@@ -371,6 +495,7 @@ class UserRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+    history = HistoricalRecords()
 
     class Meta:
         constraints = [

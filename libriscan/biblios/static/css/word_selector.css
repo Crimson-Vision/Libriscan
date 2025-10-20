@@ -1,0 +1,53 @@
+/* Confidence level indicators */
+.word-block.confidence-medium {
+  border-bottom: 2px dotted #ffd700; /* Yellow dotted underline */
+}
+
+.word-block.confidence-low,
+.word-block.confidence-none {
+  border-bottom: 3px dashed #ff0000; /* Red dashed underline, thicker for low confidence */
+}
+
+/* Active word button: lightweight, matches DaisyUI 'info' look */
+.btn-active {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .375rem .75rem;
+  border-radius: .375rem;
+  font-weight: 500;
+  background: #0ea5e9;
+  color: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter .12s, box-shadow .12s;
+}
+
+.btn-active:hover { filter: brightness(.95); }
+.btn-active:focus { outline: 2px solid rgba(14,165,233,.25); outline-offset: 2px; }
+
+/* Dark theme tweak */
+[data-theme="dark"] .btn-active {
+  background: #1fb6ff;
+  color: #0f172a;
+  border-color: rgba(255,255,255,.08);
+}
+
+@media (prefers-contrast: more) {
+  .btn-active { box-shadow: 0 1px 0 rgba(0,0,0,.2); }
+  [data-theme="dark"] .btn-active { box-shadow: 0 1px 0 rgba(255,255,255,.08); }
+}
+
+/* Accepted status indicator positioning */
+.accepted-status {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 10;
+}
+
+/* Ensure parent button has relative positioning */
+.word-block {
+  position: relative;
+}

@@ -1,7 +1,7 @@
 {% extends "biblios/base.html" %}
 {% block content %}
     <!-- Breadcrumb Navigation with Icons -->
-    <nav class="mb-6 text-sm breadcrumbs">
+    <nav class="mb-3 text-sm breadcrumbs">
       <ul>
         <li>
           <a href="{{ collection.owner.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
@@ -48,7 +48,7 @@
           {% endfor %}
         </ul>
         <div class="mt-4 flex justify-end">
-          <a href="{% url 'document_create' collection.owner.short_name collection.slug %}" class="btn btn-primary btn-md">Add New Series</a>
+          <a href="{% url 'series_create' collection.owner.short_name collection.slug %}" class="btn btn-primary btn-md">Add New Series</a>
         </div>
       </div>
     </div>

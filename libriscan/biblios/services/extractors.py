@@ -1,9 +1,10 @@
 import json
-from django.http import HttpResponse
-from PIL import Image
+import logging
 
 from biblios.models import CloudService, TextBlock
 from biblios.services.suggestions import generate_suggestions
+
+logger = logging.getLogger(__name__)
 
 
 class BaseExtractor(object):
@@ -19,7 +20,6 @@ class BaseExtractor(object):
     service = None
 
     def __init__(self, page):
-        self.image = None
         self.page = page
 
     def __str__(self):
@@ -30,12 +30,31 @@ class BaseExtractor(object):
 
     def __filter__(self, res):
         """
-        Method to remove non-word items from the extraction response.
-        `res` is a list from json.loads(), and this method should return a subset of items from it
+        Method to split word and non-word items from the extraction response.
+        `res` is a list from json.loads().
+        This method should return three subsets of items from it: words, lines, and then the remainder
         """
-        return res
+        words = res
+        lines = []
+        others = []
+        return words, lines, others
 
+    def _process_lines__(self, lines):
+        return lines
+
+    def __process_others__(self, others):
+        return others
+
+    def __generate_line_numbers__(self, lines):
+        return [
+            0,
+        ]
+
+    # Override this method with specifics about how to translate an extraction service's response to a TextBlock
     def __create_text_block__(self, word):
+        """Generate a text block for cleaning."""
+
+        # Note that this method gets called indirectly via check_text
         return {
             "extraction_id": None,
             "text": word,
@@ -48,57 +67,41 @@ class BaseExtractor(object):
             "geo_y_1": None,
         }
 
-    # Ideally, don't override this
+    # Don't override this; it has safety checks to keep invalid textblocks from being loaded
+    def create_block(self, word):
+        """Safely extracting a text block."""
+
+        textblock = self.__create_text_block__(word)
+
+        # A confidence score of exactly 100 causes a decimal.InvalidOperation error.
+        # Cap it to the "accepted" level.
+        textblock.confidence = min(textblock.confidence, TextBlock.CONF_ACCEPTED)
+
+        # If the text reaches the exact edge of the image, that causes a decimal.InvalidOperation error.
+        # Nudge it in just slightly.
+        for coord in ("geo_x_0", "geo_y_0", "geo_x_1", "geo_y_1"):
+            c = getattr(textblock, coord)
+            setattr(textblock, coord, max(c, 0.000000000000001))
+            setattr(textblock, coord, min(c, 0.999999999999999))
+
+        return textblock
+
+    # Ideally, don't override this.
+    # This can take a while because of the spellchecking. Best to call it through tasks.queue_extraction().
     def get_words(self):
+        logger.info(f"Extracting {self.page} with {self.service}")
         response = self.__get_extraction__()
-        words = [self.__create_text_block__(w) for w in self.__filter__(response)]
+
+        words, lines, others = self.__filter__(response)
+        self.lines = self.__process_lines__(lines)
+        self.others = self.__process_others__(others)
+        self.line_numbers = self.__generate_line_numbers__(self.lines)
+
+        words = [self.create_block(w) for w in words]
 
         TextBlock.objects.bulk_create(words)
 
         return words
-
-    def process_image(self, image):
-        try:
-            image = Image.open(image)
-        except OSError as e:
-            return HttpResponse(f"Error: {e}", status=400)
-        except Exception as e:
-            return HttpResponse(f"Something went wrong: {e}", status=500)
-        else:
-            self.image = image
-            return HttpResponse("Image saved", status=200)
-
-
-class TestExtractor(BaseExtractor):
-    service = "Test Service"
-
-    def __get_extraction__(self):
-        with open("biblios/tests/textract_response.json") as j:
-            response = json.load(j)
-        return response["Blocks"]
-
-    def __create_text_block__(self, word):
-        text_type = (
-            TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
-        )
-        return TextBlock(
-            extraction_id=word["Id"],
-            page=self.page,
-            text=word["Text"],
-            text_type=text_type,
-            confidence=word["Confidence"],
-            # TextBlock does this on save(), but the bulk create process bypasses its method override
-            suggestions=generate_suggestions(
-                word["Text"], self.page.document.use_long_s_detection
-            ),
-            geo_x_0=word["Geometry"]["Polygon"][0]["X"],
-            geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
-            geo_x_1=word["Geometry"]["Polygon"][2]["X"],
-            geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
-        )
-
-    def __filter__(self, res):
-        return [r for r in res if r["BlockType"] == "WORD"]
 
 
 class AWSExtractor(BaseExtractor):
@@ -108,7 +111,6 @@ class AWSExtractor(BaseExtractor):
         import boto3
 
         service = self.page.document.series.collection.owner.cloudservice
-
         client = boto3.client(
             "textract",
             region_name="us-east-1",
@@ -119,29 +121,68 @@ class AWSExtractor(BaseExtractor):
         # Get the bytes of the page image to send to Textract
         image = self.page.image.file.file.read()
 
+        logger.info("Submitting Textract request")
+
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/textract/client/detect_document_text.html
         extracted_page = client.detect_document_text(Document={"Bytes": image})
 
+        logger.info("Textract response received")
         return extracted_page["Blocks"]
 
     def __filter__(self, res):
         """
         Filter the Textract response to just word blocks.
         """
-        return [r for r in res if r["BlockType"] == "WORD"]
+        words = []
+        lines = []
+        others = []
+        for block in res:
+            if block["BlockType"] == "WORD":
+                words.append(block)
+            elif block["BlockType"] == "LINE":
+                lines.append(block)
+            else:
+                others.append(block)
+
+        return words, lines, others
+
+    def __process_lines__(self, lines):
+        relationships = {}
+        for block in lines:
+            # For lines, record each child as a key in that dict.
+            # Using the line's top point and its index as the value gives us sortability.
+            # All lines *should* have Relationships but it's not clear whether that's a guarantee.
+            rel = block.get("Relationships", [])
+            top = block["Geometry"]["BoundingBox"]["Top"]
+            children = rel.pop()
+            for child in children["Ids"]:
+                relationships[child] = (top, children["Ids"].index(child))
+        return relationships
+
+    def __generate_line_numbers__(self, lines):
+        numbers = []
+        for line in lines.values():
+            if line[0] not in numbers:
+                numbers.append(line[0])
+        numbers.sort()
+        return numbers
 
     def __create_text_block__(self, word):
         text_type = (
             TextBlock.PRINTED if word["Text"] == "PRINTED" else TextBlock.HANDWRITING
         )
 
+        position = self.lines[word["Id"]]
+
         return TextBlock(
             extraction_id=word["Id"],
             page=self.page,
             text=word["Text"],
             text_type=text_type,
+            line=self.line_numbers.index(position[0]),
+            number=position[1],
             confidence=word["Confidence"],
-            # TextBlock does this on save(), but the bulk create process bypasses its method override
+            # TextBlock does this on save(), but the bulk create process bypasses that
             suggestions=generate_suggestions(
                 word["Text"], self.page.document.use_long_s_detection
             ),
@@ -150,6 +191,15 @@ class AWSExtractor(BaseExtractor):
             geo_x_1=word["Geometry"]["Polygon"][2]["X"],
             geo_y_1=word["Geometry"]["Polygon"][2]["Y"],
         )
+
+
+class TestExtractor(AWSExtractor):
+    service = "Dummy Service"
+
+    def __get_extraction__(self):
+        with open("biblios/tests/textract_response.json") as j:
+            response = json.load(j)
+        return response["Blocks"]
 
 
 EXTRACTORS = {CloudService.TEST: TestExtractor, CloudService.AWS: AWSExtractor}

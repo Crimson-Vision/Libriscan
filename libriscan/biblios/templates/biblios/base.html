@@ -1,4 +1,5 @@
 {% load django_htmx %}
+{% load static %}
 <!doctype html>
 <html lang="en-US" data-theme="light" id="html-root">
 
@@ -16,6 +17,14 @@
   <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
   <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
   <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+  
+  <!-- OpenSeadragon Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+  
+  <!-- Application CSS -->
+  <link rel="stylesheet" href="{% static 'css/openseadragon-viewer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/word_selector.css' %}">
+  <link rel="stylesheet" href="{% static 'css/word_details.css' %}">
   
   <!-- Theme Toggle Script -->
   <script>
@@ -47,11 +56,6 @@
   <!-- Navigation -->
   {% include "biblios/components/navigation/navbar.html" %}
 
-  <!-- Hero Section -->
-  {% block hero %}
-    {% include "biblios/components/layout/hero_section.html" %}
-  {% endblock hero %}
-
   <!-- Main Content -->
   <main class="container mx-auto px-4 flex-grow">
     {% block content %}{% endblock content %}
@@ -63,6 +67,12 @@
       <p>Copyright © 2025 - All rights reserved by LibriScan</p>
     </div>
   </footer>
+
+  <!-- Application JavaScript -->
+  <script src="{% static 'js/utils.js' %}"></script>
+  <script src="{% static 'js/openseadragon-viewer.js' %}"></script>
+  <script src="{% static 'js/word_selector.js' %}"></script>
+  <script src="{% static 'js/word_details.js' %}"></script>
 </body>
 
 </html>

@@ -24,19 +24,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOCAL_DIR = BASE_DIR / "mnt"
 
 # Load env variables from the .env file in the mounted directory
-load_dotenv(dotenv_path=LOCAL_DIR / '.env')
+load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", False)
+DEBUG = os.environ.get("LB_DEBUG", False)
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_TRUSTED_ORIGINS", "http://localhost").split(",")
+ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
+    ","
+)
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
 
@@ -52,7 +54,9 @@ INSTALLED_APPS = [
     "biblios",
     "localflavor",
     "django_htmx",
+    "huey.contrib.djhuey",
     "rules",
+    "simple_history",
 ]
 
 MIDDLEWARE = [
@@ -60,7 +64,9 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -86,6 +92,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "libriscan.wsgi.application"
 
+
+# Email Settings
+# Not all of these are necessarily required, depending on your SMPT setup.
+EMAIL_HOST = os.environ.get("LB_EMAIL_HOST", None)
+EMAIL_PORT = os.environ.get("LB_EMAIL_PORT", None)
+EMAIL_HOST_USER = os.environ.get("LB_EMAIL_HOST_USER", None)
+EMAIL_HOST_PASSWORD = os.environ.get("LB_EMAIL_HOST_PASSWORD", None)
+EMAIL_USE_TLS = os.environ.get("LB_EMAIL_USE_TLS", None)
+EMAIL_USE_SSL = os.environ.get("LB_EMAIL_USE_SSL", None)
+EMAIL_TIMEOUT = os.environ.get("LB_EMAIL_TIMEOUT", None)
+# If these are used, they should be file paths
+EMAIL_SSL_KEYFILE = os.environ.get("LB_EMAIL_SSL_KEYFILE", None)
+EMAIL_SSL_CERTFILE = os.environ.get("LB_EMAIL_CERTFILE", None)
+
+DEFAULT_FROM_EMAIL = os.environ.get("LB_DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -162,6 +183,14 @@ LOGGING = {
             "propagate": True,
         },
     },
+}
+
+# Task queuing
+HUEY = {
+    "name": "libriscan",
+    "huey_class": "huey.SqliteHuey",
+    "filename": LOCAL_DIR / "task_queue.db",
+    "immediate": False,
 }
 
 
