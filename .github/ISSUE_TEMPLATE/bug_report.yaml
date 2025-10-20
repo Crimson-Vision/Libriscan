@@ -51,26 +51,16 @@ body:
         - Safari
         - Microsoft Edge
   - type: textarea
-    id: environment
+    id: details
     attributes:
-      label: Environment Details
-      description: Provide details about your setup (e.g., OS, Python version, database, deployment type).
+      label: Environment Details, Logs, Context, etc.
+      description: Provide any additional details you have.
       placeholder: |
         - Operating System: [e.g., macOS Ventura]
         - Python Version: [e.g., 3.8]
         - Database: [e.g., SQLite]
         - Deployment: [e.g., Local, AWS EC2, Docker]
+        - Logs: Paste any relevant logs or error messages (e.g., Django errors, AWS Textract output).
+        - Additional details: Any other details, such as specific workflows (e.g., OCR/HTR, metadata extraction) or recent system changes?
     validations:
       required: true
-  - type: textarea
-    id: logs
-    attributes:
-      label: Relevant Log Output
-      description: Paste any relevant logs or error messages (e.g., Django errors, AWS Textract output). These will be formatted as code automatically.
-      render: shell
-  - type: textarea
-    id: additional-context
-    attributes:
-      label: Additional Context
-      description: Any other details, such as specific workflows (e.g., OCR/HTR, metadata extraction) or recent system changes?
-      placeholder: e.g., This issue occurs when processing handwritten deeds with AWS Textract.

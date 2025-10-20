@@ -395,11 +395,11 @@ def extract_text(request, short_name, collection_slug, identifier, number):
 
     # Prepare context with URL parameters for the loading template
     context = {
-        'short_name': short_name,
-        'collection_slug': collection_slug,
-        'identifier': identifier,
-        'number': number,
-        'owner': page.document.series.collection.owner,
+        "short_name": short_name,
+        "collection_slug": collection_slug,
+        "identifier": identifier,
+        "number": number,
+        "owner": page.document.series.collection.owner,
     }
 
     # Return the loading template immediately
@@ -495,24 +495,28 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
             page__document__series__collection__slug=collection_slug,
             page__document__series__collection__owner__short_name=short_name,
         )
-        
+
         # Update the word text and confidence
-        new_text = request.POST.get('text', '').strip()
+        new_text = request.POST.get("text", "").strip()
         if new_text:
             word.text = new_text
             word.confidence = 99.999
-            word.save(update_fields=['text', 'confidence'])
-            
-            return JsonResponse({
-                'id': word.id,
-                'text': word.text,
-                'confidence': float(word.confidence),
-                'confidence_level': word.confidence_level,
-                'suggestions': dict(word.suggestions) if isinstance(word.suggestions, list) else word.suggestions
-            })
+            word.save(update_fields=["text", "confidence"])
+
+            return JsonResponse(
+                {
+                    "id": word.id,
+                    "text": word.text,
+                    "confidence": float(word.confidence),
+                    "confidence_level": word.confidence_level,
+                    "suggestions": dict(word.suggestions)
+                    if isinstance(word.suggestions, list)
+                    else word.suggestions,
+                }
+            )
         else:
-            return JsonResponse({'error': 'Text cannot be empty'}, status=400)
-            
+            return JsonResponse({"error": "Text cannot be empty"}, status=400)
+
     except Exception as e:
         logger.error(f"Error updating word {word_id}: {e}")
-        return JsonResponse({'error': 'Failed to update word'}, status=500)
+        return JsonResponse({"error": "Failed to update word"}, status=500)
