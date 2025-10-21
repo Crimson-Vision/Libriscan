@@ -5,8 +5,9 @@ ARG PYTHON_VERSION="3.14"
 # Stage 1: Base build stage
 FROM python:${PYTHON_VERSION}-slim AS builder
 
-# Pull the Python version arg into this build stage
+# Pull the version args into this build stage
 ARG PYTHON_VERSION
+
 
 LABEL org.opencontainers.image.title="Libriscan"
 LABEL org.opencontainers.image.description="Libriscan helps extract and analyze text from historical documents."
@@ -14,8 +15,7 @@ LABEL org.opencontainers.image.source="https://github.com/crimson-vision/librisc
 LABEL org.opencontainers.image.url="https://github.com/crimson-vision/libriscan"
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.3 /uv /uvx /bin/
-
+COPY --from=ghcr.io/astral-sh/uv:0.9.5 /uv /uvx /bin/
 
 # Create the app directory
 RUN mkdir /app
