@@ -102,6 +102,10 @@ class BaseExtractor(object):
         self.others = self.__process_others__(others)
         self.line_numbers = self.__generate_line_numbers__(self.lines)
 
+        # Loop through the response words and create new text blocks for them.
+        # As we do this, generate spellcheck candidates for each unique word.
+        # This is currently case-sensitive and not aware of punctuation, and we can get
+        # bigger performance gains there with some more work.
         new_text = []
         for w in words:
             text = w.get(self.word_attr)
