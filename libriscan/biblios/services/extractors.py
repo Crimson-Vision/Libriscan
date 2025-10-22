@@ -4,7 +4,7 @@ import logging
 from biblios.models import CloudService, TextBlock
 from biblios.services.suggestions import generate_suggestions
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 class BaseExtractor(object):
@@ -19,8 +19,13 @@ class BaseExtractor(object):
 
     service = None
 
+    # Override this is your extractor service uses a different attribute for the TextBlock's text
+    word_attr = "Text"
+
     def __init__(self, page):
         self.page = page
+        self.distinct_words = set()
+        self.spelling_candidates = {}
 
     def __str__(self):
         return f"{self.service} Extractor"
@@ -68,8 +73,8 @@ class BaseExtractor(object):
         }
 
     # Don't override this; it has safety checks to keep invalid textblocks from being loaded
-    def create_block(self, word):
-        """Safely extracting a text block."""
+    def __create_block__(self, word):
+        """Safely extract a text block."""
 
         textblock = self.__create_text_block__(word)
 
@@ -97,9 +102,20 @@ class BaseExtractor(object):
         self.others = self.__process_others__(others)
         self.line_numbers = self.__generate_line_numbers__(self.lines)
 
-        words = [self.create_block(w) for w in words]
+        new_text = []
+        for w in words:
+            text = w.get(self.word_attr)
+            if text not in self.distinct_words:
+                self.distinct_words.add(text)
+                self.spelling_candidates[text] = generate_suggestions(
+                    text, self.page.document.use_long_s_detection
+                )
 
-        TextBlock.objects.bulk_create(words)
+            new_text.append(self.__create_block__(w))
+
+        logger.info(f"Found {len(self.distinct_words)} distinct words")
+
+        TextBlock.objects.bulk_create(new_text)
 
         return words
 
@@ -183,9 +199,7 @@ class AWSExtractor(BaseExtractor):
             number=position[1],
             confidence=word["Confidence"],
             # TextBlock does this on save(), but the bulk create process bypasses that
-            suggestions=generate_suggestions(
-                word["Text"], self.page.document.use_long_s_detection
-            ),
+            suggestions=self.spelling_candidates[word["Text"]],
             geo_x_0=word["Geometry"]["Polygon"][0]["X"],
             geo_y_0=word["Geometry"]["Polygon"][0]["Y"],
             geo_x_1=word["Geometry"]["Polygon"][2]["X"],
