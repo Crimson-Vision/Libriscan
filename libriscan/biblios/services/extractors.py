@@ -73,7 +73,7 @@ class BaseExtractor(object):
         }
 
     # Don't override this; it has safety checks to keep invalid textblocks from being loaded
-    def __create_block__(self, word):
+    def __clean_block__(self, word):
         """Safely extract a text block."""
 
         textblock = self.__create_text_block__(word)
@@ -115,13 +115,13 @@ class BaseExtractor(object):
                     text, self.page.document.use_long_s_detection
                 )
 
-            new_text.append(self.__create_block__(w))
+            new_text.append(self.__clean_block__(w))
 
         logger.info(f"Found {len(self.distinct_words)} distinct words")
 
         TextBlock.objects.bulk_create(new_text)
 
-        return words
+        return new_text
 
 
 class AWSExtractor(BaseExtractor):
