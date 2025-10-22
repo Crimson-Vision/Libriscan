@@ -33,7 +33,8 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("LB_DEBUG", False)
+# Default to DEBUG=False unless the LB_DEBUG environment variable is explicitly "True".
+DEBUG = os.environ.get("LB_DEBUG") == "True"
 
 ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
@@ -41,6 +42,11 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").
 )
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not DEBUG
+
+# This prevents the app from crashing for local development
+# while ensuring a key is required for production
+if DEBUG and not SECRET_KEY:
+    SECRET_KEY = "django-insecure-change-me-for-a-real-project"
 
 # Application definition
 
