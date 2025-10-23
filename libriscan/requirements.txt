@@ -1,4 +1,4 @@
-boto3==1.40.50
+boto3==1.40.57
 Django==5.2.7
 django_localflavor==5.0
 Pillow==11.3.0
