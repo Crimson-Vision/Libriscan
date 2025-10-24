@@ -100,6 +100,7 @@ class ConfidenceToggle {
     this.container = document.getElementById('word-container');
     if (!this.container) return; // Exit if container not found
     
+    this.toggleAll = document.getElementById('toggle-all');
     this.toggles = {
       high: document.getElementById('toggle-high'),
       medium: document.getElementById('toggle-medium'),
@@ -115,13 +116,22 @@ class ConfidenceToggle {
    * Attach event listeners to checkboxes
    */
   attachEventListeners() {
+    // Attach listeners to individual toggles
     Object.entries(this.toggles).forEach(([level, checkbox]) => {
       if (checkbox) {
         checkbox.addEventListener('change', () => {
           this.handleToggle(level, checkbox.checked);
+          this.updateToggleAllState();
         });
       }
     });
+    
+    // Attach listener to "All" toggle
+    if (this.toggleAll) {
+      this.toggleAll.addEventListener('change', () => {
+        this.handleToggleAll(this.toggleAll.checked);
+      });
+    }
   }
 
   /**
@@ -142,6 +152,33 @@ class ConfidenceToggle {
     
     // Log for debugging
     console.log(`Confidence toggle: ${level} = ${isVisible ? 'visible' : 'hidden'}`);
+  }
+
+  /**
+   * Handle "Toggle All" checkbox change
+   * @param {boolean} isChecked - Whether all should be visible or hidden
+   */
+  handleToggleAll(isChecked) {
+    Object.entries(this.toggles).forEach(([level, checkbox]) => {
+      if (checkbox && checkbox.checked !== isChecked) {
+        checkbox.checked = isChecked;
+        this.handleToggle(level, isChecked);
+      }
+    });
+    this.savePreferences();
+  }
+
+  /**
+   * Update "Toggle All" state based on individual toggles
+   */
+  updateToggleAllState() {
+    if (!this.toggleAll) return;
+    
+    const allChecked = Object.values(this.toggles).every(
+      checkbox => checkbox && checkbox.checked
+    );
+    
+    this.toggleAll.checked = allChecked;
   }
 
   /**
@@ -168,7 +205,10 @@ class ConfidenceToggle {
   loadPreferences() {
     try {
       const saved = localStorage.getItem('confidenceTogglePrefs');
-      if (!saved) return;
+      if (!saved) {
+        this.updateToggleAllState();
+        return;
+      }
       
       const preferences = JSON.parse(saved);
       
@@ -179,6 +219,9 @@ class ConfidenceToggle {
           this.handleToggle(level, isVisible);
         }
       });
+      
+      // Update "All" toggle state after loading preferences
+      this.updateToggleAllState();
     } catch (error) {
       console.warn('Failed to load confidence toggle preferences:', error);
     }
