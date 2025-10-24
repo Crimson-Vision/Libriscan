@@ -1,5 +1,7 @@
 import logging
 import os
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
@@ -11,6 +13,8 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+
+from huey.contrib.djhuey import HUEY as huey
 
 from rules.contrib.views import AutoPermissionRequiredMixin, permission_required
 
@@ -25,7 +29,7 @@ from .models import (
 )
 from .forms import FilePondUploadForm
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("django")
 
 
 # Most permissions in this app depend on Organization. This mixin overrides get_permission_object
@@ -364,6 +368,9 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         context["prev_page"] = prev_page
         context["next_page"] = next_page
 
+        # Get page extraction status
+        context["extracting"] = huey.get(f"extracting-{page.id}", peek=True)
+
         return context
 
     def get_object(self, **kwargs):
@@ -390,8 +397,15 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
-    # Start the extraction process in the background
-    page.generate_extraction()
+    if extract_time := huey.get(f"extracting-{page.id}", peek=True):
+        if datetime.today() - extract_time > timedelta(minutes=10):
+            logger.error(f"Extraction timed out for page {page.id}")
+            # Remove the page handle from the Huey store
+            huey.get(f"extracting-{page.id}")
+        logger.info(f"Extraction already in progress for page {page.id}")
+    else:
+        # Start the extraction process in the background
+        page.generate_extraction()
 
     # Prepare context with URL parameters for the loading template
     context = {
@@ -469,6 +483,8 @@ def check_words(request, short_name, collection_slug, identifier, number):
 
     if page.words.exists():
         # HTMX's polling trigger will stop polling when it receives status code 286
+        # Take the page's extraction handle out of Huey's result store
+        huey.get(f"extraction-{page.id}")
         context = {"words": page.words.all()}
         return render(
             request, "biblios/components/forms/text_display.html", context, status=286
@@ -500,7 +516,7 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
         new_text = request.POST.get("text", "").strip()
         if new_text:
             word.text = new_text
-            word.confidence = 99.999
+            word.confidence = TextBlock.CONF_ACCEPTED
             word.save(update_fields=["text", "confidence"])
 
             return JsonResponse(
