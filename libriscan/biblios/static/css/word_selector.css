@@ -113,23 +113,14 @@
   gap: 0.25rem;
 }
 
-/* Hide confidence levels when toggled off */
-.hide-confidence-high .word-block:not(.confidence-medium):not(.confidence-low):not(.confidence-none),
-.hide-confidence-medium .word-block.confidence-medium,
-.hide-confidence-low .word-block.confidence-low,
-.hide-confidence-low .word-block.confidence-none {
-  opacity: 0.3;
-  pointer-events: none;
-  filter: grayscale(1);
-}
-
+/* Remove confidence indicators when toggled off - words remain fully visible and interactive */
 .hide-confidence-medium .word-block.confidence-medium,
 .hide-confidence-low .word-block.confidence-low,
 .hide-confidence-low .word-block.confidence-none {
   border-bottom: none !important;
 }
 
-/* Hide accepted status indicators when toggled off */
+/* Hide accepted status badge when toggled off */
 .hide-confidence-accepted .accepted-status {
-  display: none;
+  display: none !important;
 }
