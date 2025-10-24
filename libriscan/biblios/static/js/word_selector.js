@@ -91,7 +91,102 @@ class WordSelector {
   }
 }
 
+/**
+ * Confidence Toggle Component
+ * Handles showing/hiding words based on confidence level
+ */
+class ConfidenceToggle {
+  constructor() {
+    this.container = document.getElementById('word-container');
+    if (!this.container) return; // Exit if container not found
+    
+    this.toggles = {
+      high: document.getElementById('toggle-high'),
+      medium: document.getElementById('toggle-medium'),
+      low: document.getElementById('toggle-low'),
+      modified: document.getElementById('toggle-modified')
+    };
+    
+    this.loadPreferences();
+    this.attachEventListeners();
+  }
+
+  /**
+   * Attach event listeners to checkboxes
+   */
+  attachEventListeners() {
+    Object.entries(this.toggles).forEach(([level, checkbox]) => {
+      if (checkbox) {
+        checkbox.addEventListener('change', () => {
+          this.handleToggle(level, checkbox.checked);
+        });
+      }
+    });
+  }
+
+  /**
+   * Handle toggle checkbox change
+   * @param {string} level - Confidence level (high, medium, low)
+   * @param {boolean} isVisible - Whether to show or hide words
+   */
+  handleToggle(level, isVisible) {
+    const className = `hide-confidence-${level}`;
+    
+    if (isVisible) {
+      this.container.classList.remove(className);
+    } else {
+      this.container.classList.add(className);
+    }
+    
+    this.savePreferences();
+    
+    // Log for debugging
+    console.log(`Confidence toggle: ${level} = ${isVisible ? 'visible' : 'hidden'}`);
+  }
+
+  /**
+   * Save toggle preferences to localStorage
+   */
+  savePreferences() {
+    const preferences = {
+      high: this.toggles.high?.checked ?? true,
+      medium: this.toggles.medium?.checked ?? true,
+      low: this.toggles.low?.checked ?? true,
+      modified: this.toggles.modified?.checked ?? true
+    };
+    
+    try {
+      localStorage.setItem('confidenceTogglePrefs', JSON.stringify(preferences));
+    } catch (error) {
+      console.warn('Failed to save confidence toggle preferences:', error);
+    }
+  }
+
+  /**
+   * Load toggle preferences from localStorage
+   */
+  loadPreferences() {
+    try {
+      const saved = localStorage.getItem('confidenceTogglePrefs');
+      if (!saved) return;
+      
+      const preferences = JSON.parse(saved);
+      
+      Object.entries(preferences).forEach(([level, isVisible]) => {
+        const checkbox = this.toggles[level];
+        if (checkbox) {
+          checkbox.checked = isVisible;
+          this.handleToggle(level, isVisible);
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to load confidence toggle preferences:', error);
+    }
+  }
+}
+
 // Initialize word selector when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   new WordSelector();
+  new ConfidenceToggle();
 });

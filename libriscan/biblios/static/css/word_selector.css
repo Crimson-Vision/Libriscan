@@ -51,3 +51,82 @@
 .word-block {
   position: relative;
 }
+
+/* Confidence Toggle Panel */
+.confidence-toggle-panel {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: oklch(var(--b2));
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Custom checkbox colors matching confidence indicators */
+.checkbox-confidence-high {
+  --chkbg: #10b981; /* Green for success/clean */
+  --chkfg: white;
+}
+
+.checkbox-confidence-medium {
+  --chkbg: #ffd700; /* Gold - matches confidence-medium */
+  --chkfg: #1f2937; /* Dark text for contrast */
+}
+
+.checkbox-confidence-low {
+  --chkbg: #ff0000; /* Red - matches confidence-low */
+  --chkfg: white;
+}
+
+.checkbox-confidence-modified {
+  --chkbg: #0ea5e9; /* Blue - matches badge-primary/status-primary */
+  --chkfg: white;
+}
+
+/* Styled label text for confidence levels */
+.confidence-label-high {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.confidence-label-medium {
+  color: #d4a017;
+  font-weight: 600;
+  border-bottom: 2px dotted #ffd700;
+  padding-bottom: 2px;
+}
+
+.confidence-label-low {
+  color: #ff0000;
+  font-weight: 600;
+  border-bottom: 3px dashed #ff0000;
+  padding-bottom: 2px;
+}
+
+.confidence-label-modified {
+  color: #0ea5e9;
+  font-weight: 600;
+}
+
+/* Hide confidence levels when toggled off */
+.hide-confidence-high .word-block:not(.confidence-medium):not(.confidence-low):not(.confidence-none),
+.hide-confidence-medium .word-block.confidence-medium,
+.hide-confidence-low .word-block.confidence-low,
+.hide-confidence-low .word-block.confidence-none {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.hide-confidence-medium .word-block.confidence-medium,
+.hide-confidence-low .word-block.confidence-low,
+.hide-confidence-low .word-block.confidence-none {
+  border-bottom: none !important;
+}
+
+/* Hide modified/accepted status indicators when toggled off */
+.hide-confidence-modified .accepted-status {
+  display: none;
+}
