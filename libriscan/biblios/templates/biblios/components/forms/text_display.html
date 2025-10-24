@@ -15,10 +15,10 @@
       </label>
       <div class="tab-content bg-base-100 border-base-300 p-6">
         <div class="prose">
-          <!-- Confidence Toggle Controls -->
+          <!-- Toggle Indicators Controls -->
           <div class="confidence-toggle-panel">
-            <span class="text-sm font-semibold text-base-content/70">Toggle Confidence Indicators:</span>
-            <!-- High Confidence Toggle -->
+            <span class="text-sm font-semibold text-base-content/70">Toggle Indicators:</span>
+            <!-- High Indicator Toggle -->
             <div class="form-control">
               <label class="label">
                 <input type="checkbox" 
@@ -51,14 +51,17 @@
               </label>
             </div>
             
-            <!-- Modified/Accepted Toggle -->
+            <!-- Accepted Toggle -->
             <div class="form-control">
               <label class="label">
                 <input type="checkbox" 
-                       class="checkbox checkbox-sm checkbox-confidence-modified" 
-                       id="toggle-modified" 
+                       class="checkbox checkbox-sm checkbox-confidence-accepted" 
+                       id="toggle-accepted" 
                        checked />
-                <span class="label-text ml-2 confidence-label-modified">Modified</span>
+                <span class="label-text ml-2 confidence-label-accepted">
+                  Accepted
+                  <div aria-label="status" class="status status-primary"></div>
+                </span>
               </label>
             </div>
           </div>

@@ -104,7 +104,7 @@ class ConfidenceToggle {
       high: document.getElementById('toggle-high'),
       medium: document.getElementById('toggle-medium'),
       low: document.getElementById('toggle-low'),
-      modified: document.getElementById('toggle-modified')
+      accepted: document.getElementById('toggle-accepted')
     };
     
     this.loadPreferences();
@@ -152,7 +152,7 @@ class ConfidenceToggle {
       high: this.toggles.high?.checked ?? true,
       medium: this.toggles.medium?.checked ?? true,
       low: this.toggles.low?.checked ?? true,
-      modified: this.toggles.modified?.checked ?? true
+      accepted: this.toggles.accepted?.checked ?? true
     };
     
     try {

@@ -80,9 +80,9 @@
   --chkfg: white;
 }
 
-.checkbox-confidence-modified {
-  --chkbg: #0ea5e9; /* Blue - matches badge-primary/status-primary */
-  --chkfg: white;
+.checkbox-confidence-accepted {
+  --chkbg: oklch(var(--p)); /* Primary color - matches badge-primary/status-primary */
+  --chkfg: oklch(var(--pc)); /* Primary content color */
 }
 
 /* Styled label text for confidence levels */
@@ -105,9 +105,12 @@
   padding-bottom: 2px;
 }
 
-.confidence-label-modified {
-  color: #0ea5e9;
+.confidence-label-accepted {
+  color: oklch(var(--p));
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 /* Hide confidence levels when toggled off */
@@ -126,7 +129,7 @@
   border-bottom: none !important;
 }
 
-/* Hide modified/accepted status indicators when toggled off */
-.hide-confidence-modified .accepted-status {
+/* Hide accepted status indicators when toggled off */
+.hide-confidence-accepted .accepted-status {
   display: none;
 }
