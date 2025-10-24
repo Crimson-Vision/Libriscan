@@ -93,137 +93,89 @@ class WordSelector {
 
 /**
  * Confidence Toggle Component
- * Handles showing/hiding words based on confidence level
+ * Manages visibility of confidence indicators (underlines and badges)
  */
 class ConfidenceToggle {
+  static STORAGE_KEY = 'confidenceTogglePrefs';
+  static LEVELS = ['high', 'medium', 'low', 'accepted'];
+
   constructor() {
     this.container = document.getElementById('word-container');
-    if (!this.container) return; // Exit if container not found
+    if (!this.container) return;
     
     this.toggleAll = document.getElementById('toggle-all');
-    this.toggles = {
-      high: document.getElementById('toggle-high'),
-      medium: document.getElementById('toggle-medium'),
-      low: document.getElementById('toggle-low'),
-      accepted: document.getElementById('toggle-accepted')
-    };
+    this.toggles = Object.fromEntries(
+      ConfidenceToggle.LEVELS.map(level => [level, document.getElementById(`toggle-${level}`)])
+    );
     
+    this.init();
+  }
+
+  init() {
     this.loadPreferences();
     this.attachEventListeners();
   }
 
-  /**
-   * Attach event listeners to checkboxes
-   */
   attachEventListeners() {
-    // Attach listeners to individual toggles
+    // Individual toggle handlers
     Object.entries(this.toggles).forEach(([level, checkbox]) => {
-      if (checkbox) {
-        checkbox.addEventListener('change', () => {
-          this.handleToggle(level, checkbox.checked);
-          this.updateToggleAllState();
-        });
-      }
-    });
-    
-    // Attach listener to "All" toggle
-    if (this.toggleAll) {
-      this.toggleAll.addEventListener('change', () => {
-        this.handleToggleAll(this.toggleAll.checked);
+      checkbox?.addEventListener('change', () => {
+        this.toggleIndicator(level, checkbox.checked);
+        this.syncToggleAll();
+        this.savePreferences();
       });
-    }
-  }
-
-  /**
-   * Handle toggle checkbox change
-   * @param {string} level - Confidence level (high, medium, low)
-   * @param {boolean} isVisible - Whether to show or hide words
-   */
-  handleToggle(level, isVisible) {
-    const className = `hide-confidence-${level}`;
-    
-    if (isVisible) {
-      this.container.classList.remove(className);
-    } else {
-      this.container.classList.add(className);
-    }
-    
-    this.savePreferences();
-    
-    // Log for debugging
-    console.log(`Confidence toggle: ${level} = ${isVisible ? 'visible' : 'hidden'}`);
-  }
-
-  /**
-   * Handle "Toggle All" checkbox change
-   * @param {boolean} isChecked - Whether all should be visible or hidden
-   */
-  handleToggleAll(isChecked) {
-    Object.entries(this.toggles).forEach(([level, checkbox]) => {
-      if (checkbox && checkbox.checked !== isChecked) {
-        checkbox.checked = isChecked;
-        this.handleToggle(level, isChecked);
-      }
     });
-    this.savePreferences();
+    
+    // "All" toggle handler
+    this.toggleAll?.addEventListener('change', () => {
+      Object.entries(this.toggles).forEach(([level, checkbox]) => {
+        if (checkbox) {
+          checkbox.checked = this.toggleAll.checked;
+          this.toggleIndicator(level, this.toggleAll.checked);
+        }
+      });
+      this.savePreferences();
+    });
   }
 
-  /**
-   * Update "Toggle All" state based on individual toggles
-   */
-  updateToggleAllState() {
+  toggleIndicator(level, isVisible) {
+    this.container.classList.toggle(`hide-confidence-${level}`, !isVisible);
+  }
+
+  syncToggleAll() {
     if (!this.toggleAll) return;
-    
-    const allChecked = Object.values(this.toggles).every(
-      checkbox => checkbox && checkbox.checked
+    this.toggleAll.checked = Object.values(this.toggles)
+      .every(checkbox => checkbox?.checked);
+  }
+
+  savePreferences() {
+    const prefs = Object.fromEntries(
+      Object.entries(this.toggles).map(([level, checkbox]) => [level, checkbox?.checked ?? true])
     );
     
-    this.toggleAll.checked = allChecked;
-  }
-
-  /**
-   * Save toggle preferences to localStorage
-   */
-  savePreferences() {
-    const preferences = {
-      high: this.toggles.high?.checked ?? true,
-      medium: this.toggles.medium?.checked ?? true,
-      low: this.toggles.low?.checked ?? true,
-      accepted: this.toggles.accepted?.checked ?? true
-    };
-    
     try {
-      localStorage.setItem('confidenceTogglePrefs', JSON.stringify(preferences));
+      localStorage.setItem(ConfidenceToggle.STORAGE_KEY, JSON.stringify(prefs));
     } catch (error) {
-      console.warn('Failed to save confidence toggle preferences:', error);
+      console.warn('Failed to save toggle preferences:', error);
     }
   }
 
-  /**
-   * Load toggle preferences from localStorage
-   */
   loadPreferences() {
     try {
-      const saved = localStorage.getItem('confidenceTogglePrefs');
-      if (!saved) {
-        this.updateToggleAllState();
-        return;
-      }
+      const saved = localStorage.getItem(ConfidenceToggle.STORAGE_KEY);
+      const prefs = saved ? JSON.parse(saved) : {};
       
-      const preferences = JSON.parse(saved);
-      
-      Object.entries(preferences).forEach(([level, isVisible]) => {
-        const checkbox = this.toggles[level];
-        if (checkbox) {
-          checkbox.checked = isVisible;
-          this.handleToggle(level, isVisible);
+      Object.entries(this.toggles).forEach(([level, checkbox]) => {
+        if (checkbox && level in prefs) {
+          checkbox.checked = prefs[level];
+          this.toggleIndicator(level, prefs[level]);
         }
       });
       
-      // Update "All" toggle state after loading preferences
-      this.updateToggleAllState();
+      this.syncToggleAll();
     } catch (error) {
-      console.warn('Failed to load confidence toggle preferences:', error);
+      console.warn('Failed to load toggle preferences:', error);
+      this.syncToggleAll();
     }
   }
 }
