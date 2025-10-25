@@ -32,6 +32,7 @@ class WordDetails {
     this.textTypeDropdownBtn = document.getElementById('textTypeDropdownBtn');
     this.textTypeDisplay = document.getElementById('textTypeDisplay');
     this.textTypeBadge = document.getElementById('textTypeBadge');
+    this.textTypeOptions = document.querySelectorAll('.text-type-option');
 
     // Stat container elements for full-width edit mode
     this.typeControlStat = document.getElementById('typeControlStat');
@@ -103,6 +104,19 @@ class WordDetails {
         // Close dropdown by removing focus
         if (this.printControlDropdownBtn) {
           this.printControlDropdownBtn.blur();
+        }
+      });
+    });
+
+    // Text type dropdown actions
+    this.textTypeOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        const value = option.getAttribute('data-value');
+        this.updateTextType(value);
+        // Close dropdown by removing focus
+        if (this.textTypeDropdownBtn) {
+          this.textTypeDropdownBtn.blur();
         }
       });
     });
@@ -563,6 +577,49 @@ class WordDetails {
   }
 
   /**
+   * Update text type value for the current word
+   */
+  async updateTextType(textTypeValue) {
+    if (!this.currentWordId) return console.error('No word selected');
+
+    // Show loading state
+    this.textTypeDisplay.textContent = 'Updating...';
+    this.textTypeDropdownBtn.disabled = true;
+
+    try {
+      const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
+      const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/text-type/`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': LibriscanUtils.getCSRFToken(),
+        },
+        body: new URLSearchParams({ text_type: textTypeValue }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || 'Failed to update text type');
+      }
+
+      const data = await response.json();
+      this.currentWordInfo.text_type = data.text_type;
+      this._updateTextTypeDisplay(data.text_type);
+      this._showTextTypeSuccess();
+      LibriscanUtils.showToast('Text type updated', 'success');
+      
+    } catch (error) {
+      console.error('Error updating text type:', error);
+      LibriscanUtils.showToast(error.message || 'Failed to update text type', 'error');
+      this._updateTextTypeDisplay(this.currentWordInfo.text_type);
+    } finally {
+      this.textTypeDropdownBtn.disabled = false;
+    }
+  }
+
+  /**
    * Mark the current word as accepted (set confidence to 99.999)
    * Reuses the existing word update flow with loading state management
    */
@@ -653,6 +710,16 @@ class WordDetails {
     
     this.printControlBadge.classList.add('badge-outline');
     setTimeout(() => this.printControlBadge.classList.remove('badge-outline'), 300);
+  }
+
+  /**
+   * Show success feedback for text type update
+   */
+  _showTextTypeSuccess() {
+    if (!this.textTypeBadge) return;
+    
+    this.textTypeBadge.classList.add('badge-outline');
+    setTimeout(() => this.textTypeBadge.classList.remove('badge-outline'), 300);
   }
 
   /**

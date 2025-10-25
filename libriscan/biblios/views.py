@@ -588,3 +588,55 @@ def update_print_control(request, short_name, collection_slug, identifier, numbe
     except Exception as e:
         logger.error(f"Error updating print_control for word {word_id}: {e}")
         return JsonResponse({"error": "Failed to update print control"}, status=500)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def update_text_type(request, short_name, collection_slug, identifier, number, word_id):
+    """Update a TextBlock's text_type field"""
+    try:
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+
+        # Get the new text_type value
+        text_type = request.POST.get("text_type", "").strip()
+        
+        # Validate against allowed choices
+        valid_choices = [choice[0] for choice in TextBlock.TEXT_TYPE_CHOICES.items()]
+        if text_type not in valid_choices:
+            return JsonResponse(
+                {
+                    "error": f"Invalid text_type value. Must be one of: {', '.join(valid_choices)}"
+                },
+                status=400
+            )
+
+        # Update the text_type field
+        word.text_type = text_type
+        word.save(update_fields=["text_type"])
+
+        logger.info(f"Updated word {word_id} text_type to {text_type}")
+
+        return JsonResponse(
+            {
+                "id": word.id,
+                "text": word.text,
+                "text_type": word.text_type,
+                "text_type_display": TextBlock.TEXT_TYPE_CHOICES.get(word.text_type),
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error updating text_type for word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to update text type"}, status=500)

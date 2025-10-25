@@ -128,6 +128,11 @@ urlpatterns = [
                                             views.update_print_control,
                                             name="update_print_control",
                                         ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/text-type/",
+                                            views.update_text_type,
+                                            name="update_text_type",
+                                        ),
                                     ]
                                 ),
                             ),
