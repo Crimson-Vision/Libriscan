@@ -44,6 +44,8 @@
                   {% endif %}
                 </button>
               {% endfor %}
+            {% elif error %}
+              <p class="text-base-content/60">{{ error }}</p>            
             {% else %}
               <p class="text-base-content/60">No text extracted yet.</p>
             {% endif %}
