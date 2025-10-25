@@ -44,7 +44,8 @@ class ConfidenceToggle {
   attachEventListeners() {
     // Individual toggle handlers
     Object.entries(this.toggles).forEach(([level, checkbox]) => {
-      checkbox?.addEventListener('change', () => {
+      checkbox?.addEventListener('change', (e) => {
+        e.stopPropagation(); // Keep dropdown open
         this.toggleIndicator(level, checkbox.checked);
         this.syncToggleAll();
         this.savePreferences();
@@ -52,7 +53,8 @@ class ConfidenceToggle {
     });
     
     // "All" toggle handler
-    this.toggleAll?.addEventListener('change', () => {
+    this.toggleAll?.addEventListener('change', (e) => {
+      e.stopPropagation(); // Keep dropdown open
       const isChecked = this.toggleAll.checked;
       Object.entries(this.toggles).forEach(([level, checkbox]) => {
         if (checkbox) {
@@ -61,6 +63,14 @@ class ConfidenceToggle {
         }
       });
       this.savePreferences();
+    });
+
+    // Keep dropdown open on label click
+    const dropdownContent = document.querySelector('.dropdown-content');
+    dropdownContent?.addEventListener('click', (e) => {
+      if (e.target.closest('label')) {
+        e.stopPropagation();
+      }
     });
   }
 
