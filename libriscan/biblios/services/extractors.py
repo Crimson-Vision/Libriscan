@@ -1,6 +1,8 @@
 import json
 import logging
 
+from simple_history.utils import bulk_create_with_history
+
 from biblios.models import CloudService, TextBlock
 from biblios.services.suggestions import generate_suggestions
 
@@ -119,7 +121,7 @@ class BaseExtractor(object):
 
         logger.info(f"Found {len(self.distinct_words)} distinct words")
 
-        TextBlock.objects.bulk_create(new_text)
+        bulk_create_with_history(new_text, TextBlock)
 
         return new_text
 
