@@ -1,9 +1,10 @@
 <!-- Formatted Text Display Component
    - Displays formatted text from either 'formatted_text' variable or reconstructed from 'words'
    - Includes copy functionality via LibriscanUtils.initCopyButtons() from utils.js 
+   - Auto-refreshes when words are updated via event
 -->
 
-<div class="prose relative">
+<div id="formattedTextContainer" class="prose relative">
   <div class="h-[100vh] overflow-y-auto p-4">
     {% if formatted_text %}
       <button type="button" class="btn btn-ghost btn-sm absolute top-2 right-2 copy-formatted-btn" title="Copy formatted text" aria-label="Copy formatted text" aria-pressed="false">
@@ -32,3 +33,33 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+(function() {
+  let isStale = false;
+  
+  document.addEventListener('wordUpdated', () => isStale = true);
+  
+  function refreshFormattedText() {
+    if (!isStale) return;
+    
+    const contentEl = document.querySelector('.formatted-text-content p');
+    const wordBlocks = document.querySelectorAll('.word-block');
+    if (!contentEl || !wordBlocks.length) return;
+    
+    const text = Array.from(wordBlocks).map(block => block.dataset.wordText).join(' ');
+    contentEl.textContent = text;
+    isStale = false;
+  }
+  
+  document.querySelectorAll('input[name="text_tabs"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (!this.checked) return;
+      const tabContent = this.closest('label').nextElementSibling;
+      if (tabContent?.contains(document.getElementById('formattedTextContainer'))) {
+        refreshFormattedText();
+      }
+    });
+  });
+})();
+</script>

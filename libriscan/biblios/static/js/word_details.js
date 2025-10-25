@@ -301,6 +301,9 @@ class WordDetails {
       this._updateWordUI();
       this._updateWordBlock(data);
       
+      // Dispatch event to notify other components (e.g., formatted text)
+      document.dispatchEvent(new CustomEvent('wordUpdated', { detail: { wordId: this.currentWordId, data } }));
+      
       // Handle callback and toast message
       if (typeof callbackOrOptions === 'function') {
         LibriscanUtils.showToast('Word updated successfully');
