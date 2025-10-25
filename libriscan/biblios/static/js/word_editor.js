@@ -35,7 +35,6 @@ class WordEditor {
     
     // Visual feedback
     this.wordElement.style.cursor = 'pointer';
-    this.wordElement.title = 'Double-click to edit';
   }
 
   enterEditMode() {
@@ -63,6 +62,7 @@ class WordEditor {
     if (this.preEditWord !== null) {
       this.wordInput.value = this.preEditWord;
       this.wordElement.textContent = this.preEditWord;
+      this.wordElement.title = this.preEditWord;
       
       if (this.onRevert) {
         this.onRevert(this.preEditWord);
@@ -73,6 +73,8 @@ class WordEditor {
 
   updateWord(word) {
     this.wordElement.textContent = word;
+    // Add title attribute to show full word on hover when truncated
+    this.wordElement.title = word;
   }
 
   isEditingMode() {

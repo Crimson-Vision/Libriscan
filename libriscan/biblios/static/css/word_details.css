@@ -3,13 +3,31 @@
   margin-top: 2rem;
 }
 
+/* Word Stat Container - Prevent overflow */
+#wordStat {
+  min-width: 0;
+}
+
+#wordStat .flex {
+  min-width: 0;
+}
+
 /* Word Value Section */
 #clickedWord {
   font-size: 1.5rem;
   line-height: 2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 /* Word Input Field */
+#wordInput {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
 #wordInput.hidden {
   display: none;
 }
