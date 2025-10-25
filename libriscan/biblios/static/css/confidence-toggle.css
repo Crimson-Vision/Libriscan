@@ -1,0 +1,27 @@
+/**
+ * Indicator Toggle Styles
+ */
+
+/* Checkbox Colors */
+.checkbox-confidence-high { --chkbg: #10b981; --chkfg: white; }
+.checkbox-confidence-medium { --chkbg: #ffd700; --chkfg: #1f2937; }
+.checkbox-confidence-low { --chkbg: #ff0000; --chkfg: white; }
+.checkbox-confidence-accepted { --chkbg: oklch(var(--p)); --chkfg: oklch(var(--pc)); }
+
+/* Label Colors */
+.confidence-label-high { color: #10b981; font-weight: 600; }
+.confidence-label-medium { color: #d4a017; font-weight: 600; border-bottom: 2px dotted #ffd700; padding-bottom: 2px; }
+.confidence-label-low { color: #ff0000; font-weight: 600; border-bottom: 3px dashed #ff0000; padding-bottom: 2px; }
+.confidence-label-accepted { color: oklch(var(--p)); font-weight: 600; display: inline-flex; align-items: center; }
+
+/* Hide Indicators (words stay visible) */
+.hide-confidence-medium .word-block.confidence-medium,
+.hide-confidence-low .word-block.confidence-low,
+.hide-confidence-low .word-block.confidence-none {
+  border-bottom: none !important;
+}
+
+.hide-confidence-accepted .accepted-status {
+  display: none !important;
+}
+

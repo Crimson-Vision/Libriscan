@@ -1,15 +1,21 @@
 # Basically yoinked from https://www.docker.com/blog/how-to-dockerize-django-app/
 
+ARG PYTHON_VERSION="3.14"
+
 # Stage 1: Base build stage
-FROM python:3.13-slim AS builder
+FROM python:${PYTHON_VERSION}-slim AS builder
+
+# Pull the version args into this build stage
+ARG PYTHON_VERSION
+
+
 LABEL org.opencontainers.image.title="Libriscan"
 LABEL org.opencontainers.image.description="Libriscan helps extract and analyze text from historical documents."
 LABEL org.opencontainers.image.source="https://github.com/crimson-vision/libriscan"
 LABEL org.opencontainers.image.url="https://github.com/crimson-vision/libriscan"
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.3 /uv /uvx /bin/
-
+COPY --from=ghcr.io/astral-sh/uv:0.9.5 /uv /uvx /bin/
 
 # Create the app directory
 RUN mkdir /app
@@ -30,14 +36,17 @@ COPY libriscan/requirements.txt /app/
 RUN uv pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Production stage
-FROM python:3.13-slim
+FROM python:${PYTHON_VERSION}-slim
+
+# Pull the Python version arg into this build stage too
+ARG PYTHON_VERSION
 
 RUN useradd -m -r appuser && \
     mkdir /app && \
     chown -R appuser /app
 
 # Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
+COPY --from=builder /usr/local/lib/python${PYTHON_VERSION}/site-packages/ /usr/local/lib/python${PYTHON_VERSION}/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Set the working directory

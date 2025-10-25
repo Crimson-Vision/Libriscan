@@ -148,7 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/logging/
 
 # Configure INFO logging as default, but can override with this env variable
-log_level = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+log_level = os.getenv("LB_LOG_LEVEL", "INFO")
 
 # Make sure the logging folder exists, or else we get a FileNotFoundError
 if not os.path.exists(LOCAL_DIR / "logs/"):
