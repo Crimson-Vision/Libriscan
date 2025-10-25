@@ -177,6 +177,11 @@ class WordDetails {
   }
 
   updateWordDetails(wordInfo) {
+    // Exit edit mode if currently editing before switching to new word
+    if (!this.wordInput.classList.contains('hidden')) {
+      this.exitEditMode();
+    }
+
     this.currentWordInfo = wordInfo;
     this.originalWord = wordInfo.word;
     this.currentWordId = wordInfo.id;
