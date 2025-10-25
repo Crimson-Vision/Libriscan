@@ -371,6 +371,19 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         # Get page extraction status
         context["extracting"] = huey.get(f"extracting-{page.id}", peek=True)
 
+        # Find last edited word on this page for auto-focus
+        from django.db.models import Subquery, OuterRef
+        
+        last_edited = page.words.annotate(
+            last_edit=Subquery(
+                TextBlock.history.filter(id=OuterRef('id'))  # pylint: disable=no-member
+                .order_by('-history_date')
+                .values('history_date')[:1]
+            )
+        ).order_by('-last_edit').first() if page.words.exists() else None
+        
+        context["last_edited_word_id"] = last_edited.id if last_edited else None
+
         return context
 
     def get_object(self, **kwargs):

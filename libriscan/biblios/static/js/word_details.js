@@ -387,8 +387,11 @@ class WordDetails {
 
   selectFirstWord() {
     setTimeout(() => {
-      const firstWordBlock = document.querySelector('.word-block');
-      if (firstWordBlock) firstWordBlock.click();
+      const lastEditedId = this.container.dataset.lastEditedWordId;
+      const wordToSelect = (lastEditedId && document.querySelector(`[data-word-id="${lastEditedId}"]`)) 
+        || document.querySelector('.word-block');
+      
+      if (wordToSelect) wordToSelect.click();
     }, 100);
   }
 }
