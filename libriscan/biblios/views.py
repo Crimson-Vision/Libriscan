@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
@@ -383,15 +384,21 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
 
         # Find last edited word on this page for auto-focus
         from django.db.models import Subquery, OuterRef
-        
-        last_edited = page.words.annotate(
-            last_edit=Subquery(
-                TextBlock.history.filter(id=OuterRef('id'))  # pylint: disable=no-member
-                .order_by('-history_date')
-                .values('history_date')[:1]
+
+        last_edited = (
+            page.words.annotate(
+                last_edit=Subquery(
+                    TextBlock.history.filter(id=OuterRef("id"))  # pylint: disable=no-member
+                    .order_by("-history_date")
+                    .values("history_date")[:1]
+                )
             )
-        ).order_by('-last_edit').first() if page.words.exists() else None
-        
+            .order_by("-last_edit")
+            .first()
+            if page.words.exists()
+            else None
+        )
+
         context["last_edited_word_id"] = last_edited.id if last_edited else None
 
         return context
@@ -572,7 +579,9 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
     "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
 )
 @require_http_methods(["POST", "PATCH"])
-def update_print_control(request, short_name, collection_slug, identifier, number, word_id):
+def update_print_control(
+    request, short_name, collection_slug, identifier, number, word_id
+):
     """Update a TextBlock's print_control field"""
     try:
         # Get the word with proper permissions check
@@ -587,15 +596,17 @@ def update_print_control(request, short_name, collection_slug, identifier, numbe
 
         # Get the new print_control value
         print_control = request.POST.get("print_control", "").strip()
-        
+
         # Validate against allowed choices
-        valid_choices = [choice[0] for choice in TextBlock.PRINT_CONTROL_CHOICES.items()]
+        valid_choices = [
+            choice[0] for choice in TextBlock.PRINT_CONTROL_CHOICES.items()
+        ]
         if print_control not in valid_choices:
             return JsonResponse(
                 {
                     "error": f"Invalid print_control value. Must be one of: {', '.join(valid_choices)}"
                 },
-                status=400
+                status=400,
             )
 
         # Update the print_control field
@@ -609,7 +620,9 @@ def update_print_control(request, short_name, collection_slug, identifier, numbe
                 "id": word.id,
                 "text": word.text,
                 "print_control": word.print_control,
-                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(word.print_control),
+                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(
+                    word.print_control
+                ),
                 "confidence": float(word.confidence),
                 "confidence_level": word.confidence_level,
             }
@@ -639,7 +652,7 @@ def update_text_type(request, short_name, collection_slug, identifier, number, w
 
         # Get the new text_type value
         text_type = request.POST.get("text_type", "").strip()
-        
+
         # Validate against allowed choices
         valid_choices = [choice[0] for choice in TextBlock.TEXT_TYPE_CHOICES.items()]
         if text_type not in valid_choices:
@@ -647,7 +660,7 @@ def update_text_type(request, short_name, collection_slug, identifier, number, w
                 {
                     "error": f"Invalid text_type value. Must be one of: {', '.join(valid_choices)}"
                 },
-                status=400
+                status=400,
             )
 
         # Update the text_type field
@@ -672,11 +685,11 @@ def update_text_type(request, short_name, collection_slug, identifier, number, w
         return JsonResponse({"error": "Failed to update text type"}, status=500)
 
 
-@permission_required(
-    "biblios.view_textblock", fn=get_org_by_word, raise_exception=True
-)
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
 @require_http_methods(["GET"])
-def textblock_history(request, short_name, collection_slug, identifier, number, word_id):
+def textblock_history(
+    request, short_name, collection_slug, identifier, number, word_id
+):
     """Return the audit history of a specific TextBlock"""
     try:
         # Get the word with proper permissions check
@@ -702,32 +715,86 @@ def textblock_history(request, short_name, collection_slug, identifier, number, 
                 role_obj = record.history_user.userrole_set.first()
                 if role_obj:
                     user_role = role_obj.get_role_display()
-            
-            history_data.append({
-                "history_id": record.history_id,
-                "history_date": record.history_date.isoformat(),
-                "history_type": record.get_history_type_display(),
-                "history_user": record.history_user.get_full_name() or record.history_user.email if record.history_user else "Unknown User",
-                "history_user_role": user_role,
-                "text": record.text,
-                "confidence": float(record.confidence),
-                "text_type": record.text_type,
-                "text_type_display": TextBlock.TEXT_TYPE_CHOICES.get(record.text_type),
-                "print_control": record.print_control,
-                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(record.print_control),
-                "line": record.line,
-                "number": record.number,
-            })
+
+            history_data.append(
+                {
+                    "history_id": record.history_id,
+                    "history_date": record.history_date.isoformat(),
+                    "history_type": record.get_history_type_display(),
+                    "history_user": record.history_user.get_full_name()
+                    or record.history_user.email
+                    if record.history_user
+                    else "Unknown User",
+                    "history_user_role": user_role,
+                    "text": record.text,
+                    "confidence": float(record.confidence),
+                    "text_type": record.text_type,
+                    "text_type_display": TextBlock.TEXT_TYPE_CHOICES.get(
+                        record.text_type
+                    ),
+                    "print_control": record.print_control,
+                    "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(
+                        record.print_control
+                    ),
+                    "line": record.line,
+                    "number": record.number,
+                }
+            )
 
         logger.info(f"Retrieved {len(history_data)} history records for word {word_id}")
 
-        return JsonResponse({
-            "word_id": word_id,
-            "current_text": word.text,
-            "history_count": len(history_data),
-            "history": history_data
-        })
+        return JsonResponse(
+            {
+                "word_id": word_id,
+                "current_text": word.text,
+                "history_count": len(history_data),
+                "history": history_data,
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error retrieving history for word {word_id}: {e}")
         return JsonResponse({"error": "Failed to retrieve history"}, status=500)
+
+
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def revert_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Revert a word to its original value."""
+    try:
+        response = {}
+        status = 400
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        try:
+            # earliest() will be the creation record
+            original = word.history.earliest()
+            word = original.instance
+            word._change_reason = "Revert to original"
+            word.save()
+            response = {
+                "id": word.id,
+                "text": word.text,
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+                "suggestions": dict(word.suggestions)
+                if isinstance(word.suggestions, list)
+                else word.suggestions,
+            }
+            status = 200
+        except ObjectDoesNotExist:
+            # Some existing text blocks may not have an audit history
+            response = {"error": "No prior version to revert to"}
+            status = 400
+        return JsonResponse(response, status=status)
+
+    except Exception as e:
+        logger.error(f"Error reverting word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to revert word"}, status=500)
