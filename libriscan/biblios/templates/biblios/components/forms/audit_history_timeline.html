@@ -1,0 +1,30 @@
+{% load static %}
+<!-- Audit History Timeline Component -->
+
+<div id="auditHistoryContent" class="h-[50vh] overflow-y-auto">
+  <!-- Empty State -->
+  <div id="auditHistoryEmpty" class="flex flex-col items-center justify-center h-full text-center p-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 text-base-300 mb-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    <h3 class="text-lg font-semibold mb-2">No History Available</h3>
+    <p class="text-base-content/60">Select a word to view its audit history</p>
+  </div>
+
+  <!-- Timeline Content -->
+  <div id="auditHistoryTimeline" class="hidden">
+    <div class="mb-6 p-4 bg-base-200 rounded-lg">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xl font-bold" id="historyWordText"></h3>
+          <p class="text-sm text-base-content/60">
+            Word ID: <span id="historyWordId" class="font-mono"></span>
+          </p>
+        </div>
+        <div class="badge badge-primary badge-lg" id="historyCount"></div>
+      </div>
+    </div>
+
+    <ul class="timeline timeline-snap-icon timeline-vertical"></ul>
+  </div>
+</div>

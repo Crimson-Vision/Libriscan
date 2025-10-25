@@ -24,7 +24,6 @@ class WordDetails {
     this.wordActionsDropdown = document.getElementById('wordActionsDropdown');
     this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
     this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
-    this.viewAuditLogAction = document.getElementById('viewAuditLogAction');
 
     // Stat container elements for full-width edit mode
     this.typeControlStat = document.getElementById('typeControlStat');
@@ -96,7 +95,15 @@ class WordDetails {
 
     if (this.revertToOriginalAction) this.revertToOriginalAction.onclick = () => this.revertToOriginalWord();
     if (this.saveToDictionaryAction) this.saveToDictionaryAction.onclick = () => this.saveToDictionary();
-    if (this.viewAuditLogAction) this.viewAuditLogAction.onclick = () => this.viewAuditLog();
+
+    const auditHistoryTab = document.getElementById('wordAuditHistoryTab');
+    if (auditHistoryTab) {
+      auditHistoryTab.addEventListener('change', () => {
+        if (auditHistoryTab.checked) {
+          this.loadAuditHistory();
+        }
+      });
+    }
 
     this.editor.initializeEventListeners();
     this.metadata.initializeEventListeners();
@@ -360,24 +367,17 @@ class WordDetails {
     // TODO: Implement functionality
   }
 
-  async viewAuditLog() {
+  async loadAuditHistory() {
     if (!this.currentWordId) {
-      console.log('No word selected');
+      LibriscanUtils.showToast('No word selected', 'error');
       return;
     }
 
-    try {
-      console.log('Fetching audit log for word ID:', this.currentWordId);
-      
-      const historyUrl = LibriscanUtils.buildWordHistoryURL(this.currentWordId);
-      const data = await LibriscanUtils.fetchJSON(historyUrl);
-      
-      LibriscanUtils.logHistoryToConsole(data);
-      LibriscanUtils.showToast('History logged to console', 'success');
-    } catch (error) {
-      console.error('Error fetching audit log:', error);
-      LibriscanUtils.showToast('Error fetching audit log', 'error');
+    if (!this.auditHistory) {
+      this.auditHistory = new AuditHistory();
     }
+
+    await this.auditHistory.displayHistory(this.currentWordId);
   }
 
   selectFirstWord() {

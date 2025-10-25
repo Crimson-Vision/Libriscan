@@ -4,140 +4,154 @@
 <div id="clickedWordsContainer" class="mt-8 hidden"
      data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.geo_x_0 }},{{ word.geo_y_0 }},{{ word.geo_x_1 }},{{ word.geo_y_1 }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}">
   <div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="card-title">Word Details</h3>
-        <!-- Dropdown Menu -->
-        <div class="dropdown dropdown-right">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm" id="wordActionsDropdown">
-            <!-- Kebab (three dots) icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
-            </svg>
-          </div>
-          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
-            <li>
-              <a id="revertToOriginalAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Revert to Original</a>
-            </li>
-            <li>
-              <a id="saveToDictionaryAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Save to Dictionary</a>
-            </li>
-            <li>
-              <a id="viewAuditLogAction">View Audit Log</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Word Navigation -->
-      <div class="flex justify-between items-center mb-4">
-        <button id="prevWordBtn" class="btn btn-outline btn-sm" disabled>
-          <span class="text-md mr-2" aria-hidden="true">«</span>
-          Previous
-        </button>
-        <span id="wordPosition" class="text-sm opacity-70">0 of 0</span>
-        <button id="nextWordBtn" class="btn btn-outline btn-sm" disabled>
-          Next
-          <span class="text-md ml-2" aria-hidden="true">»</span>
-        </button>
-      </div>
-      <div class="stats stats-vertical lg:stats-horizontal shadow overflow-visible" id="wordStatsContainer">
-        <div class="stat overflow-visible min-w-0" id="wordStat">
-          <div class="stat-title">Word</div>
-          <div class="flex items-start gap-2 min-w-0">
-            <div id="clickedWord" class="stat-value text-2xl truncate min-w-0 flex-1"></div>
-            <input type="text" id="wordInput" class="input input-bordered w-full hidden min-w-0 flex-1 break-all" />
-            <button id="editButton" class="btn btn-ghost btn-sm flex-shrink-0 tooltip tooltip-top" data-tip="Edit word">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-              </svg>
-            </button>
-            <button id="saveButton" class="btn btn-ghost btn-sm hidden flex-shrink-0 tooltip tooltip-top" data-tip="Save current input">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-            </button>
-            <button id="revertButton" class="btn btn-ghost btn-sm hidden flex-shrink-0 tooltip tooltip-top" data-tip="Revert to pre-edit">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="stat overflow-visible" id="typeControlStat">
-          <div class="stat-title">Type & Control</div>
-          <div class="stat-value py-0">
-            <div class="flex flex-col gap-0.5">
-              <div class="dropdown w-full">
-                <div tabindex="0" role="button" class="btn btn-xs gap-0.5 h-6 min-h-6 px-2 w-full justify-between" id="textTypeDropdownBtn">
-                  <div class="flex items-center gap-0.5">
-                    <span id="textTypeBadge" class="badge badge-xs"></span>
-                    <span id="textTypeDisplay" class="text-xs">Printed</span>
-                  </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-40 p-1.5 shadow-xl">
-                  <li><a data-value="P" class="text-type-option gap-1 px-2 py-1">
-                    <span class="badge badge-info badge-xs">P</span>
-                    <span>Printed</span>
-                  </a></li>
-                  <li><a data-value="H" class="text-type-option gap-1 px-2 py-1">
-                    <span class="badge badge-secondary badge-xs">H</span>
-                    <span>Handwriting</span>
-                  </a></li>
-                </ul>
+    <div class="card-body p-0">
+      <!-- Word Details Tabs -->
+      <div role="tablist" class="tabs tabs-lift">
+        <!-- Details Tab -->
+        <input type="radio" name="word_details_tabs" role="tab" class="tab text-base" aria-label="Details" id="wordDetailsTab" checked="checked" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6" id="wordDetailsContent">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="card-title">Word Details</h3>
+            <!-- Dropdown Menu -->
+            <div class="dropdown dropdown-right">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-sm" id="wordActionsDropdown">
+                <!-- Kebab (three dots) icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                </svg>
               </div>
-              <div class="dropdown w-full">
-                <div tabindex="0" role="button" class="btn btn-xs gap-0.5 h-6 min-h-6 px-2 w-full justify-between" id="printControlDropdownBtn">
-                  <div class="flex items-center gap-0.5">
-                    <span id="printControlBadge" class="badge badge-xs"></span>
-                    <span id="printControlDisplay" class="text-xs">Include</span>
-                  </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
+              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+                <li>
+                  <a id="revertToOriginalAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Revert to Original</a>
+                </li>
+                <li>
+                  <a id="saveToDictionaryAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Save to Dictionary</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Word Navigation -->
+          <div class="flex justify-between items-center mb-4">
+            <button id="prevWordBtn" class="btn btn-outline btn-sm" disabled>
+              <span class="text-md mr-2" aria-hidden="true">«</span>
+              Previous
+            </button>
+            <span id="wordPosition" class="text-sm opacity-70">0 of 0</span>
+            <button id="nextWordBtn" class="btn btn-outline btn-sm" disabled>
+              Next
+              <span class="text-md ml-2" aria-hidden="true">»</span>
+            </button>
+          </div>
+          
+          <div class="stats shadow overflow-visible w-full mb-4" id="wordStatsContainer">
+            <div class="stat overflow-visible min-w-0" id="wordStat">
+              <div class="stat-title">Word</div>
+              <div class="flex items-center gap-2 min-w-0 mt-1">
+                <div id="clickedWord" class="stat-value text-2xl truncate min-w-0 flex-1"></div>
+                <input type="text" id="wordInput" class="input input-bordered input-sm w-full hidden min-w-0 flex-1" />
+                <div class="flex gap-1">
+                  <button id="editButton" class="btn btn-ghost btn-sm flex-shrink-0 tooltip tooltip-top" data-tip="Edit word">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                  </button>
+                  <button id="saveButton" class="btn btn-ghost btn-sm hidden flex-shrink-0 tooltip tooltip-top" data-tip="Save">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                  </button>
+                  <button id="revertButton" class="btn btn-ghost btn-sm hidden flex-shrink-0 tooltip tooltip-top" data-tip="Cancel">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-40 p-1.5 shadow-xl">
-                  <li><a data-value="I" class="print-control-option gap-1 px-2 py-1">
-                    <span class="badge badge-success badge-xs">I</span>
-                    <span>Include</span>
-                  </a></li>
-                  <li><a data-value="M" class="print-control-option gap-1 px-2 py-1">
-                    <span class="badge badge-warning badge-xs">M</span>
-                    <span>Merge with Prior</span>
-                  </a></li>
-                  <li><a data-value="O" class="print-control-option gap-1 px-2 py-1">
-                    <span class="badge badge-error badge-xs">O</span>
-                    <span>Omit</span>
-                  </a></li>
-                </ul>
+              </div>
+            </div>
+            <div class="stat overflow-visible" id="typeControlStat">
+              <div class="stat-title">Type & Control</div>
+              <div class="flex flex-col gap-2 mt-1">
+                <div class="dropdown w-full">
+                  <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-8 min-h-8" id="textTypeDropdownBtn">
+                    <div class="flex items-center gap-2">
+                      <span id="textTypeBadge" class="badge badge-sm"></span>
+                      <span id="textTypeDisplay">Printed</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
+                    <li><a data-value="P" class="text-type-option">
+                      <span class="badge badge-info badge-sm">P</span>
+                      <span>Printed</span>
+                    </a></li>
+                    <li><a data-value="H" class="text-type-option">
+                      <span class="badge badge-secondary badge-sm">H</span>
+                      <span>Handwriting</span>
+                    </a></li>
+                  </ul>
+                </div>
+                <div class="dropdown w-full">
+                  <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-8 min-h-8" id="printControlDropdownBtn">
+                    <div class="flex items-center gap-2">
+                      <span id="printControlBadge" class="badge badge-sm"></span>
+                      <span id="printControlDisplay">Include</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
+                    <li><a data-value="I" class="print-control-option">
+                      <span class="badge badge-success badge-sm">I</span>
+                      <span>Include</span>
+                    </a></li>
+                    <li><a data-value="M" class="print-control-option">
+                      <span class="badge badge-warning badge-sm">M</span>
+                      <span>Merge with Prior</span>
+                    </a></li>
+                    <li><a data-value="O" class="print-control-option">
+                      <span class="badge badge-error badge-sm">O</span>
+                      <span>Omit</span>
+                    </a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="stat" id="confidenceStat">
+              <div class="stat-title">Confidence Level</div>
+              <div class="flex items-center gap-2 mt-1 mb-2">
+                <div id="confidenceScore" class="stat-value text-3xl"></div>
+                <span id="confidenceLevel" class="badge badge-lg"></span>
+              </div>
+              <div class="stat-desc">
+                <progress id="confidenceBar" class="progress w-full" value="0" max="100"></progress>
+                <button id="markAcceptedBtn" class="btn btn-xs btn-success mt-2 w-full hidden gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                  Mark as Accepted
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="stats shadow w-full">
+            <div class="stat">
+              <div class="stat-title mb-2">Suggestions</div>
+              <div id="wordSuggestions" class="stat-desc p-0">
+                <!-- Suggestions will be populated here -->
               </div>
             </div>
           </div>
         </div>
-        <div class="stat" id="confidenceStat">
-          <div class="stat-title">Confidence Level</div>
-          <span id="confidenceLevel" class="ms-2 opacity-70"></span>
-          <div id="confidenceScore" class="stat-value text-2xl"></div>
-          <div class="stat-desc">
-            <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
-            <button id="markAcceptedBtn" class="btn btn-xs btn-success mt-2 hidden gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-              </svg>
-              Mark as Accepted
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="stats stats-vertical lg:stats-horizontal shadow">
-        <div class="stat">
-          <div class="stat-title mb-2">Suggestions</div>
-          <div id="wordSuggestions" class="stat-desc p-0">
-            <!-- Suggestions will be populated here -->
-          </div>
+        
+        <!-- Audit History Tab -->
+        <input type="radio" name="word_details_tabs" role="tab" class="tab text-base" aria-label="Audit History" id="wordAuditHistoryTab" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 p-6" id="wordAuditHistoryContent">
+          {% include 'biblios/components/forms/audit_history_timeline.html' %}
         </div>
       </div>
     </div>
