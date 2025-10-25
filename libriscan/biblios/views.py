@@ -678,11 +678,20 @@ def textblock_history(request, short_name, collection_slug, identifier, number, 
         # Build response data
         history_data = []
         for record in history_records:
+            # Get user role information
+            user_role = None
+            if record.history_user:
+                # Get the user's primary role (first role found)
+                role_obj = record.history_user.userrole_set.first()
+                if role_obj:
+                    user_role = role_obj.get_role_display()
+            
             history_data.append({
                 "history_id": record.history_id,
                 "history_date": record.history_date.isoformat(),
                 "history_type": record.get_history_type_display(),
                 "history_user": record.history_user.get_full_name() or record.history_user.email if record.history_user else "Unknown User",
+                "history_user_role": user_role,
                 "text": record.text,
                 "confidence": float(record.confidence),
                 "text_type": record.text_type,

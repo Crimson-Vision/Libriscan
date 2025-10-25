@@ -1,46 +1,45 @@
 {% load static %}
 <!-- Audit History Timeline: Displays word edit history with timestamps and change details -->
 
-<div id="auditHistoryContent" class="h-[50vh] overflow-y-auto">
+<div id="auditHistoryContent" class="h-[50vh] overflow-y-auto px-2">
   
-  <div id="auditHistoryEmpty" class="flex flex-col items-center justify-center h-full text-center p-8">
-    <div class="relative mb-6">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20 text-base-300" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-      </svg>
-      <div class="absolute inset-0 blur-2xl bg-base-300 opacity-20 rounded-full"></div>
+  <!-- Empty State -->
+  <div id="auditHistoryEmpty" class="flex flex-col items-center justify-center h-full text-center py-12">
+    <div class="mb-6">
+      <div class="w-24 h-24 rounded-full bg-base-200 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+      </div>
     </div>
-    <h3 class="text-xl font-bold mb-2 text-base-content">No History Available</h3>
-    <p class="text-base-content/60 max-w-sm">Select a word from the document to view its complete audit history and changes over time</p>
+    <h3 class="text-lg font-semibold mb-2 text-base-content">No History Yet</h3>
+    <p class="text-sm text-base-content/60 max-w-xs leading-relaxed">Select a word to view its complete edit history and track all changes over time</p>
   </div>
 
-  <div id="auditHistoryTimeline" class="hidden">
-    <header class="mb-4 p-3 bg-gradient-to-r from-primary/10 to-transparent rounded-lg border border-primary/20">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-3 min-w-0 flex-1">
-          <div class="flex items-baseline gap-2 min-w-0 flex-wrap">
-            <h3 id="historyWordText" class="text-xl font-bold text-base-content truncate"></h3>
-            <div class="flex items-center gap-1.5 text-xs">
-              <span class="text-base-content/50">ID:</span>
-              <code id="historyWordId" class="font-mono text-base-content/70"></code>
-            </div>
+  <!-- Timeline Content -->
+  <div id="auditHistoryTimeline" class="hidden pb-4">
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-base-100 pb-4 mb-2">
+      <div class="alert shadow-sm border-primary/20 bg-primary/5">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <h3 id="historyWordText" class="font-bold text-base text-base-content"></h3>
+            <code id="historyWordId" class="text-xs font-mono text-base-content/50"></code>
           </div>
         </div>
-        
         <div class="flex items-center gap-2 flex-shrink-0">
-          <div id="historyCount" class="badge badge-primary badge-md font-semibold" aria-label="Number of changes"></div>
-          <div class="tooltip tooltip-left" data-tip="Your local timezone">
-            <div class="flex items-center gap-1.5 text-xs text-base-content/60 bg-base-200/50 px-2 py-1 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-3.5" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd" />
-              </svg>
+          <div id="historyCount" class="badge badge-primary badge-sm font-medium"></div>
+          <div class="tooltip tooltip-bottom" data-tip="Your timezone">
+            <div class="badge badge-ghost badge-sm gap-1">
+              <span>🕐</span>
               <span id="userTimezone" class="font-mono text-[10px]"></span>
             </div>
           </div>
         </div>
       </div>
-    </header>
+    </div>
 
+    <!-- Timeline List -->
     <ul class="timeline timeline-snap-icon timeline-vertical w-full" role="list" aria-label="Audit history timeline"></ul>
   </div>
 </div>

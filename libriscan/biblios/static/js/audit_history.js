@@ -3,7 +3,14 @@
  */
 class AuditHistory {
   static CONFIG = {
-    EMOJI: { CREATED: '✨', CHANGED: '✏️', EDIT: '✏️', USER: '👤', PLUS: '➕', ARROW: '→' },
+    EMOJI: {
+      CREATED: '✨',
+      CHANGED: '📝',
+      EDIT: '✏️',
+      USER: '👤',
+      ARROW: '→',
+      PLUS: '➕'
+    },
     FIELDS: [
       { key: 'text', label: 'Text', getValue: (r) => r.text },
       { key: 'confidence', label: 'Confidence', getValue: (r) => parseFloat(r.confidence).toFixed(2), format: (v) => `${v}%` },
@@ -56,44 +63,54 @@ class AuditHistory {
 
   createTimelineItem(record, index, allHistory) {
     const { isFirst, isLast, previous } = this._getRecordContext(index, allHistory);
-    const { relative, exact, time } = LibriscanUtils.formatDateTime(record.history_date);
+    const { relative, exact } = LibriscanUtils.formatDateTime(record.history_date);
     const changes = this._detectChanges(record, previous);
-    const { EMOJI, TIMELINE_SPLIT } = AuditHistory.CONFIG;
+    const { EMOJI } = AuditHistory.CONFIG;
     
+    const isCreated = record.history_type === 'Created';
     const styles = {
-      icon: isFirst ? 'bg-primary text-primary-content shadow-lg ring-4 ring-primary/20' : 'bg-base-300',
-      card: isFirst ? 'border-2 border-primary/30 bg-primary/5' : 'border-base-300',
-      badge: isFirst ? 'badge-primary' : 'badge-ghost'
+      icon: isFirst 
+        ? 'bg-primary text-primary-content shadow-md' 
+        : isCreated 
+        ? 'bg-success text-success-content' 
+        : 'bg-base-300 text-base-content',
+      card: isFirst ? 'border-primary shadow-md bg-primary/5' : 'border-base-200 hover:border-primary/30',
+      badge: isFirst ? 'badge-primary' : isCreated ? 'badge-success' : 'badge-ghost'
     };
     
-    const emoji = record.history_type === 'Created' ? EMOJI.CREATED : EMOJI.CHANGED;
+    const emoji = isCreated ? EMOJI.CREATED : EMOJI.CHANGED;
     const content = changes.length ? this._renderChanges(changes) : 
-                    record.history_type === 'Created' ? this._renderCreation(record) : '';
+                    isCreated ? this._renderCreation(record) : '';
 
     return `
       <li>
-        ${!isFirst ? '<hr class="bg-primary/30"/>' : ''}
-        <div class="timeline-start text-right pr-3 min-w-0" style="flex: 0 0 22%;">
-          <div class="inline-block text-left">
-            <time class="block text-sm font-bold text-primary mb-1 whitespace-nowrap" datetime="${record.history_date}">${relative}</time>
-            <time class="block text-[11px] text-base-content/60 font-mono mb-0.5 whitespace-nowrap" datetime="${record.history_date}">${exact}</time>
-            <time class="block text-[11px] text-base-content/50 whitespace-nowrap" datetime="${record.history_date}">${time}</time>
+        ${!isFirst ? '<hr class="bg-base-300"/>' : ''}
+        <div class="timeline-start pr-4" style="flex: 0 0 120px;">
+          <div class="text-right">
+            <time class="text-sm font-semibold text-primary block mb-0.5" datetime="${record.history_date}">${relative}</time>
+            <time class="text-xs text-base-content/50 font-mono block" datetime="${record.history_date}">${exact}</time>
           </div>
         </div>
-        <div class="timeline-middle flex-shrink-0"><span class="flex items-center justify-center size-5 rounded-full ${styles.icon} transition-all">${emoji}</span></div>
-        <div class="timeline-end pl-3 mb-6 min-w-0" style="flex: 1 1 auto;">
-          <div class="bg-base-100 border rounded-lg shadow-sm hover:shadow-md transition-all p-3 ${styles.card}">
-            <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
-              <span class="badge ${styles.badge} badge-sm font-semibold">${record.history_type}</span>
-              <div class="flex items-center gap-1.5 text-xs text-base-content/60">
-                <span>${EMOJI.USER}</span>
-                <span class="truncate max-w-[140px]">${record.history_user}</span>
+        <div class="timeline-middle">
+          <div class="flex items-center justify-center w-8 h-8 rounded-full ${styles.icon} transition-all duration-200 text-lg">
+            ${emoji}
+          </div>
+        </div>
+        <div class="timeline-end pl-4 pb-8" style="flex: 1;">
+          <div class="card bg-base-100 border ${styles.card} transition-all duration-200">
+            <div class="card-body p-4">
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+                  <span>${EMOJI.USER}</span>
+                  <span class="font-medium">${record.history_user}</span>
+                  ${record.history_user_role ? `<span class="badge badge-xs badge-outline">${record.history_user_role}</span>` : ''}
+                </div>
               </div>
+              ${content}
             </div>
-            ${content}
           </div>
         </div>
-        ${!isLast ? '<hr class="bg-primary/30"/>' : ''}
+        ${!isLast ? '<hr class="bg-base-300"/>' : ''}
       </li>
     `;
   }
@@ -163,3 +180,4 @@ class AuditHistory {
 }
 
 window.AuditHistory = AuditHistory;
+
