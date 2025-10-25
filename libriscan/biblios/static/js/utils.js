@@ -289,6 +289,39 @@ const LibriscanUtils = {
       });
     });
   },
+
+  /**
+   * Get user's timezone from browser settings
+   */
+  getUserTimezone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  },
+
+  /**
+   * Format date/time for audit history display
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
+   */
+  formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const seconds = Math.floor((Date.now() - date) / 1000);
+    const tz = this.getUserTimezone();
+
+    // Calculate relative time
+    const units = [[2592000, 'month'], [604800, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+    let relative = 'Just now';
+    for (const [limit, unit] of units) {
+      if (seconds >= limit) {
+        relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-Math.floor(seconds / limit), unit);
+        break;
+      }
+    }
+
+    return {
+      relative,
+      exact: date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', timeZone: tz }),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: tz })
+    };
+  },
 };
 
 // Make utils available globally

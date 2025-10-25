@@ -1,21 +1,14 @@
+/**
+ * AuditHistory - Word edit history timeline display
+ */
 class AuditHistory {
-  static ICONS = {
-    CREATED: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 rounded-full p-1">
-        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-      </svg>
-    `,
-    CHANGED: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 rounded-full p-1">
-        <path d="m5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z" />
-        <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z" />
-      </svg>
-    `,
-    ARROW: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-3">
-        <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
-      </svg>
-    `
+  static EMOJI = {
+    CREATED: '✨',
+    CHANGED: '✏️',
+    EDIT: '✏️',
+    USER: '👤',
+    PLUS: '➕',
+    ARROW: '→'
   };
 
   static CHANGE_FIELDS = [
@@ -32,15 +25,14 @@ class AuditHistory {
       timeline: document.getElementById('auditHistoryTimeline'),
       wordText: document.getElementById('historyWordText'),
       wordId: document.getElementById('historyWordId'),
-      count: document.getElementById('historyCount')
+      count: document.getElementById('historyCount'),
+      timezone: document.getElementById('userTimezone')
     };
   }
 
   async displayHistory(wordId) {
     try {
-      const url = LibriscanUtils.buildWordHistoryURL(wordId);
-      const data = await LibriscanUtils.fetchJSON(url);
-      
+      const data = await LibriscanUtils.fetchJSON(LibriscanUtils.buildWordHistoryURL(wordId));
       this.renderTimeline(data);
       LibriscanUtils.showToast('History loaded', 'success');
     } catch (error) {
@@ -51,158 +43,111 @@ class AuditHistory {
 
   renderTimeline(data) {
     if (!data.history?.length) {
-      this.showEmptyState();
+      this.elements.emptyState.classList.remove('hidden');
+      this.elements.timeline.classList.add('hidden');
       return;
     }
 
-    this.updateHeader(data);
-    this.renderTimelineItems(data.history);
-    this.showTimeline();
-  }
-
-  updateHeader(data) {
     this.elements.wordText.textContent = data.current_text;
     this.elements.wordId.textContent = data.word_id;
     this.elements.count.textContent = `${data.history_count} ${data.history_count === 1 ? 'Change' : 'Changes'}`;
-  }
+    this.elements.timezone.textContent = LibriscanUtils.getUserTimezone();
 
-  renderTimelineItems(history) {
-    this.elements.container.innerHTML = '';
-    
-    history.forEach((record, index) => {
-      const item = this.createTimelineItem(record, index, history);
-      this.elements.container.appendChild(item);
-    });
+    this.elements.container.innerHTML = data.history.map((record, index) => 
+      this.createTimelineItem(record, index, data.history)
+    ).join('');
+
+    this.elements.emptyState.classList.add('hidden');
+    this.elements.timeline.classList.remove('hidden');
   }
 
   createTimelineItem(record, index, allHistory) {
     const isFirst = index === 0;
     const isLast = index === allHistory.length - 1;
-    const previousRecord = index < allHistory.length - 1 ? allHistory[index + 1] : null;
+    const previous = index < allHistory.length - 1 ? allHistory[index + 1] : null;
+    const { relative, exact, time } = LibriscanUtils.formatDateTime(record.history_date);
+    const changes = this.detectChanges(record, previous);
     
-    const li = document.createElement('li');
-    li.innerHTML = `
-      ${!isFirst ? '<hr class="bg-primary"/>' : ''}
-      <div class="timeline-start timeline-box bg-base-200">
-        <time class="text-xs text-base-content/60">${this.formatDate(record.history_date)}</time>
-      </div>
-      <div class="timeline-middle">
-        ${this.getHistoryIcon(record.history_type, isFirst)}
-      </div>
-      <div class="timeline-end timeline-box">
-        ${this.createChangeDetails(record, previousRecord, isFirst)}
-      </div>
-      ${!isLast ? '<hr class="bg-primary"/>' : ''}
-    `;
-    
-    return li;
-  }
-
-  getHistoryIcon(type, isFirst) {
-    const colorClass = isFirst ? 'bg-primary text-primary-content' : 'bg-base-300';
-    const icon = type === 'Created' ? AuditHistory.ICONS.CREATED : AuditHistory.ICONS.CHANGED;
-    return icon.replace('class="size-5', `class="size-5 ${colorClass}`);
-  }
-
-  createChangeDetails(record, previousRecord, isFirst) {
-    const changes = this.detectChanges(record, previousRecord);
+    const iconClass = isFirst ? 'bg-primary text-primary-content shadow-lg ring-4 ring-primary/20' : 'bg-base-300';
+    const iconEmoji = record.history_type === 'Created' ? AuditHistory.EMOJI.CREATED : AuditHistory.EMOJI.CHANGED;
+    const icon = `<span class="flex items-center justify-center size-5 rounded-full ${iconClass} transition-all">${iconEmoji}</span>`;
+    const cardClass = isFirst ? 'border-2 border-primary/30 bg-primary/5' : 'border-base-300';
     const badgeClass = isFirst ? 'badge-primary' : 'badge-ghost';
-    
-    let html = `
-      <div class="flex items-center gap-2 mb-2">
-        <span class="badge ${badgeClass} badge-sm">${record.history_type}</span>
-        <span class="text-sm text-base-content/60">by ${record.history_user}</span>
-      </div>
-    `;
 
-    if (changes.length > 0) {
-      html += '<div class="space-y-2">';
-      changes.forEach(change => html += this.renderChange(change));
-      html += '</div>';
-    } else if (record.history_type === 'Created') {
-      html += this.renderCreationDetails(record);
-    }
-
-    return html;
-  }
-
-  renderChange(change) {
     return `
-      <div class="text-sm">
-        <span class="font-semibold">${change.field}:</span>
-        ${change.from ? `
-          <div class="flex items-center gap-2">
-            <span class="badge badge-error badge-sm line-through">${change.from}</span>
-            ${AuditHistory.ICONS.ARROW}
-            <span class="badge badge-success badge-sm">${change.to}</span>
+      <li>
+        ${!isFirst ? '<hr class="bg-primary/30"/>' : ''}
+        <div class="timeline-start text-right pr-3 min-w-0" style="flex: 0 0 22%;">
+          <div class="inline-block text-left">
+            <time class="block text-sm font-bold text-primary mb-1 whitespace-nowrap" datetime="${record.history_date}">${relative}</time>
+            <time class="block text-[11px] text-base-content/60 font-mono mb-0.5 whitespace-nowrap" datetime="${record.history_date}">${exact}</time>
+            <time class="block text-[11px] text-base-content/50 whitespace-nowrap" datetime="${record.history_date}">${time}</time>
           </div>
-        ` : `
-          <span class="badge badge-success badge-sm">${change.to}</span>
-        `}
-      </div>
+        </div>
+        <div class="timeline-middle flex-shrink-0">${icon}</div>
+        <div class="timeline-end pl-3 mb-6 min-w-0" style="flex: 1 1 auto;">
+          <div class="bg-base-100 border rounded-lg shadow-sm hover:shadow-md transition-all p-3 ${cardClass}">
+            <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <span class="badge ${badgeClass} badge-sm font-semibold">${record.history_type}</span>
+              <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+                <span>${AuditHistory.EMOJI.USER}</span>
+                <span class="truncate max-w-[140px]">${record.history_user}</span>
+              </div>
+            </div>
+            ${changes.length > 0 ? this.renderChanges(changes) : record.history_type === 'Created' ? this.renderCreation(record) : ''}
+          </div>
+        </div>
+        ${!isLast ? '<hr class="bg-primary/30"/>' : ''}
+      </li>
     `;
   }
 
-  renderCreationDetails(record) {
-    return `
-      <div class="text-sm">
-        <span class="font-semibold">Initial text:</span>
-        <span class="badge badge-success badge-sm">${record.text}</span>
+  renderChanges(changes) {
+    return '<div class="space-y-2">' + changes.map(c => `
+      <div class="bg-base-200/50 rounded-md p-2.5 hover:bg-base-200 transition-colors">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-primary">${AuditHistory.EMOJI.EDIT}</span>
+          <span class="font-semibold text-xs text-base-content">${c.field}</span>
+        </div>
+        ${c.from ? `
+          <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center ml-5">
+            <span class="badge badge-error badge-xs line-through opacity-75 justify-start truncate" title="${c.from}">${c.from}</span>
+            <span class="text-base-content/40">${AuditHistory.EMOJI.ARROW}</span>
+            <span class="badge badge-success badge-xs font-semibold justify-start truncate" title="${c.to}">${c.to}</span>
+          </div>
+        ` : `<div class="ml-5"><span class="badge badge-success badge-xs">${c.to}</span></div>`}
       </div>
-      <div class="text-sm">
-        <span class="font-semibold">Confidence:</span>
-        <span class="badge badge-sm">${record.confidence}%</span>
+    `).join('') + '</div>';
+  }
+
+  renderCreation(record) {
+    return `
+      <div class="bg-success/10 rounded-md p-2.5 border border-success/20">
+        <div class="flex items-center gap-1.5 mb-2">
+          <span class="text-success">${AuditHistory.EMOJI.PLUS}</span>
+          <span class="font-semibold text-xs text-success">Initial Values</span>
+        </div>
+        <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 ml-5 text-xs">
+          <span class="text-base-content/60">Text:</span>
+          <span class="badge badge-success badge-xs font-semibold">${record.text}</span>
+          <span class="text-base-content/60">Confidence:</span>
+          <span class="badge badge-outline badge-xs">${record.confidence}%</span>
+          <span class="text-base-content/60">Type:</span>
+          <span class="badge badge-ghost badge-xs">${record.text_type_display || 'N/A'}</span>
+        </div>
       </div>
     `;
   }
 
   detectChanges(current, previous) {
     if (!previous) return [];
-
     return AuditHistory.CHANGE_FIELDS
-      .map(field => {
-        const currentValue = field.getValue(current);
-        const previousValue = field.getValue(previous);
-        
-        return currentValue !== previousValue ? {
-          field: field.label,
-          from: previousValue,
-          to: currentValue
-        } : null;
+      .map(f => {
+        const curr = f.getValue(current);
+        const prev = f.getValue(previous);
+        return curr !== prev ? { field: f.label, from: prev, to: curr } : null;
       })
       .filter(Boolean);
-  }
-
-  formatDate(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  showEmptyState() {
-    this.elements.emptyState.classList.remove('hidden');
-    this.elements.timeline.classList.add('hidden');
-  }
-
-  showTimeline() {
-    this.elements.emptyState.classList.add('hidden');
-    this.elements.timeline.classList.remove('hidden');
   }
 }
 
