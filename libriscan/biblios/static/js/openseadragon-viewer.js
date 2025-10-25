@@ -1,6 +1,6 @@
 /**
  * OpenSeadragon Viewer
- * Handles image zoom and pan with auto-height adjustment
+ * Handles image zoom, pan, and rotation with auto-height adjustment
  */
 
 let viewerInstance = null;
@@ -29,6 +29,7 @@ function initializeViewer(imageUrl, containerId = 'openseadragon-viewer') {
       homeFillsViewer: true,
       constrainDuringPan: true,
       visibilityRatio: 1,
+      degrees: 0,
       
       // Zoom behavior
       zoomPerScroll: 1.2,
@@ -36,7 +37,16 @@ function initializeViewer(imageUrl, containerId = 'openseadragon-viewer') {
       
       // Controls
       showNavigationControl: true,
+      showRotationControl: true,
+      showFullPageControl: true,
+      showFlipControl: true,
       navigationControlAnchor: OpenSeadragon.ControlAnchor.TOP_LEFT,
+      
+      // Navigation
+      showNavigator: true,
+      navigatorPosition: 'BOTTOM_RIGHT',
+      navigatorSizeRatio: 0.15,
+      navigatorAutoFade: true,
       
       // Mouse gestures
       gestureSettingsMouse: {
@@ -49,7 +59,10 @@ function initializeViewer(imageUrl, containerId = 'openseadragon-viewer') {
       gestureSettingsTouch: {
         pinchToZoom: true,
         dblClickToZoom: true
-      }
+      },
+      
+      // Keyboard shortcuts
+      showSequenceControl: false
     });
 
     // Auto-adjust height to match image aspect ratio
