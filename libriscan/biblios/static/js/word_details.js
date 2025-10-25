@@ -9,7 +9,6 @@ class WordDetails {
     this.revertButton = document.getElementById('revertButton');
     this.scoreElement = document.getElementById('confidenceScore');
     this.progressBar = document.getElementById('confidenceBar');
-    this.wordMetadata = document.getElementById('wordMetadata');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
     this.confidenceLevelSpan = document.getElementById('confidenceLevel');
     this.prevWordBtn = document.getElementById('prevWordBtn');
@@ -26,8 +25,12 @@ class WordDetails {
     this.printControlDropdownBtn = document.getElementById('printControlDropdownBtn');
     this.printControlDisplay = document.getElementById('printControlDisplay');
     this.printControlBadge = document.getElementById('printControlBadge');
-    this.printControlDescription = document.getElementById('printControlDescription');
     this.printControlOptions = document.querySelectorAll('.print-control-option');
+
+    // Text type elements
+    this.textTypeDropdownBtn = document.getElementById('textTypeDropdownBtn');
+    this.textTypeDisplay = document.getElementById('textTypeDisplay');
+    this.textTypeBadge = document.getElementById('textTypeBadge');
 
     // Initialize data
     this.currentWordId = null;
@@ -175,8 +178,8 @@ class WordDetails {
     // Update confidence score and progress bar
     this._updateConfidenceDisplay(wordInfo);
 
-    // Update metadata
-    this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'}`;
+    // Update text type display
+    this._updateTextTypeDisplay(wordInfo.text_type || 'P');
 
     // Update print control display
     this._updatePrintControlDisplay(this.currentPrintControl);
@@ -514,23 +517,38 @@ class WordDetails {
   }
 
   /**
+   * Update the text type display UI
+   */
+  _updateTextTypeDisplay(textTypeValue) {
+    const config = {
+      'P': { text: 'Printed', badge: 'badge-info' },
+      'H': { text: 'Handwriting', badge: 'badge-secondary' }
+    }[textTypeValue] || { text: 'Printed', badge: 'badge-info' };
+
+    if (this.textTypeDisplay) this.textTypeDisplay.textContent = config.text;
+    
+    if (this.textTypeBadge) {
+      this.textTypeBadge.textContent = textTypeValue;
+      this.textTypeBadge.className = `badge badge-xs ${config.badge}`;
+    }
+  }
+
+  /**
    * Update the print control display UI
    */
   _updatePrintControlDisplay(printControlValue) {
     const config = {
-      'I': { text: 'Include', badge: 'badge-success', desc: 'Included in exports' },
-      'M': { text: 'Merge', badge: 'badge-warning', desc: 'Merged with previous word' },
-      'O': { text: 'Omit', badge: 'badge-error', desc: 'Excluded from exports' }
-    }[printControlValue] || { text: 'Include', badge: 'badge-success', desc: 'Included in exports' };
+      'I': { text: 'Include', badge: 'badge-success' },
+      'M': { text: 'Merge with Prior', badge: 'badge-warning' },
+      'O': { text: 'Omit', badge: 'badge-error' }
+    }[printControlValue] || { text: 'Include', badge: 'badge-success' };
 
     if (this.printControlDisplay) this.printControlDisplay.textContent = config.text;
     
     if (this.printControlBadge) {
       this.printControlBadge.textContent = printControlValue;
-      this.printControlBadge.className = `badge badge-sm ${config.badge}`;
+      this.printControlBadge.className = `badge badge-xs ${config.badge}`;
     }
-
-    if (this.printControlDescription) this.printControlDescription.textContent = config.desc;
   }
 
   /**

@@ -44,7 +44,7 @@
       <div class="stats stats-vertical lg:stats-horizontal shadow overflow-visible">
         <div class="stat">
           <div class="stat-title">Word</div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-start gap-2">
             <div id="clickedWord" class="stat-value text-2xl"></div>
             <input type="text" id="wordInput" class="input input-bordered w-full max-w-xs hidden" />
             <button id="editButton" class="btn btn-ghost btn-sm">
@@ -63,7 +63,59 @@
               </svg>
             </button>
           </div>
-          <div class="stat-desc" id="wordMetadata"></div>
+        </div>
+        <div class="stat overflow-visible">
+          <div class="stat-title">Type & Control</div>
+          <div class="stat-value py-0">
+            <div class="flex flex-col gap-0.5">
+              <div class="dropdown w-full">
+                <div tabindex="0" role="button" class="btn btn-xs gap-0.5 h-6 min-h-6 px-2 w-full justify-between" id="textTypeDropdownBtn">
+                  <div class="flex items-center gap-0.5">
+                    <span id="textTypeBadge" class="badge badge-xs"></span>
+                    <span id="textTypeDisplay" class="text-xs">Printed</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-40 p-1.5 shadow-xl">
+                  <li><a data-value="P" class="text-type-option gap-1 px-2 py-1">
+                    <span class="badge badge-info badge-xs">P</span>
+                    <span>Printed</span>
+                  </a></li>
+                  <li><a data-value="H" class="text-type-option gap-1 px-2 py-1">
+                    <span class="badge badge-secondary badge-xs">H</span>
+                    <span>Handwriting</span>
+                  </a></li>
+                </ul>
+              </div>
+              <div class="dropdown w-full">
+                <div tabindex="0" role="button" class="btn btn-xs gap-0.5 h-6 min-h-6 px-2 w-full justify-between" id="printControlDropdownBtn">
+                  <div class="flex items-center gap-0.5">
+                    <span id="printControlBadge" class="badge badge-xs"></span>
+                    <span id="printControlDisplay" class="text-xs">Include</span>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-40 p-1.5 shadow-xl">
+                  <li><a data-value="I" class="print-control-option gap-1 px-2 py-1">
+                    <span class="badge badge-success badge-xs">I</span>
+                    <span>Include</span>
+                  </a></li>
+                  <li><a data-value="M" class="print-control-option gap-1 px-2 py-1">
+                    <span class="badge badge-warning badge-xs">M</span>
+                    <span>Merge with Prior</span>
+                  </a></li>
+                  <li><a data-value="O" class="print-control-option gap-1 px-2 py-1">
+                    <span class="badge badge-error badge-xs">O</span>
+                    <span>Omit</span>
+                  </a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="stat">
           <div class="stat-title">Confidence Level</div>
@@ -72,35 +124,6 @@
           <div class="stat-desc">
             <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
           </div>
-        </div>
-        <div class="stat overflow-visible">
-          <div class="stat-title">Print Control</div>
-          <div class="stat-value text-lg">
-            <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="btn btn-sm gap-2" id="printControlDropdownBtn">
-                <span id="printControlBadge" class="badge badge-sm"></span>
-                <span id="printControlDisplay" class="text-sm">Include</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-48 p-2 shadow-xl">
-                <li><a data-value="I" class="print-control-option gap-2">
-                  <span class="badge badge-success badge-sm">I</span>
-                  <span>Include</span>
-                </a></li>
-                <li><a data-value="M" class="print-control-option gap-2">
-                  <span class="badge badge-warning badge-sm">M</span>
-                  <span>Merge</span>
-                </a></li>
-                <li><a data-value="O" class="print-control-option gap-2">
-                  <span class="badge badge-error badge-sm">O</span>
-                  <span>Omit</span>
-                </a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="stat-desc" id="printControlDescription">Included in exports</div>
         </div>
       </div>
       <!-- <div class="stats stats-vertical lg:stats-horizontal shadow">
