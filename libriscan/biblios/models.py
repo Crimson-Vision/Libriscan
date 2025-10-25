@@ -385,7 +385,7 @@ class TextBlock(BibliosModel):
     OMIT = "O"
     PRINT_CONTROL_CHOICES = {
         INCLUDE: "Include",
-        MERGE: "Merge With Prior",
+        MERGE: "Merged",
         OMIT: "Omit",
     }
 
