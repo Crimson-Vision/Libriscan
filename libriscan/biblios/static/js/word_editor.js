@@ -21,10 +21,7 @@ class WordEditor {
     this.onSave = null;
     this.onRevert = null;
   }
-  
-  /**
-   * Initialize event listeners for edit functionality
-   */
+
   initializeEventListeners() {
     this.editButton.onclick = () => this.enterEditMode();
     this.saveButton.onclick = () => this.save();
@@ -40,24 +37,15 @@ class WordEditor {
     this.wordElement.style.cursor = 'pointer';
     this.wordElement.title = 'Double-click to edit';
   }
-  
-  /**
-   * Enter edit mode
-   */
+
   enterEditMode() {
     this._setEditMode(true);
   }
-  
-  /**
-   * Exit edit mode
-   */
+
   exitEditMode() {
     this._setEditMode(false);
   }
-  
-  /**
-   * Save edited word
-   */
+
   async save() {
     const newText = this.wordInput.value.trim();
     if (!newText) {
@@ -70,10 +58,7 @@ class WordEditor {
       this.exitEditMode();
     }
   }
-  
-  /**
-   * Revert to pre-edit word
-   */
+
   revert() {
     if (this.preEditWord !== null) {
       this.wordInput.value = this.preEditWord;
@@ -85,17 +70,11 @@ class WordEditor {
     }
     this.exitEditMode();
   }
-  
-  /**
-   * Update the displayed word
-   */
+
   updateWord(word) {
     this.wordElement.textContent = word;
   }
-  
-  /**
-   * Check if currently in edit mode
-   */
+
   isEditingMode() {
     return this.isEditing;
   }
@@ -135,10 +114,7 @@ class WordEditor {
       this.revertButton.classList.add('hidden');
     }
   }
-  
-  /**
-   * Check if user is currently typing in input
-   */
+
   static isTyping() {
     const active = document.activeElement;
     return !!(active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable));

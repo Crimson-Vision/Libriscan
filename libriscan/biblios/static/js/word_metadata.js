@@ -24,10 +24,7 @@ class WordMetadata {
     this.currentTextType = 'P';
     this.onMarkAccepted = null;
   }
-  
-  /**
-   * Initialize event listeners for metadata functionality
-   */
+
   initializeEventListeners() {
     // Print control dropdown actions
     this.printControlOptions.forEach(option => {
@@ -54,25 +51,16 @@ class WordMetadata {
       this.markAcceptedBtn.onclick = () => this.markAsAccepted();
     }
   }
-  
-  /**
-   * Set current word ID
-   */
+
   setCurrentWordId(wordId) {
     this.currentWordId = wordId;
   }
-  
-  /**
-   * Set current word info
-   */
+
   setCurrentWordInfo(wordInfo) {
     this.currentWordInfo = wordInfo;
     this.currentWordId = wordInfo.id;
   }
-  
-  /**
-   * Update print control value
-   */
+
   async updatePrintControl(printControlValue) {
     if (!this.currentWordId) {
       console.error('No word selected');
@@ -99,10 +87,7 @@ class WordMetadata {
       this.printControlDropdownBtn.disabled = false;
     }
   }
-  
-  /**
-   * Update text type value
-   */
+
   async updateTextType(textTypeValue) {
     if (!this.currentWordId) {
       console.error('No word selected');
@@ -129,26 +114,17 @@ class WordMetadata {
       this.textTypeDropdownBtn.disabled = false;
     }
   }
-  
-  /**
-   * Update print control display
-   */
+
   updatePrintControlDisplay(printControlValue) {
     this.currentPrintControl = printControlValue;
     this._updatePrintControlDisplay(printControlValue);
   }
-  
-  /**
-   * Update text type display
-   */
+
   updateTextTypeDisplay(textTypeValue) {
     this.currentTextType = textTypeValue;
     this._updateTextTypeDisplay(textTypeValue);
   }
-  
-  /**
-   * Send print control update to server
-   */
+
   async _sendPrintControlUpdate(printControlValue) {
     const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
     const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/print-control/`;
@@ -169,10 +145,7 @@ class WordMetadata {
     
     return await response.json();
   }
-  
-  /**
-   * Send text type update to server
-   */
+
   async _sendTextTypeUpdate(textTypeValue) {
     const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
     const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/text-type/`;
@@ -193,10 +166,7 @@ class WordMetadata {
     
     return await response.json();
   }
-  
-  /**
-   * Update the print control display UI
-   */
+
   _updatePrintControlDisplay(printControlValue) {
     const config = {
       'I': { text: 'Include', badge: 'badge-success' },
@@ -211,10 +181,7 @@ class WordMetadata {
       this.printControlBadge.className = `badge badge-xs ${config.badge}`;
     }
   }
-  
-  /**
-   * Update the text type display UI
-   */
+
   _updateTextTypeDisplay(textTypeValue) {
     const config = {
       'P': { text: 'Printed', badge: 'badge-info' },
@@ -228,30 +195,21 @@ class WordMetadata {
       this.textTypeBadge.className = `badge badge-xs ${config.badge}`;
     }
   }
-  
-  /**
-   * Show success feedback for print control update
-   */
+
   _showPrintControlSuccess() {
     if (!this.printControlBadge) return;
     
     this.printControlBadge.classList.add('badge-outline');
     setTimeout(() => this.printControlBadge.classList.remove('badge-outline'), 300);
   }
-  
-  /**
-   * Show success feedback for text type update
-   */
+
   _showTextTypeSuccess() {
     if (!this.textTypeBadge) return;
     
     this.textTypeBadge.classList.add('badge-outline');
     setTimeout(() => this.textTypeBadge.classList.remove('badge-outline'), 300);
   }
-  
-  /**
-   * Close dropdown by blurring focused elements
-   */
+
   _closeDropdown(dropdownBtn) {
     if (dropdownBtn) {
       dropdownBtn.blur();
