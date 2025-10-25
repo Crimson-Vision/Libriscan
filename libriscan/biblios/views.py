@@ -369,7 +369,7 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         context["next_page"] = next_page
 
         # Get page extraction status
-        context["extracting"] = huey.get(f"extracting-{page.id}", peek=True)
+        context["extracting"] = huey.get(page.extraction_key, peek=True)
 
         # Find last edited word on this page for auto-focus
         from django.db.models import Subquery, OuterRef
@@ -410,11 +410,11 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
-    if extract_time := huey.get(f"extracting-{page.id}", peek=True):
+    if extract_time := huey.get(page.extraction_key, peek=True):
         if datetime.today() - extract_time > timedelta(minutes=10):
             logger.error(f"Extraction timed out for page {page.id}")
             # Remove the page handle from the Huey store
-            huey.get(f"extracting-{page.id}")
+            huey.get(page.extraction_key)
         logger.info(f"Extraction already in progress for page {page.id}")
     else:
         # Start the extraction process in the background
@@ -497,8 +497,15 @@ def check_words(request, short_name, collection_slug, identifier, number):
     if page.words.exists():
         # HTMX's polling trigger will stop polling when it receives status code 286
         # Take the page's extraction handle out of Huey's result store
-        huey.get(f"extraction-{page.id}")
+        huey.get(page.extraction_key)
         context = {"words": page.words.all()}
+        return render(
+            request, "biblios/components/forms/text_display.html", context, status=286
+        )
+    elif huey.get(page.extraction_key, peek=True) is None:
+        context = {
+            "error": "Text extraction has unexpectedly stopped. See the system logs for details."
+        }
         return render(
             request, "biblios/components/forms/text_display.html", context, status=286
         )

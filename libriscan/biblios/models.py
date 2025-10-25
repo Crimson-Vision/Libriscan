@@ -1,9 +1,9 @@
 import logging
 
-from datetime import datetime
-
 import rules
 from rules.contrib.models import RulesModelMixin, RulesModelBase
+
+from huey.contrib.djhuey import HUEY as huey
 
 from django.db import models
 from django.urls import reverse
@@ -13,7 +13,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from huey.contrib.djhuey import HUEY as huey
 
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
@@ -358,18 +357,21 @@ class Page(BibliosModel):
             and CloudService.objects.filter(
                 organization=self.document.series.collection.owner
             ).exists()
+            and huey.get(self.extraction_key, peek=True) is None
         )
 
     @property
     def has_extraction(self):
         return self.words.exists()
 
+    @cached_property
+    def extraction_key(self):
+        return f"extracting-{self.id}"
+
     # Hand off this work to the Huey background task
     def generate_extraction(self):
         extractor = self.document.series.collection.owner.cloudservice.extractor
         q = queue_extraction(extractor(self))
-        # Put a handle for this page in the Huey store, and track the request time
-        huey.put(f"extracting-{self.id}", datetime.today())
         logger.info(f"Queuing {q.id}")
 
 
