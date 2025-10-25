@@ -1,0 +1,45 @@
+{% load static %}
+<!-- Audit History Timeline: Displays word edit history with timestamps and change details -->
+
+<div id="auditHistoryContent" class="h-[50vh] overflow-y-auto px-2">
+  
+  <!-- Empty State -->
+  <div id="auditHistoryEmpty" class="flex flex-col items-center justify-center h-full text-center py-12">
+    <div class="mb-6">
+      <div class="w-24 h-24 rounded-full bg-base-200 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+      </div>
+    </div>
+    <h3 class="text-lg font-semibold mb-2 text-base-content">No History Yet</h3>
+    <p class="text-sm text-base-content/60 max-w-xs leading-relaxed">Select a word to view its complete edit history and track all changes over time</p>
+  </div>
+
+  <!-- Timeline Content -->
+  <div id="auditHistoryTimeline" class="hidden pb-4">
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-base-100 pb-4 mb-2">
+      <div class="alert shadow-sm border-primary/20 bg-primary/5">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-baseline gap-2 flex-wrap">
+            <h3 id="historyWordText" class="font-bold text-base text-base-content"></h3>
+            <code id="historyWordId" class="text-xs font-mono text-base-content/50"></code>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div id="historyCount" class="badge badge-primary badge-sm font-medium"></div>
+          <div class="tooltip tooltip-bottom" data-tip="Your timezone">
+            <div class="badge badge-ghost badge-sm gap-1">
+              <span>🕐</span>
+              <span id="userTimezone" class="font-mono text-[10px]"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline List -->
+    <ul class="timeline timeline-snap-icon timeline-vertical w-full" role="list" aria-label="Audit history timeline"></ul>
+  </div>
+</div>

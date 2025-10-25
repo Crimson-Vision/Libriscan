@@ -371,6 +371,19 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         # Get page extraction status
         context["extracting"] = huey.get(f"extracting-{page.id}", peek=True)
 
+        # Find last edited word on this page for auto-focus
+        from django.db.models import Subquery, OuterRef
+        
+        last_edited = page.words.annotate(
+            last_edit=Subquery(
+                TextBlock.history.filter(id=OuterRef('id'))  # pylint: disable=no-member
+                .order_by('-history_date')
+                .values('history_date')[:1]
+            )
+        ).order_by('-last_edit').first() if page.words.exists() else None
+        
+        context["last_edited_word_id"] = last_edited.id if last_edited else None
+
         return context
 
     def get_object(self, **kwargs):
@@ -640,3 +653,64 @@ def update_text_type(request, short_name, collection_slug, identifier, number, w
     except Exception as e:
         logger.error(f"Error updating text_type for word {word_id}: {e}")
         return JsonResponse({"error": "Failed to update text type"}, status=500)
+
+
+@permission_required(
+    "biblios.view_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["GET"])
+def textblock_history(request, short_name, collection_slug, identifier, number, word_id):
+    """Return the audit history of a specific TextBlock"""
+    try:
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+
+        # Get all historical records for this TextBlock
+        history_records = word.history.all()
+
+        # Build response data
+        history_data = []
+        for record in history_records:
+            # Get user role information
+            user_role = None
+            if record.history_user:
+                # Get the user's primary role (first role found)
+                role_obj = record.history_user.userrole_set.first()
+                if role_obj:
+                    user_role = role_obj.get_role_display()
+            
+            history_data.append({
+                "history_id": record.history_id,
+                "history_date": record.history_date.isoformat(),
+                "history_type": record.get_history_type_display(),
+                "history_user": record.history_user.get_full_name() or record.history_user.email if record.history_user else "Unknown User",
+                "history_user_role": user_role,
+                "text": record.text,
+                "confidence": float(record.confidence),
+                "text_type": record.text_type,
+                "text_type_display": TextBlock.TEXT_TYPE_CHOICES.get(record.text_type),
+                "print_control": record.print_control,
+                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(record.print_control),
+                "line": record.line,
+                "number": record.number,
+            })
+
+        logger.info(f"Retrieved {len(history_data)} history records for word {word_id}")
+
+        return JsonResponse({
+            "word_id": word_id,
+            "current_text": word.text,
+            "history_count": len(history_data),
+            "history": history_data
+        })
+
+    except Exception as e:
+        logger.error(f"Error retrieving history for word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to retrieve history"}, status=500)
