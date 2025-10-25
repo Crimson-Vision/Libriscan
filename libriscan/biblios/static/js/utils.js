@@ -125,6 +125,63 @@ const LibriscanUtils = {
   },
 
   /**
+   * Build a word history URL for the current page
+   * @param {number} wordId - Word ID to get history for
+   * @param {string} pathname - URL pathname (default: current location)
+   * @returns {string} History URL
+   */
+  buildWordHistoryURL(wordId, pathname = window.location.pathname) {
+    const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
+    return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/history/`;
+  },
+
+  /**
+   * Fetch JSON data from a URL with optional authentication
+   * @param {string} url - Request URL
+   * @param {Object} options - Request options
+   * @param {string} options.method - HTTP method (default: 'GET')
+   * @param {boolean} options.includeCSRF - Whether to include CSRF token (default: false for GET)
+   * @returns {Promise<Object>} Parsed JSON response
+   */
+  async fetchJSON(url, options = {}) {
+    const {
+      method = 'GET',
+      includeCSRF = method !== 'GET'
+    } = options;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    };
+
+    if (includeCSRF) {
+      const csrfToken = this.getCSRFToken();
+      if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      credentials: 'same-origin'
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If JSON parsing fails, use default error message
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  /**
    * Post form data to a URL with CSRF protection
    * @param {string} url - Target URL
    * @param {Object} data - Data to send as form fields
@@ -159,6 +216,31 @@ const LibriscanUtils = {
     setTimeout(() => {
       document.body.removeChild(toast);
     }, duration);
+  },
+
+  /**
+   * Log history data to console in a formatted way
+   * @param {Object} historyData - History data object from API
+   * @param {number} historyData.word_id - Word ID
+   * @param {string} historyData.current_text - Current text value
+   * @param {number} historyData.history_count - Number of history records
+   * @param {Array} historyData.history - Array of history records
+   */
+  logHistoryToConsole(historyData) {
+    console.group('=== AUDIT LOG FOR WORD ===');
+    console.log('Word ID:', historyData.word_id);
+    console.log('Current Text:', historyData.current_text);
+    console.log('Total History Records:', historyData.history_count);
+    console.groupEnd();
+    
+    if (historyData.history && historyData.history.length > 0) {
+      console.log('=== HISTORY RECORDS ===');
+      console.table(historyData.history);
+    } else {
+      console.log('No history records found');
+    }
+    
+    console.log('Full History Data:', historyData);
   },
 
   /**

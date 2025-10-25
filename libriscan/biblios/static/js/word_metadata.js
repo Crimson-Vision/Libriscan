@@ -4,20 +4,15 @@
  */
 class WordMetadata {
   constructor(elements) {
-    // Print control elements
     this.printControlDropdownBtn = elements.printControlDropdownBtn;
     this.printControlDisplay = elements.printControlDisplay;
     this.printControlBadge = elements.printControlBadge;
     this.printControlOptions = elements.printControlOptions;
-    
-    // Text type elements
     this.textTypeDropdownBtn = elements.textTypeDropdownBtn;
     this.textTypeDisplay = elements.textTypeDisplay;
     this.textTypeBadge = elements.textTypeBadge;
     this.textTypeOptions = elements.textTypeOptions;
     this.markAcceptedBtn = elements.markAcceptedBtn;
-    
-    // State
     this.currentWordId = null;
     this.currentWordInfo = null;
     this.currentPrintControl = 'I';
@@ -26,27 +21,22 @@ class WordMetadata {
   }
 
   initializeEventListeners() {
-    // Print control dropdown actions
     this.printControlOptions.forEach(option => {
       option.addEventListener('click', (e) => {
         e.preventDefault();
-        const value = option.getAttribute('data-value');
-        this.updatePrintControl(value);
+        this.updatePrintControl(option.getAttribute('data-value'));
         this._closeDropdown(this.printControlDropdownBtn);
       });
     });
     
-    // Text type dropdown actions
     this.textTypeOptions.forEach(option => {
       option.addEventListener('click', (e) => {
         e.preventDefault();
-        const value = option.getAttribute('data-value');
-        this.updateTextType(value);
+        this.updateTextType(option.getAttribute('data-value'));
         this._closeDropdown(this.textTypeDropdownBtn);
       });
     });
     
-    // Mark as accepted button
     if (this.markAcceptedBtn) {
       this.markAcceptedBtn.onclick = () => this.markAsAccepted();
     }
@@ -67,7 +57,6 @@ class WordMetadata {
       return;
     }
     
-    // Show loading state
     this.printControlDisplay.textContent = 'Updating...';
     this.printControlDropdownBtn.disabled = true;
     
@@ -94,7 +83,6 @@ class WordMetadata {
       return;
     }
     
-    // Show loading state
     this.textTypeDisplay.textContent = 'Updating...';
     this.textTypeDropdownBtn.disabled = true;
     
@@ -129,42 +117,18 @@ class WordMetadata {
     const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
     const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/print-control/`;
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': LibriscanUtils.getCSRFToken(),
-      },
-      body: new URLSearchParams({ print_control: printControlValue }),
+    return await LibriscanUtils.postFormData(url, { 
+      print_control: printControlValue 
     });
-    
-    if (!response.ok) {
-      const { error } = await response.json();
-      throw new Error(error || 'Failed to update print control');
-    }
-    
-    return await response.json();
   }
 
   async _sendTextTypeUpdate(textTypeValue) {
     const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
     const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/text-type/`;
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-CSRFToken': LibriscanUtils.getCSRFToken(),
-      },
-      body: new URLSearchParams({ text_type: textTypeValue }),
+    return await LibriscanUtils.postFormData(url, { 
+      text_type: textTypeValue 
     });
-    
-    if (!response.ok) {
-      const { error } = await response.json();
-      throw new Error(error || 'Failed to update text type');
-    }
-    
-    return await response.json();
   }
 
   _updatePrintControlDisplay(printControlValue) {
@@ -211,18 +175,10 @@ class WordMetadata {
   }
 
   _closeDropdown(dropdownBtn) {
-    if (dropdownBtn) {
-      dropdownBtn.blur();
-    }
-    if (document.activeElement) {
-      document.activeElement.blur();
-    }
+    if (dropdownBtn) dropdownBtn.blur();
+    if (document.activeElement) document.activeElement.blur();
   }
   
-  /**
-   * Mark the current word as accepted (set confidence to 99.999)
-   * Calls the onMarkAccepted callback to update word text
-   */
   async markAsAccepted() {
     if (!this.currentWordInfo?.word) {
       LibriscanUtils.showToast('No word selected', 'error');
@@ -232,8 +188,6 @@ class WordMetadata {
     this._setMarkAcceptedLoading(true);
     
     try {
-      // Call the callback to update word with same text
-      // Backend will set confidence to 99.999
       if (this.onMarkAccepted) {
         await this.onMarkAccepted(this.currentWordInfo.word);
       }
@@ -245,27 +199,16 @@ class WordMetadata {
     }
   }
   
-  /**
-   * Toggle loading state for Mark as Accepted button
-   */
   _setMarkAcceptedLoading(isLoading) {
     if (!this.markAcceptedBtn) return;
     
     this.markAcceptedBtn.disabled = isLoading;
-    
-    if (isLoading) {
-      this.markAcceptedBtn.innerHTML = `
-        <span class="loading loading-spinner loading-xs"></span>
-        Saving...
-      `;
-    } else {
-      this.markAcceptedBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    this.markAcceptedBtn.innerHTML = isLoading
+      ? `<span class="loading loading-spinner loading-xs"></span>Saving...`
+      : `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
         </svg>
-        Mark as Accepted
-      `;
-    }
+        Mark as Accepted`;
   }
 }
 

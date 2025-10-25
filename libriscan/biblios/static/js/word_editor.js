@@ -48,7 +48,7 @@ class WordEditor {
   async save() {
     const newText = this.wordInput.value.trim();
     if (!newText) {
-      alert('Text cannot be empty');
+      LibriscanUtils.showToast('Text cannot be empty', 'error');
       return;
     }
     
