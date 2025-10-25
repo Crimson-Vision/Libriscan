@@ -51,9 +51,11 @@ class WordSelector {
     if (!suggestionsStr) return {};
     
     try {
+      // Try JSON.parse first (for JavaScript-updated data with double quotes)
       return Object.fromEntries(JSON.parse(suggestionsStr));
     } catch (jsonError) {
       try {
+        // Fallback to eval for template-generated data with single quotes
         return Object.fromEntries(eval(suggestionsStr));
       } catch (evalError) {
         console.error('Error parsing suggestions:', evalError);
