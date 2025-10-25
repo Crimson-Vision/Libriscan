@@ -101,9 +101,13 @@ class WordDetails {
         e.preventDefault();
         const value = option.getAttribute('data-value');
         this.updatePrintControl(value);
-        // Close dropdown by removing focus
+        // Close dropdown by removing focus from both button and active element
         if (this.printControlDropdownBtn) {
           this.printControlDropdownBtn.blur();
+        }
+        // Ensure dropdown closes by blurring any focused element
+        if (document.activeElement) {
+          document.activeElement.blur();
         }
       });
     });
@@ -114,9 +118,13 @@ class WordDetails {
         e.preventDefault();
         const value = option.getAttribute('data-value');
         this.updateTextType(value);
-        // Close dropdown by removing focus
+        // Close dropdown by removing focus from both button and active element
         if (this.textTypeDropdownBtn) {
           this.textTypeDropdownBtn.blur();
+        }
+        // Ensure dropdown closes by blurring any focused element
+        if (document.activeElement) {
+          document.activeElement.blur();
         }
       });
     });
