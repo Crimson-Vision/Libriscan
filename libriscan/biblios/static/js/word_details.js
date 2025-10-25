@@ -118,6 +118,11 @@ class WordDetails {
 
     this.metadata.setCurrentWordInfo(wordInfo);
     this.container.classList.remove('hidden');
+    
+    // Always switch to Details tab when a new word is selected
+    const detailsTab = document.getElementById('wordDetailsTab');
+    if (detailsTab) detailsTab.checked = true;
+    
     this.editor.updateWord(wordInfo.word);
     this._syncActiveWordButton();
     this.updateNavigationState();

@@ -13,7 +13,7 @@ class AuditHistory {
 
   static CHANGE_FIELDS = [
     { key: 'text', label: 'Text', getValue: (r) => r.text },
-    { key: 'confidence', label: 'Confidence', getValue: (r) => `${r.confidence}%` },
+    { key: 'confidence', label: 'Confidence', getValue: (r) => parseFloat(r.confidence).toFixed(2), format: (v) => `${v}%` },
     { key: 'text_type', label: 'Type', getValue: (r) => r.text_type_display },
     { key: 'print_control', label: 'Print Control', getValue: (r) => r.print_control_display }
   ];
@@ -121,6 +121,7 @@ class AuditHistory {
   }
 
   renderCreation(record) {
+    const confidenceValue = parseFloat(record.confidence).toFixed(2);
     return `
       <div class="bg-success/10 rounded-md p-2.5 border border-success/20">
         <div class="flex items-center gap-1.5 mb-2">
@@ -131,7 +132,7 @@ class AuditHistory {
           <span class="text-base-content/60">Text:</span>
           <span class="badge badge-success badge-xs font-semibold">${record.text}</span>
           <span class="text-base-content/60">Confidence:</span>
-          <span class="badge badge-outline badge-xs">${record.confidence}%</span>
+          <span class="badge badge-outline badge-xs">${confidenceValue}%</span>
           <span class="text-base-content/60">Type:</span>
           <span class="badge badge-ghost badge-xs">${record.text_type_display || 'N/A'}</span>
         </div>
@@ -145,7 +146,12 @@ class AuditHistory {
       .map(f => {
         const curr = f.getValue(current);
         const prev = f.getValue(previous);
-        return curr !== prev ? { field: f.label, from: prev, to: curr } : null;
+        if (curr !== prev) {
+          const fromDisplay = f.format ? f.format(prev) : prev;
+          const toDisplay = f.format ? f.format(curr) : curr;
+          return { field: f.label, from: fromDisplay, to: toDisplay };
+        }
+        return null;
       })
       .filter(Boolean);
   }
