@@ -3,6 +3,8 @@ import logging
 import rules
 from rules.contrib.models import RulesModelMixin, RulesModelBase
 
+from huey.contrib.djhuey import HUEY as huey
+
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import AbstractUser
@@ -355,6 +357,7 @@ class Page(BibliosModel):
             and CloudService.objects.filter(
                 organization=self.document.series.collection.owner
             ).exists()
+            and huey.get(self.extraction_key, peek=True) is None
         )
 
     @property
