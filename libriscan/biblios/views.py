@@ -536,3 +536,55 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
     except Exception as e:
         logger.error(f"Error updating word {word_id}: {e}")
         return JsonResponse({"error": "Failed to update word"}, status=500)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def update_print_control(request, short_name, collection_slug, identifier, number, word_id):
+    """Update a TextBlock's print_control field"""
+    try:
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+
+        # Get the new print_control value
+        print_control = request.POST.get("print_control", "").strip()
+        
+        # Validate against allowed choices
+        valid_choices = [choice[0] for choice in TextBlock.PRINT_CONTROL_CHOICES.items()]
+        if print_control not in valid_choices:
+            return JsonResponse(
+                {
+                    "error": f"Invalid print_control value. Must be one of: {', '.join(valid_choices)}"
+                },
+                status=400
+            )
+
+        # Update the print_control field
+        word.print_control = print_control
+        word.save(update_fields=["print_control"])
+
+        logger.info(f"Updated word {word_id} print_control to {print_control}")
+
+        return JsonResponse(
+            {
+                "id": word.id,
+                "text": word.text,
+                "print_control": word.print_control,
+                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(word.print_control),
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error updating print_control for word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to update print control"}, status=500)

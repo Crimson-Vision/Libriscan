@@ -123,6 +123,11 @@ urlpatterns = [
                                             views.update_word,
                                             name="update_word",
                                         ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/print-control/",
+                                            views.update_print_control,
+                                            name="update_print_control",
+                                        ),
                                     ]
                                 ),
                             ),
