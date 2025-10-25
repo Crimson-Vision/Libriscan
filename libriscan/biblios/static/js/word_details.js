@@ -32,6 +32,10 @@ class WordDetails {
     this.textTypeDisplay = document.getElementById('textTypeDisplay');
     this.textTypeBadge = document.getElementById('textTypeBadge');
 
+    // Stat container elements for full-width edit mode
+    this.typeControlStat = document.getElementById('typeControlStat');
+    this.confidenceStat = document.getElementById('confidenceStat');
+
     // Initialize data
     this.currentWordId = null;
     this.currentPrintControl = 'I';
@@ -131,6 +135,11 @@ class WordDetails {
       // Save the current word value before editing starts
       this.preEditWord = this.wordElement.textContent;
       
+      // Hide other stats to give input full width (desktop only)
+      // This is to get the input to full width for extremely long words
+      if (this.typeControlStat) this.typeControlStat.classList.add('lg:hidden');
+      if (this.confidenceStat) this.confidenceStat.classList.add('lg:hidden');
+      
       this.wordElement.classList.add('hidden');
       this.wordInput.classList.remove('hidden');
       this.editButton.classList.add('hidden');
@@ -139,6 +148,10 @@ class WordDetails {
       this.wordInput.value = this.wordElement.textContent;
       this.wordInput.focus();
     } else {
+      // Restore other stats visibility
+      if (this.typeControlStat) this.typeControlStat.classList.remove('lg:hidden');
+      if (this.confidenceStat) this.confidenceStat.classList.remove('lg:hidden');
+      
       this.wordElement.classList.remove('hidden');
       this.wordInput.classList.add('hidden');
       this.editButton.classList.remove('hidden');
