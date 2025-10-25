@@ -115,8 +115,9 @@ class WordDetails {
   }
 
   revertEdit() {
-    this.wordElement.textContent = this.originalWord;
-    this.currentWordInfo.word = this.originalWord;
+    this.wordInput.value = this.preEditWord;
+    this.wordElement.textContent = this.preEditWord;
+    this.currentWordInfo.word = this.preEditWord;
     this.exitEditMode();
   }
 
@@ -127,6 +128,9 @@ class WordDetails {
   // Toggle edit UI
   _setEditMode(enabled) {
     if (enabled) {
+      // Save the current word value before editing starts
+      this.preEditWord = this.wordElement.textContent;
+      
       this.wordElement.classList.add('hidden');
       this.wordInput.classList.remove('hidden');
       this.editButton.classList.add('hidden');
