@@ -172,10 +172,10 @@ class WordDetails {
       this.progressBar.style.display = 'none';
     }
     
-    // Special handling for 99.999 confidence - only show "Modified" badge aka accepted
+    // Special handling for 99.999 confidence - only show "Accepted" badge
     if (raw >= 99.999) {
       if (this.confidenceLevelSpan) {
-        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Modified</span>';
+        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Accepted</span>';
       }
     } else {
       // Normal display for other confidence levels - show badge only
