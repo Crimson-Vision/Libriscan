@@ -163,7 +163,7 @@ class WordDetails {
       // Save the current word value before editing starts
       this.preEditWord = this.wordElement.textContent;
       
-      // Hide other stats to give input full width (desktop only)
+      // Hide other stats to give input full width
       // This is to get the input to full width for extremely long words
       if (this.typeControlStat) this.typeControlStat.classList.add('lg:hidden');
       if (this.confidenceStat) this.confidenceStat.classList.add('lg:hidden');
