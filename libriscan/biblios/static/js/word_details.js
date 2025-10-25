@@ -22,8 +22,16 @@ class WordDetails {
     this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
     this.viewAuditLogAction = document.getElementById('viewAuditLogAction');
 
+    // Print control elements
+    this.printControlDropdownBtn = document.getElementById('printControlDropdownBtn');
+    this.printControlDisplay = document.getElementById('printControlDisplay');
+    this.printControlBadge = document.getElementById('printControlBadge');
+    this.printControlDescription = document.getElementById('printControlDescription');
+    this.printControlOptions = document.querySelectorAll('.print-control-option');
+
     // Initialize data
     this.currentWordId = null;
+    this.currentPrintControl = 'I';
     this.totalWords = document.querySelectorAll('.word-block').length;
 
     // Initialize event listeners
@@ -72,6 +80,19 @@ class WordDetails {
     if (this.viewAuditLogAction) {
       this.viewAuditLogAction.onclick = () => this.viewAuditLog();
     }
+
+    // Print control dropdown actions
+    this.printControlOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        const value = option.getAttribute('data-value');
+        this.updatePrintControl(value);
+        // Close dropdown by removing focus
+        if (this.printControlDropdownBtn) {
+          this.printControlDropdownBtn.blur();
+        }
+      });
+    });
   }
 
   startEditing() {
@@ -139,6 +160,7 @@ class WordDetails {
     this.currentWordInfo = wordInfo;
     this.originalWord = wordInfo.word;
     this.currentWordId = wordInfo.id;
+    this.currentPrintControl = wordInfo.print_control || 'I';
 
     // Show container and update basic word info
     this.container.classList.remove('hidden');
@@ -154,7 +176,10 @@ class WordDetails {
     this._updateConfidenceDisplay(wordInfo);
 
     // Update metadata
-    this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'} | Control: ${wordInfo.print_control}`;
+    this.wordMetadata.textContent = `Type: ${wordInfo.text_type === 'H' ? 'Handwriting' : 'Printed'}`;
+
+    // Update print control display
+    this._updatePrintControlDisplay(this.currentPrintControl);
 
     this.updateSuggestions(wordInfo);
   }
@@ -443,6 +468,79 @@ class WordDetails {
   viewAuditLog() {
     // TODO: Implement view audit log functionality
     console.log('View Audit Log clicked');
+  }
+
+  /**
+   * Update print control value for the current word
+   */
+  async updatePrintControl(printControlValue) {
+    if (!this.currentWordId) return console.error('No word selected');
+
+    // Show loading state
+    this.printControlDisplay.textContent = 'Updating...';
+    this.printControlDropdownBtn.disabled = true;
+
+    try {
+      const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
+      const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/print-control/`;
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': LibriscanUtils.getCSRFToken(),
+        },
+        body: new URLSearchParams({ print_control: printControlValue }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || 'Failed to update print control');
+      }
+
+      const data = await response.json();
+      this.currentPrintControl = this.currentWordInfo.print_control = data.print_control;
+      this._updatePrintControlDisplay(data.print_control);
+      this._showPrintControlSuccess();
+      LibriscanUtils.showToast('Print control updated', 'success');
+      
+    } catch (error) {
+      console.error('Error updating print control:', error);
+      LibriscanUtils.showToast(error.message || 'Failed to update print control', 'error');
+      this._updatePrintControlDisplay(this.currentPrintControl);
+    } finally {
+      this.printControlDropdownBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Update the print control display UI
+   */
+  _updatePrintControlDisplay(printControlValue) {
+    const config = {
+      'I': { text: 'Include', badge: 'badge-success', desc: 'Included in exports' },
+      'M': { text: 'Merge', badge: 'badge-warning', desc: 'Merged with previous word' },
+      'O': { text: 'Omit', badge: 'badge-error', desc: 'Excluded from exports' }
+    }[printControlValue] || { text: 'Include', badge: 'badge-success', desc: 'Included in exports' };
+
+    if (this.printControlDisplay) this.printControlDisplay.textContent = config.text;
+    
+    if (this.printControlBadge) {
+      this.printControlBadge.textContent = printControlValue;
+      this.printControlBadge.className = `badge badge-sm ${config.badge}`;
+    }
+
+    if (this.printControlDescription) this.printControlDescription.textContent = config.desc;
+  }
+
+  /**
+   * Show success feedback for print control update
+   */
+  _showPrintControlSuccess() {
+    if (!this.printControlBadge) return;
+    
+    this.printControlBadge.classList.add('badge-outline');
+    setTimeout(() => this.printControlBadge.classList.remove('badge-outline'), 300);
   }
 
   /**

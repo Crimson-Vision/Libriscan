@@ -41,7 +41,7 @@
           <span class="text-md ml-2" aria-hidden="true">»</span>
         </button>
       </div>
-      <div class="stats stats-vertical lg:stats-horizontal shadow">
+      <div class="stats stats-vertical lg:stats-horizontal shadow overflow-visible">
         <div class="stat">
           <div class="stat-title">Word</div>
           <div class="flex items-center gap-2">
@@ -72,6 +72,35 @@
           <div class="stat-desc">
             <progress id="confidenceBar" class="progress w-56" value="0" max="100"></progress>
           </div>
+        </div>
+        <div class="stat overflow-visible">
+          <div class="stat-title">Print Control</div>
+          <div class="stat-value text-lg">
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-sm gap-2" id="printControlDropdownBtn">
+                <span id="printControlBadge" class="badge badge-sm"></span>
+                <span id="printControlDisplay" class="text-sm">Include</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-48 p-2 shadow-xl">
+                <li><a data-value="I" class="print-control-option gap-2">
+                  <span class="badge badge-success badge-sm">I</span>
+                  <span>Include</span>
+                </a></li>
+                <li><a data-value="M" class="print-control-option gap-2">
+                  <span class="badge badge-warning badge-sm">M</span>
+                  <span>Merge</span>
+                </a></li>
+                <li><a data-value="O" class="print-control-option gap-2">
+                  <span class="badge badge-error badge-sm">O</span>
+                  <span>Omit</span>
+                </a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="stat-desc" id="printControlDescription">Included in exports</div>
         </div>
       </div>
       <!-- <div class="stats stats-vertical lg:stats-horizontal shadow">
