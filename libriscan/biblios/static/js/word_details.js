@@ -223,12 +223,48 @@ class WordDetails {
     const suggestionsList = document.createElement('ul');
     suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
     const frag = document.createDocumentFragment();
+    
+    const totalSuggestions = entries.length;
 
-    entries.forEach(([suggestion, frequency]) => {
+    entries.forEach(([suggestion, frequency], index) => {
       const item = document.createElement('li');
       const link = document.createElement('a');
-      link.className = 'flex justify-between items-center';
-      link.innerHTML = `<span>${suggestion}</span><span class="badge badge-neutral">${frequency}</span>`;
+      link.className = 'flex items-center gap-3';
+      
+      // Calculate dynamic progress value based on position (descending from 100%)
+      // First suggestion = 100%, last suggestion = minimum value
+      let progressValue;
+      let progressClass;
+      
+      if (totalSuggestions === 1) {
+        // Single suggestion gets full green
+        progressValue = 100;
+        progressClass = 'progress-success';
+      } else {
+        // Calculate progress: starts at 100% and decreases evenly
+        // Ensure minimum of 10% for visibility
+        const minProgress = 10;
+        const maxProgress = 100;
+        const range = maxProgress - minProgress;
+        progressValue = maxProgress - (index / (totalSuggestions - 1)) * range;
+        
+        // Determine color based on progress value
+        if (progressValue >= 70) {
+          progressClass = 'progress-success'; // green for high confidence
+        } else if (progressValue >= 40) {
+          progressClass = 'progress-warning'; // orange for medium confidence
+        } else {
+          progressClass = 'progress-error'; // red for low confidence
+        }
+      }
+      
+      // Create badge number, suggestion text, and progress bar
+      link.innerHTML = `
+        <span class="badge badge-neutral badge-sm shrink-0">${index + 1}</span>
+        <span class="flex-1">${suggestion}</span>
+        <progress class="progress w-20 ${progressClass}" value="${progressValue}" max="100"></progress>
+      `;
+      
       link.addEventListener('click', event => {
         event.preventDefault();
         this.applySuggestion(suggestion, suggestionsList, link);
