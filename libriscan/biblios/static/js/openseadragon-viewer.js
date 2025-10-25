@@ -65,6 +65,9 @@ function initializeViewer(imageUrl, containerId = 'openseadragon-viewer') {
     return viewerInstance;
   } catch (error) {
     console.error('Viewer initialization failed:', error);
+    if (typeof LibriscanUtils !== 'undefined') {
+      LibriscanUtils.showToast('Failed to load image viewer', 'error');
+    }
     return null;
   }
 }

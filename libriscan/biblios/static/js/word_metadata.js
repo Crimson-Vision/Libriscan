@@ -54,6 +54,7 @@ class WordMetadata {
   async updatePrintControl(printControlValue) {
     if (!this.currentWordId) {
       console.error('No word selected');
+      LibriscanUtils.showToast('No word selected', 'error');
       return;
     }
     
@@ -80,6 +81,7 @@ class WordMetadata {
   async updateTextType(textTypeValue) {
     if (!this.currentWordId) {
       console.error('No word selected');
+      LibriscanUtils.showToast('No word selected', 'error');
       return;
     }
     

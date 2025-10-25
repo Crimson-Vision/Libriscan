@@ -93,6 +93,9 @@ class ConfidenceToggle {
       localStorage.setItem(ConfidenceToggle.STORAGE_KEY, JSON.stringify(prefs));
     } catch (error) {
       console.warn('Failed to save toggle preferences:', error);
+      if (typeof LibriscanUtils !== 'undefined') {
+        LibriscanUtils.showToast('Could not save preferences', 'warning');
+      }
     }
   }
 
@@ -102,6 +105,9 @@ class ConfidenceToggle {
       return saved ? JSON.parse(saved) : {};
     } catch (error) {
       console.warn('Failed to load toggle preferences:', error);
+      if (typeof LibriscanUtils !== 'undefined') {
+        LibriscanUtils.showToast('Could not load preferences', 'warning');
+      }
       return {};
     }
   }
