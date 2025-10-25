@@ -184,7 +184,7 @@ class WordDetails {
       // Show the Mark as Accepted button for non-accepted confidence
       if (this.markAcceptedBtn) {
         this.markAcceptedBtn.classList.remove('hidden');
-        this._setMarkAcceptedLoading(false); // Reset button to default state
+        this.metadata._setMarkAcceptedLoading(false); // Reset button to default state
       }
     }
   }

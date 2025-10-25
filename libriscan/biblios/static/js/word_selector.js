@@ -59,15 +59,23 @@ class WordSelector {
       print_control: wordBlock.dataset.wordPrintControl,
       extraction_id: wordBlock.dataset.wordExtractionId,
       suggestions: (() => {
+        const suggestionsStr = wordBlock.dataset.wordSuggestions;
+        if (!suggestionsStr) return {};
+        
         try {
-          const suggestionsStr = wordBlock.dataset.wordSuggestions;
-          // Convert string "[['word', count], ...]" to array
-          const suggestionsArray = eval(suggestionsStr);
-          // Convert array to object format {word: count, ...}
+          // Try JSON.parse first (for JavaScript-updated data with double quotes)
+          const suggestionsArray = JSON.parse(suggestionsStr);
           return Object.fromEntries(suggestionsArray);
-        } catch (error) {
-          console.error('Error parsing suggestions:', error);
-          return {};
+        } catch (jsonError) {
+          try {
+            // Fallback to eval for template-generated data with single quotes
+            const suggestionsArray = eval(suggestionsStr);
+            return Object.fromEntries(suggestionsArray);
+          } catch (evalError) {
+            console.error('Error parsing suggestions:', evalError);
+            LibriscanUtils.showToast('Failed to load suggestions', 'error');
+            return {};
+          }
         }
       })(),
       geometry: {
