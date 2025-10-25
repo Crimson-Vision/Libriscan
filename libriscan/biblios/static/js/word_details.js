@@ -11,6 +11,7 @@ class WordDetails {
     this.progressBar = document.getElementById('confidenceBar');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
     this.confidenceLevelSpan = document.getElementById('confidenceLevel');
+    this.markAcceptedBtn = document.getElementById('markAcceptedBtn');
     this.prevWordBtn = document.getElementById('prevWordBtn');
     this.nextWordBtn = document.getElementById('nextWordBtn');
     this.wordPosition = document.getElementById('wordPosition');
@@ -57,6 +58,11 @@ class WordDetails {
     this.saveButton.onclick = () => this.saveEdit();
     this.revertButton.onclick = () => this.revertEdit();
     this.wordInput.onkeypress = (e) => { if (e.key === 'Enter') this.saveButton.click(); };
+
+    // Mark as accepted button
+    if (this.markAcceptedBtn) {
+      this.markAcceptedBtn.onclick = () => this.markAsAccepted();
+    }
 
     // Word navigation
     this.prevWordBtn.onclick = () => this.goToPrevWord();
@@ -227,6 +233,10 @@ class WordDetails {
       if (this.confidenceLevelSpan) {
         this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Accepted</span>';
       }
+      // Hide the Mark as Accepted button
+      if (this.markAcceptedBtn) {
+        this.markAcceptedBtn.classList.add('hidden');
+      }
     } else {
       // Normal display for other confidence levels - show badge only
       if (this.confidenceLevelSpan) {
@@ -234,6 +244,11 @@ class WordDetails {
         const levelText = this.getLevelText(level);
         const badgeClass = this.getBadgeClass(level);
         this.confidenceLevelSpan.innerHTML = `<span class="badge ${badgeClass}">${levelText}</span>`;
+      }
+      // Show the Mark as Accepted button for non-accepted confidence
+      if (this.markAcceptedBtn) {
+        this.markAcceptedBtn.classList.remove('hidden');
+        this._setMarkAcceptedLoading(false); // Reset button to default state
       }
     }
   }
@@ -307,9 +322,9 @@ class WordDetails {
   /**
    * Shared method to update word text on server and refresh UI
    * @param {string} newText - The new text for the word
-   * @param {Function} onSuccessCallback - Callback to execute on successful update
+   * @param {Function|Object} callbackOrOptions - Success callback function OR options object {callback, successMessage}
    */
-  async _updateWordText(newText, onSuccessCallback) {
+  async _updateWordText(newText, callbackOrOptions) {
     try {
       const updateUrl = this._buildUpdateUrl();
       const data = await this._makeUpdateRequest(updateUrl, newText);
@@ -318,11 +333,20 @@ class WordDetails {
       this._updateWordUI();
       this._updateWordBlock(data);
       
-      LibriscanUtils.showToast('Word updated successfully');
-      onSuccessCallback?.();
+      // Handle callback and toast message
+      if (typeof callbackOrOptions === 'function') {
+        LibriscanUtils.showToast('Word updated successfully');
+        callbackOrOptions();
+      } else if (callbackOrOptions?.successMessage) {
+        LibriscanUtils.showToast(callbackOrOptions.successMessage, 'success');
+        callbackOrOptions.callback?.();
+      } else {
+        LibriscanUtils.showToast('Word updated successfully');
+      }
     } catch (error) {
       console.error('Error updating word:', error);
       LibriscanUtils.showToast('Error updating word', 'error');
+      throw error;
     }
   }
 
@@ -535,6 +559,54 @@ class WordDetails {
       this._updatePrintControlDisplay(this.currentPrintControl);
     } finally {
       this.printControlDropdownBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Mark the current word as accepted (set confidence to 99.999)
+   * Reuses the existing word update flow with loading state management
+   */
+  async markAsAccepted() {
+    if (!this.currentWordInfo?.word) {
+      LibriscanUtils.showToast('No word selected', 'error');
+      return;
+    }
+
+    this._setMarkAcceptedLoading(true);
+
+    try {
+      // Update word with same text - backend sets confidence to 99.999
+      await this._updateWordText(this.currentWordInfo.word, {
+        successMessage: 'Marked as accepted'
+      });
+    } catch (error) {
+      console.error('Error marking as accepted:', error);
+      LibriscanUtils.showToast('Failed to mark as accepted', 'error');
+    } finally {
+      this._setMarkAcceptedLoading(false);
+    }
+  }
+
+  /**
+   * Toggle loading state for Mark as Accepted button
+   */
+  _setMarkAcceptedLoading(isLoading) {
+    if (!this.markAcceptedBtn) return;
+
+    this.markAcceptedBtn.disabled = isLoading;
+    
+    if (isLoading) {
+      this.markAcceptedBtn.innerHTML = `
+        <span class="loading loading-spinner loading-xs"></span>
+        Saving...
+      `;
+    } else {
+      this.markAcceptedBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+        Mark as Accepted
+      `;
     }
   }
 
