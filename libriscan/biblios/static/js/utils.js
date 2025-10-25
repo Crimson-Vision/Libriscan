@@ -219,31 +219,6 @@ const LibriscanUtils = {
   },
 
   /**
-   * Log history data to console in a formatted way
-   * @param {Object} historyData - History data object from API
-   * @param {number} historyData.word_id - Word ID
-   * @param {string} historyData.current_text - Current text value
-   * @param {number} historyData.history_count - Number of history records
-   * @param {Array} historyData.history - Array of history records
-   */
-  logHistoryToConsole(historyData) {
-    console.group('=== AUDIT LOG FOR WORD ===');
-    console.log('Word ID:', historyData.word_id);
-    console.log('Current Text:', historyData.current_text);
-    console.log('Total History Records:', historyData.history_count);
-    console.groupEnd();
-    
-    if (historyData.history && historyData.history.length > 0) {
-      console.log('=== HISTORY RECORDS ===');
-      console.table(historyData.history);
-    } else {
-      console.log('No history records found');
-    }
-    
-    console.log('Full History Data:', historyData);
-  },
-
-  /**
    * Copy text to clipboard
    * @param {string} text - Text to copy
    * @returns {Promise<boolean>} Success status

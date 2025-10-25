@@ -363,12 +363,10 @@ class WordDetails {
   }
 
   revertToOriginalWord() {
-    console.log('Revert to Original Word clicked');
     // TODO: Implement functionality
   }
 
   saveToDictionary() {
-    console.log('Save to Dictionary clicked');
     // TODO: Implement functionality
   }
 
