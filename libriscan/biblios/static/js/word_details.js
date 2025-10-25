@@ -77,6 +77,10 @@ class WordDetails {
       });
     };
 
+    // Initialize keyboard handler
+    this.keyboard = new WordKeyboard(this);
+    this.keyboard.initialize();
+
     // Initialize event listeners
     this.initializeEventListeners();
 
@@ -91,14 +95,6 @@ class WordDetails {
     // Word navigation
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
-
-    // Keyboard navigation: left/right arrows navigate when not typing/editing
-    this._keydownHandler = (e) => {
-      if (WordEditor.isTyping() || this.editor.isEditingMode()) return;
-      if (e.key === 'ArrowLeft') { e.preventDefault(); this.goToPrevWord(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); this.goToNextWord(); }
-    };
-    document.addEventListener('keydown', this._keydownHandler);
 
     // Dropdown actions
     if (this.revertToOriginalAction) {
