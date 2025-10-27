@@ -24,6 +24,7 @@
   <!-- Application CSS -->
   <link rel="stylesheet" href="{% static 'css/openseadragon-viewer.css' %}">
   <link rel="stylesheet" href="{% static 'css/word_selector.css' %}">
+  <link rel="stylesheet" href="{% static 'css/confidence-toggle.css' %}">
   <link rel="stylesheet" href="{% static 'css/word_details.css' %}">
   
   <!-- Theme Toggle Script -->
@@ -72,6 +73,12 @@
   <script src="{% static 'js/utils.js' %}"></script>
   <script src="{% static 'js/openseadragon-viewer.js' %}"></script>
   <script src="{% static 'js/word_selector.js' %}"></script>
+  <script src="{% static 'js/confidence-toggle.js' %}"></script>
+  <!-- Word details modules - load before main word_details.js -->
+  <script src="{% static 'js/word_editor.js' %}"></script>
+  <script src="{% static 'js/word_metadata.js' %}"></script>
+  <script src="{% static 'js/word_keyboard.js' %}"></script>
+  <script src="{% static 'js/audit_history.js' %}"></script>
   <script src="{% static 'js/word_details.js' %}"></script>
 </body>
 

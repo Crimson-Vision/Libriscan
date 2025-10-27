@@ -114,6 +114,11 @@ urlpatterns = [
                                             name="page_extract",
                                         ),
                                         path(
+                                            "page<int:number>/merge/",
+                                            views.merge_blocks,
+                                            name="merge_blocks",
+                                        ),
+                                        path(
                                             "page<int:number>/words/",
                                             views.check_words,
                                             name="page_words",
@@ -122,6 +127,21 @@ urlpatterns = [
                                             "page<int:number>/word/<int:word_id>/update/",
                                             views.update_word,
                                             name="update_word",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/print-control/",
+                                            views.update_print_control,
+                                            name="update_print_control",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/text-type/",
+                                            views.update_text_type,
+                                            name="update_text_type",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/history/",
+                                            views.textblock_history,
+                                            name="textblock_history",
                                         ),
                                     ]
                                 ),
