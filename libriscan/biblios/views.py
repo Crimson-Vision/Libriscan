@@ -47,9 +47,9 @@ def index(request):
     context = {"app_name": "Libriscan"}
     if request.user.is_authenticated:
         # The most recent doc the user edited
-        context["latest_doc"] = Document.history.filter(
-            history_user=request.user
-        ).latest()
+        recent = Document.history.filter(history_user=request.user)
+
+        context["latest_doc"] = recent.latest() if recent.exists() else None
         # All docs in all orgs the user is a member of
         context["documents"] = Document.objects.filter(
             series__collection__owner__in=request.user.userrole_set.values_list(
