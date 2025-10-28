@@ -149,6 +149,10 @@ class Series(BibliosModel):
     history = HistoricalRecords()
 
     class Meta:
+        # Override needed for the /admin menu
+        # to avoid having Seriess (with 2 ss)
+        verbose_name_plural = "Series"
+        
         rules_permissions = {
             "add": is_org_editor,
             "view": is_org_viewer,
