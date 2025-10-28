@@ -2,7 +2,7 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
-from biblios.models import Series, Document, Organization, UserRole, TextBlock, Page
+from biblios.models import Document, Organization, UserRole, TextBlock, Page
 
 
 class UserModelTests(TestCase):
@@ -37,15 +37,9 @@ class BibliosTests(TestCase):
     def test_unique_docs(self):
         # Checking that the constraint isn't being applied across different series
         d = Document.objects.first()
-        s = Series.objects.create(collection=d.series.collection, name="Test series")
 
-        try:
-            Document.objects.create(series=s, identifier=d.identifier)
-            passes = True
-        except IntegrityError:
-            passes = False
-
-        self.assertTrue(passes)
+        with self.assertRaises(IntegrityError):
+            Document.objects.create(collection=d.collection, identifier=d.identifier)
 
     def test_unique_user_roles(self):
         # Checking the constraint doesn't block a user from having different roles,
