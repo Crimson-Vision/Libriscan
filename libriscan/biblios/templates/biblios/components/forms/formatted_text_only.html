@@ -26,8 +26,7 @@
       </button>
       <div class="{{ height_class }} overflow-y-auto p-4 formatted-text-content">
         <p>
-          {# Only include words that are not omitted (print_control != 'O') #}
-          {% for w in words %}{% if w.print_control != 'O' %}{{ w.text }}{% if not forloop.last %} {% endif %}{% endif %}{% endfor %}
+          {% for w in words %}{% if w.print_control == 'I' %}{{ w.text }}{% if not forloop.last %} {% endif %}{% endif %}{% endfor %}
         </p>
       </div>
     {% else %}
