@@ -41,10 +41,9 @@
                     data-word-geo-y1="{{ word.geo_y_1 }}"
                     data-word-suggestions="{{ word.suggestions|safe }}"
                     title="Click to view details">
-                    {{ word.text }}
-                    {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}
-                      <div aria-label="status" class="status status-primary accepted-status"></div>
-                    {% endif %}
+                    <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
+                      {{ word.text }}
+                    </span>
                   </button>
                 {% endfor %}
               {% elif error %}

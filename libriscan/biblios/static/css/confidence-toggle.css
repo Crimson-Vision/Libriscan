@@ -21,7 +21,8 @@
   border-bottom: none !important;
 }
 
-.hide-confidence-accepted .accepted-status {
-  display: none !important;
+.hide-confidence-accepted .word-block .accepted-word {
+  color: inherit !important;
+  opacity: 1 !important;
 }
 

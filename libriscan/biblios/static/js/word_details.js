@@ -369,17 +369,16 @@ class WordDetails {
   }
 
   updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
-    const existingStatus = wordBlock.querySelector('.accepted-status');
-    if (existingStatus) existingStatus.remove();
-
-    wordBlock.textContent = text;
+    wordBlock.innerHTML = '';
     
-    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
-      const status = document.createElement('div');
-      status.setAttribute('aria-label', 'status');
-      status.className = 'status status-primary accepted-status';
-      wordBlock.appendChild(status);
+    const isAccepted = confidenceLevel === 'accepted' || confidence >= 99.999;
+    
+    const textSpan = document.createElement('span');
+    if (isAccepted) {
+      textSpan.className = 'accepted-word';
     }
+    textSpan.textContent = text;
+    wordBlock.appendChild(textSpan);
   }
 
   revertToOriginalWord() {
