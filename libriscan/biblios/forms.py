@@ -57,14 +57,15 @@ class FilePondUploadForm(forms.Form):
         # Check file type
         if image.content_type not in getattr(settings, "ALLOWED_UPLOAD_TYPES", []):
             raise forms.ValidationError(
-                "Invalid file type. Please upload TIFF, JPEG, or PNG files only."
+                "Invalid file type. Only JPG and PNG images are accepted."
             )
 
         # Check file size
         max_size = getattr(settings, "MAX_UPLOAD_SIZE", 5 * 1024 * 1024)
         if image.size > max_size:
+            max_size_mb = max_size / (1024 * 1024)
             raise forms.ValidationError(
-                "File size exceeds limit. Please upload a smaller file."
+                f"File size exceeds the {max_size_mb:.0f}MB limit. Please upload a smaller file."
             )
 
         return image
