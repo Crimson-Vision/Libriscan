@@ -1,5 +1,6 @@
 <!-- Formatted Text Display Component
    - Displays formatted text from either 'formatted_text' variable or reconstructed from 'words'
+   - Excludes words with print_control = 'O' (Omit)
    - Includes copy functionality via LibriscanUtils.initCopyButtons() from utils.js 
    - Auto-refreshes when words are updated via event
 -->
@@ -25,7 +26,7 @@
       </button>
       <div class="{{ height_class }} overflow-y-auto p-4 formatted-text-content">
         <p>
-          {% for w in words %}{{ w.text }}{% if not forloop.last %} {% endif %}{% endfor %}
+          {% for w in words %}{% if w.print_control == 'I' %}{{ w.text }}{% if not forloop.last %} {% endif %}{% endif %}{% endfor %}
         </p>
       </div>
     {% else %}
@@ -36,10 +37,23 @@
 
 <script>
 (function() {
+  // Constants for print control values
+  const PRINT_CONTROL = {
+    INCLUDE: 'I',
+    MERGE: 'M',
+    OMIT: 'O'
+  };
+
   let isStale = false;
   
+  // Mark formatted text as stale when words are updated
   document.addEventListener('wordUpdated', () => isStale = true);
+  document.addEventListener('printControlUpdated', () => isStale = true);
   
+  /**
+   * Refreshes the formatted text display
+   * Excludes words with print_control = 'O' (Omit)
+   */
   function refreshFormattedText() {
     if (!isStale) return;
     
@@ -47,11 +61,17 @@
     const wordBlocks = document.querySelectorAll('.word-block');
     if (!contentEl || !wordBlocks.length) return;
     
-    const text = Array.from(wordBlocks).map(block => block.dataset.wordText).join(' ');
+    // Filter out omitted words and build text
+    const text = Array.from(wordBlocks)
+      .filter(block => block.dataset.wordPrintControl !== PRINT_CONTROL.OMIT)
+      .map(block => block.dataset.wordText)
+      .join(' ');
+    
     contentEl.textContent = text;
     isStale = false;
   }
   
+  // Refresh formatted text when tab is switched
   document.querySelectorAll('input[name="text_tabs"]').forEach(radio => {
     radio.addEventListener('change', function() {
       if (!this.checked) return;
