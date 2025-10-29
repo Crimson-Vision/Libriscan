@@ -89,6 +89,7 @@ class WordDetails {
 
   initializeEventListeners() {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
+    document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
     
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
@@ -300,6 +301,25 @@ class WordDetails {
     this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
   }
 
+  _handlePrintControlUpdate(detail) {
+    const { wordId, printControl } = detail;
+    const wordBlock = document.querySelector(`[data-word-id="${wordId}"]`);
+    if (!wordBlock) return;
+
+    wordBlock.dataset.wordPrintControl = printControl;
+    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
+    
+    if (printControl === 'O') {
+      wordBlock.classList.add('print-control-omit');
+    } else if (printControl === 'M') {
+      wordBlock.classList.add('print-control-merge');
+    }
+
+    document.dispatchEvent(new CustomEvent('wordUpdated', { 
+      detail: { wordId: wordId, data: { print_control: printControl } } 
+    }));
+  }
+
   goToPrevWord() {
     const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
     const prevButton = currentButton?.previousElementSibling;
@@ -349,17 +369,16 @@ class WordDetails {
   }
 
   updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
-    const existingStatus = wordBlock.querySelector('.accepted-status');
-    if (existingStatus) existingStatus.remove();
-
-    wordBlock.textContent = text;
+    wordBlock.innerHTML = '';
     
-    if (confidenceLevel === 'accepted' || confidence >= 99.999) {
-      const status = document.createElement('div');
-      status.setAttribute('aria-label', 'status');
-      status.className = 'status status-primary accepted-status';
-      wordBlock.appendChild(status);
+    const isAccepted = confidenceLevel === 'accepted' || confidence >= 99.999;
+    
+    const textSpan = document.createElement('span');
+    if (isAccepted) {
+      textSpan.className = 'accepted-word';
     }
+    textSpan.textContent = text;
+    wordBlock.appendChild(textSpan);
   }
 
   revertToOriginalWord() {
