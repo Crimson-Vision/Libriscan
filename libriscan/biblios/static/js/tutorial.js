@@ -30,6 +30,9 @@ class LibriscanTutorial {
   createDriver(steps) {
     if (!window.driver?.js?.driver) {
       console.error('Driver.js not loaded');
+      if (typeof LibriscanUtils !== 'undefined') {
+        LibriscanUtils.showToast('Tutorial system not available', 'error');
+      }
       return null;
     }
 
@@ -49,6 +52,9 @@ class LibriscanTutorial {
       return this.driver;
     } catch (error) {
       console.error('Error creating driver:', error);
+      if (typeof LibriscanUtils !== 'undefined') {
+        LibriscanUtils.showToast('Failed to start tutorial', 'error');
+      }
       return null;
     }
   }
