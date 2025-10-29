@@ -134,7 +134,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#textDisplay',
+        element: '#raw-text-content .word-block:first-child',
         popover: {
           title: '🖱️ Step 1: Select a Word',
           description: 'First, click on any word in the extracted text. This activates the word details panel and enables all keyboard shortcuts for navigation and editing.',
