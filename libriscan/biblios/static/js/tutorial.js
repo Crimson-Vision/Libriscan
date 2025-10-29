@@ -76,7 +76,7 @@ class LibriscanTutorial {
       {
         element: '#pageNavigation',
         popover: {
-          title: '📝 Page Navigation',
+          title: '⬅️ Page Navigation ➡️',
           description: 'Use the Previous and Next buttons to navigate between pages in the document. The dropdown in the center lets you jump directly to any page number.',
           side: 'bottom',
           align: 'center'
@@ -85,7 +85,7 @@ class LibriscanTutorial {
       {
         element: '#textDisplay',
         popover: {
-          title: '📖 Extracted Text',
+          title: '🔎 Extracted Text',
           description: 'This area shows all the extracted words from the page. Words are color-coded by confidence level - green for high confidence, yellow for medium, and red for low. Click any word to view and edit its details.',
           side: 'left',
           align: 'start'

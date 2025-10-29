@@ -190,24 +190,20 @@ class WordDetails {
     }
 
     const suggestionsList = document.createElement('ul');
-    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
+    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg grid grid-cols-3 gap-2';
     const frag = document.createDocumentFragment();
-    const total = entries.length;
 
     entries.forEach(([suggestion, frequency], index) => {
       const item = document.createElement('li');
       const link = document.createElement('a');
-      link.className = 'flex items-center gap-3';
-      
-      const { progressValue, progressClass } = this._calculateSuggestionProgress(index, total);
+      link.className = 'flex items-center justify-center gap-2 p-2';
       
       // Add keyboard shortcut indicator for first 9 suggestions
-      const keyboardShortcut = index < 9 ? `<kbd class="kbd kbd-xs shrink-0">${index + 1}</kbd>` : '';
+      const keyboardShortcut = index < 9 ? `<kbd class="kbd kbd-xs">${index + 1}</kbd>` : '';
       
       link.innerHTML = `
         ${keyboardShortcut}
-        <span class="flex-1">${suggestion}</span>
-        <progress class="progress w-20 ${progressClass}" value="${progressValue}" max="100"></progress>
+        <span>${suggestion}</span>
       `;
       
       link.addEventListener('click', event => {
@@ -220,19 +216,6 @@ class WordDetails {
 
     suggestionsList.appendChild(frag);
     this.suggestionsContainer.appendChild(suggestionsList);
-  }
-
-  _calculateSuggestionProgress(index, total) {
-    if (total === 1) {
-      return { progressValue: 100, progressClass: 'progress-success' };
-    }
-    
-    const progressValue = 100 - (index / (total - 1)) * 90;
-    const progressClass = progressValue >= 70 ? 'progress-success' 
-                        : progressValue >= 40 ? 'progress-warning' 
-                        : 'progress-error';
-    
-    return { progressValue, progressClass };
   }
 
   async applySuggestion(suggestion, suggestionsList, clickedLink) {

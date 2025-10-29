@@ -12,15 +12,24 @@
   margin: 0;
 }
 
+/* Ensure suggestions grid wraps properly */
+#wordSuggestions .menu.grid {
+  display: grid !important;
+}
+
+#wordSuggestions .menu.grid li {
+  width: auto;
+}
+
 .driver-popover {
   background-color: white;
   color: oklch(var(--bc));
   border-color: oklch(var(--p) / 0.3);
 }
 
-.driver-popover-title { color: oklch(var(--bc)); }
-.driver-popover-description { color: oklch(var(--bc)); }
-.driver-popover-description strong { color: oklch(var(--p)); }
+.driver-popover-title { color: black; }
+.driver-popover-description { color: black; }
+.driver-popover-description strong { color: black; }
 .driver-popover-footer { border-color: oklch(var(--b3)); }
 
 .driver-popover-next-btn {
