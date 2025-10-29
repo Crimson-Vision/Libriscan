@@ -3,6 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.forms.widgets import PasswordInput
 from django.forms import ModelForm
 
+from simple_history.admin import SimpleHistoryAdmin
+
 from .models import User, UserRole, Organization, CloudService
 from .models import Collection, Series, Document, Page, TextBlock, DublinCoreMetadata
 
@@ -50,31 +52,31 @@ class MetadataInline(admin.StackedInline):
 
 
 @admin.register(Organization)
-class OrgAdmin(admin.ModelAdmin):
+class OrgAdmin(SimpleHistoryAdmin):
     inlines = [CloudServiceInline]
     list_display = ["name", "city", "state"]
 
 
 @admin.register(Collection)
-class CollectionAdmin(admin.ModelAdmin):
+class CollectionAdmin(SimpleHistoryAdmin):
     inlines = [SeriesInline]
     list_display = ["name", "owner"]
     prepopulated_fields = {"slug": ["name"]}
 
 
 @admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(SimpleHistoryAdmin):
     list_display = ["identifier", "series", "series__collection"]
     inlines = [PagesInline, MetadataInline]
 
 
 @admin.register(Page)
-class PageAdmin(admin.ModelAdmin):
+class PageAdmin(SimpleHistoryAdmin):
     list_display = ["number", "document", "document__series__collection__owner"]
 
 
 @admin.register(UserRole)
-class UserRoleAdmin(admin.ModelAdmin):
+class UserRoleAdmin(SimpleHistoryAdmin):
     list_display = [
         "user",
         "user__first_name",
@@ -134,7 +136,7 @@ class CustomUserAdmin(UserAdmin):
 admin.site.register(User, CustomUserAdmin)
 
 
-class TextAdmin(admin.ModelAdmin):
+class TextAdmin(SimpleHistoryAdmin):
     search_fields = ("text",)
 
     list_display = ["text", "page__document", "page"]
