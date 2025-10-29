@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.forms.widgets import PasswordInput
+from django.forms import ModelForm
 
 from .models import User, UserRole, Organization, CloudService
 from .models import Collection, Series, Document, Page, TextBlock, DublinCoreMetadata
@@ -24,8 +26,16 @@ class PagesInline(admin.StackedInline):
     extra = 0
 
 
+class CloudServiceForm(ModelForm):
+    class Meta:
+        fields = ["service", "client_id", "client_secret"]
+        model = CloudService
+        widgets = {"client_secret": PasswordInput}
+
+
 class CloudServiceInline(admin.StackedInline):
     model = CloudService
+    form = CloudServiceForm
     extra = 1
 
 
@@ -60,7 +70,13 @@ class PageAdmin(admin.ModelAdmin):
 
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
-    list_display = ["user", "organization", "role"]
+    list_display = [
+        "user",
+        "user__first_name",
+        "user__last_name",
+        "organization",
+        "role",
+    ]
 
 
 class CustomUserAdmin(UserAdmin):
@@ -118,6 +134,31 @@ class TextAdmin(admin.ModelAdmin):
 
     list_display = ["text", "page__document", "page"]
     list_filter = ["page__document", "page"]
+    ordering = ("page__document", "page", "line", "number")
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "text",
+                    "text_type",
+                    "print_control",
+                    "confidence",
+                )
+            },
+        ),
+        (
+            "Position",
+            {
+                "fields": (
+                    ("line", "number"),
+                    ("geo_x_0", "geo_y_0"),
+                    ("geo_x_1", "geo_y_1"),
+                )
+            },
+        ),
+        (None, {"fields": ("suggestions",)}),
+    )
 
 
 admin.site.register(TextBlock, TextAdmin)
