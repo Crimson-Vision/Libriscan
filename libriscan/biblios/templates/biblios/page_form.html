@@ -1,40 +1,90 @@
 {% extends "biblios/base.html" %}
 
 {% block content %}
-<form enctype="multipart/form-data" method="post" class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4" id="pageUploadForm">
-    {% csrf_token %}
-    <div class="space-y-6">
-        {% for field in form.visible_fields %}
-        <div class="form-control">
-            <label for="{{ field.id_for_label }}" class="label font-semibold text-lg text-base-content mb-2">{{ field.label }}</label>
-            {% if field.field.widget.input_type == "number" %}
-                <input type="number" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="input input-bordered input-lg rounded-lg w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150 placeholder:text-base-content/60" value="{{ field.value|default_if_none:'' }}" placeholder="Enter page number" {% if field.field.required %}required{% endif %}>
-            {% elif field.field.widget.input_type == "file" %}
-                <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept=".jpeg,.jpg,.png,.tiff,image/jpeg,image/png,image/tiff" class="file-input file-input-bordered w-full focus:ring-2 focus:ring-primary/60 transition-all duration-150" {% if field.field.required %}required{% endif %}>
-            {% else %}
-                {{ field }}
-            {% endif %}
-            {% if field.help_text %}
-                <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
-            {% endif %}
-            {% for error in field.errors %}
-                <p class="text-error text-sm mt-1">{{ error }}</p>
-            {% endfor %}
+<div class="min-h-screen bg-gradient-to-br from-base-200 to-base-300 py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">Upload Page</h1>
+            <p class="text-base-content/70">Add a new page to your document</p>
         </div>
-        {% endfor %}
+
+        <div class="card bg-base-100 shadow-2xl">
+            <div class="card-body">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div class="space-y-6">
+                        {% for field in form.visible_fields %}
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-semibold">{{ field.label }}</span>
+                            </label>
+                            
+                            {% if field.field.widget.input_type == "number" %}
+                                <input type="number" name="{{ field.html_name }}" id="{{ field.id_for_label }}" 
+                                    class="input input-bordered input-lg w-full" value="{{ field.value|default_if_none:'' }}" 
+                                    placeholder="Enter page number" {% if field.field.required %}required{% endif %}>
+                            
+                            {% elif field.field.widget.input_type == "file" %}
+                                <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" 
+                                    accept=".jpeg,.jpg,.png,image/jpeg,image/png" 
+                                    class="file-input file-input-bordered file-input-primary file-input-lg w-full" 
+                                    {% if field.field.required %}required{% endif %}>
+                                
+                                <div id="fileError" class="alert alert-error mt-2 hidden">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span></span>
+                                </div>
+                                <label class="label">
+                                    <span class="label-text-alt">Please provide a JPG or PNG image with a maximum size of {{ max_upload_size|filesizeformat }}</span>
+                                </label>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            
+                            {% if field.help_text %}
+                                <label class="label"><span class="label-text-alt">{{ field.help_text }}</span></label>
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
+                            <div class="alert alert-error mt-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ error }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="btn btn-primary btn-lg w-full mt-8" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Upload Page
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary w-full" id="uploadBtn" disabled>Upload</button>
-</form>
-</script>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const fileInput = document.querySelector('#pageUploadForm input[type="file"]');
-        const uploadBtn = document.getElementById('uploadBtn');
-        if (fileInput && uploadBtn) {
-            const toggle = () => uploadBtn.disabled = !fileInput.files.length;
-            fileInput.addEventListener('change', toggle);
-            toggle();
-        }
+        LibriscanUtils.setupFileValidation(
+            'input[type="file"]',
+            '#submitBtn',
+            '#fileError',
+            {
+                maxSize: {{ max_upload_size|default:5242880 }},
+                allowedTypes: {{ allowed_upload_types|default:'["image/jpeg", "image/png"]'|safe }},
+                allowedExtensions: [".jpg", ".jpeg", ".png"]
+            }
+        );
     });
 </script>
-{% endblock content %}
+{% endblock %}

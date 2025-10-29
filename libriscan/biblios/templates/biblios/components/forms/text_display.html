@@ -2,7 +2,7 @@
 <!-- Text Display Component Template -->
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
-<div class="card bg-base-100 shadow-sm h-full">
+<div id="textDisplay" class="card bg-base-100 shadow-sm h-full">
   <div class="card-body p-0">
     <!-- Tabs with Filter Dropdown -->
     <div class="relative">
@@ -15,7 +15,7 @@
           </svg>
           Raw Text
         </label>
-        <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-6">
           <div class="prose">
             <div class="h-[45vh] overflow-y-auto">
               <div class="flex flex-wrap" id="word-container">
@@ -24,7 +24,8 @@
                   <!-- Word block with confidence indicators -->
                   <button 
                     class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
-                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
+                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
+                           {% if word.print_control == 'O' %}print-control-omit{% elif word.print_control == 'M' %}print-control-merge{% endif %}"
                     data-word-id="{{ word.id }}"
                     data-word-text="{{ word.text }}"
                     data-word-confidence="{{ word.confidence }}"
@@ -40,10 +41,9 @@
                     data-word-geo-y1="{{ word.geo_y_1 }}"
                     data-word-suggestions="{{ word.suggestions|safe }}"
                     title="Click to view details">
-                    {{ word.text }}
-                    {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}
-                      <div aria-label="status" class="status status-primary accepted-status"></div>
-                    {% endif %}
+                    <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
+                      {{ word.text }}
+                    </span>
                   </button>
                 {% endfor %}
               {% elif error %}

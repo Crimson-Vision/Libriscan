@@ -184,9 +184,15 @@ class Document(BibliosModel):
         REVIEW: "Ready for Review",
         APPROVED: "Approved",
     }
-
+    collection = models.ForeignKey(
+        Collection, on_delete=models.CASCADE, related_name="documents"
+    )
     series = models.ForeignKey(
-        Series, on_delete=models.CASCADE, related_name="documents"
+        Series,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        blank=True,
+        null=True,
     )
     identifier = models.SlugField(max_length=25)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
@@ -197,10 +203,9 @@ class Document(BibliosModel):
     use_long_s_detection = models.BooleanField(default=True)
 
     class Meta:
-        # In theory this would be better as a unique identifer per collection
         constraints = [
             models.UniqueConstraint(
-                fields=["series", "identifier"], name="unique_doc_per_org"
+                fields=["collection", "identifier"], name="unique_doc_per_org"
             )
         ]
         rules_permissions = {
@@ -232,8 +237,8 @@ class Document(BibliosModel):
 
     def get_absolute_url(self):
         keys = {
-            "short_name": self.series.collection.owner.short_name,
-            "collection_slug": self.series.collection.slug,
+            "short_name": self.collection.owner.short_name,
+            "collection_slug": self.collection.slug,
             "identifier": self.identifier,
         }
         return reverse("document", kwargs=keys)
@@ -385,7 +390,7 @@ class TextBlock(BibliosModel):
     OMIT = "O"
     PRINT_CONTROL_CHOICES = {
         INCLUDE: "Include",
-        MERGE: "Merge With Prior",
+        MERGE: "Merged",
         OMIT: "Omit",
     }
 

@@ -114,6 +114,11 @@ urlpatterns = [
                                             name="page_extract",
                                         ),
                                         path(
+                                            "page<int:number>/merge/",
+                                            views.merge_blocks,
+                                            name="merge_blocks",
+                                        ),
+                                        path(
                                             "page<int:number>/words/",
                                             views.check_words,
                                             name="page_words",

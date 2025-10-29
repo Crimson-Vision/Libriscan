@@ -1,13 +1,13 @@
-boto3==1.40.57
+boto3==1.40.59
 Django==5.2.7
 django_localflavor==5.0
 Pillow==12.0.0
 django_htmx==1.26.0
-python-dotenv==1.1.1
+python-dotenv==1.2.1
 rules==3.5
 gunicorn==23.0.0
 whitenoise==6.11.0
 pyspellchecker==0.8.3
 pymupdf==1.26.5
 django-_simple_history==3.10.1
-huey==2.5.3
+huey==2.5.4
