@@ -60,8 +60,8 @@ class WordDetails {
 
     // Setup editor callbacks
     this.editor.onSave = async (newText) => {
-      await this._updateWordText(newText, () => {
-        // Callback after successful save
+      await this._updateWordText(newText, {
+        autoAdvance: true
       });
     };
 
@@ -72,7 +72,8 @@ class WordDetails {
     // Setup metadata callbacks
     this.metadata.onMarkAccepted = async (wordText) => {
       await this._updateWordText(wordText, {
-        successMessage: 'Marked as accepted'
+        successMessage: 'Marked as accepted',
+        autoAdvance: true
       });
     };
 
@@ -190,21 +191,20 @@ class WordDetails {
     }
 
     const suggestionsList = document.createElement('ul');
-    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg';
+    suggestionsList.className = 'menu menu-sm bg-base-200 w-full rounded-lg grid grid-cols-3 gap-2';
     const frag = document.createDocumentFragment();
-    const total = entries.length;
 
     entries.forEach(([suggestion, frequency], index) => {
       const item = document.createElement('li');
       const link = document.createElement('a');
-      link.className = 'flex items-center gap-3';
+      link.className = 'flex items-center justify-center gap-2 p-2';
       
-      const { progressValue, progressClass } = this._calculateSuggestionProgress(index, total);
+      // Add keyboard shortcut indicator for first 9 suggestions
+      const keyboardShortcut = index < 9 ? `<kbd class="kbd kbd-xs">${index + 1}</kbd>` : '';
       
       link.innerHTML = `
-        <span class="badge badge-neutral badge-sm shrink-0">${index + 1}</span>
-        <span class="flex-1">${suggestion}</span>
-        <progress class="progress w-20 ${progressClass}" value="${progressValue}" max="100"></progress>
+        ${keyboardShortcut}
+        <span>${suggestion}</span>
       `;
       
       link.addEventListener('click', event => {
@@ -219,28 +219,18 @@ class WordDetails {
     this.suggestionsContainer.appendChild(suggestionsList);
   }
 
-  _calculateSuggestionProgress(index, total) {
-    if (total === 1) {
-      return { progressValue: 100, progressClass: 'progress-success' };
-    }
-    
-    const progressValue = 100 - (index / (total - 1)) * 90;
-    const progressClass = progressValue >= 70 ? 'progress-success' 
-                        : progressValue >= 40 ? 'progress-warning' 
-                        : 'progress-error';
-    
-    return { progressValue, progressClass };
-  }
-
   async applySuggestion(suggestion, suggestionsList, clickedLink) {
     if (!suggestion.trim()) {
       LibriscanUtils.showToast('Suggestion cannot be empty', 'error');
       return;
     }
 
-    await this._updateWordText(suggestion, () => {
-      suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-      clickedLink.classList.add('active');
+    await this._updateWordText(suggestion, {
+      callback: () => {
+        suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+        clickedLink.classList.add('active');
+      },
+      autoAdvance: true
     });
   }
 
@@ -257,6 +247,7 @@ class WordDetails {
         detail: { wordId: this.currentWordId, data } 
       }));
       
+      // Handle callbacks and messages
       if (typeof callbackOrOptions === 'function') {
         LibriscanUtils.showToast('Word updated successfully');
         callbackOrOptions();
@@ -265,6 +256,17 @@ class WordDetails {
         callbackOrOptions.callback?.();
       } else {
         LibriscanUtils.showToast('Word updated successfully');
+      }
+      
+      // Auto-advance to next word if requested and not at last word
+      if (callbackOrOptions?.autoAdvance) {
+        const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+        const hasNextWord = currentButton?.nextElementSibling?.classList.contains('word-block');
+        
+        if (hasNextWord) {
+          // Small delay to allow UI updates to complete
+          setTimeout(() => this.goToNextWord(), 100);
+        }
       }
     } catch (error) {
       console.error('Error updating word:', error);
