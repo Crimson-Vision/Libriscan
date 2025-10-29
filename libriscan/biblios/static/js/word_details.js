@@ -60,8 +60,8 @@ class WordDetails {
 
     // Setup editor callbacks
     this.editor.onSave = async (newText) => {
-      await this._updateWordText(newText, () => {
-        // Callback after successful save
+      await this._updateWordText(newText, {
+        autoAdvance: true
       });
     };
 
@@ -72,7 +72,8 @@ class WordDetails {
     // Setup metadata callbacks
     this.metadata.onMarkAccepted = async (wordText) => {
       await this._updateWordText(wordText, {
-        successMessage: 'Marked as accepted'
+        successMessage: 'Marked as accepted',
+        autoAdvance: true
       });
     };
 
@@ -237,9 +238,12 @@ class WordDetails {
       return;
     }
 
-    await this._updateWordText(suggestion, () => {
-      suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-      clickedLink.classList.add('active');
+    await this._updateWordText(suggestion, {
+      callback: () => {
+        suggestionsList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+        clickedLink.classList.add('active');
+      },
+      autoAdvance: true
     });
   }
 
@@ -256,6 +260,7 @@ class WordDetails {
         detail: { wordId: this.currentWordId, data } 
       }));
       
+      // Handle callbacks and messages
       if (typeof callbackOrOptions === 'function') {
         LibriscanUtils.showToast('Word updated successfully');
         callbackOrOptions();
@@ -264,6 +269,17 @@ class WordDetails {
         callbackOrOptions.callback?.();
       } else {
         LibriscanUtils.showToast('Word updated successfully');
+      }
+      
+      // Auto-advance to next word if requested and not at last word
+      if (callbackOrOptions?.autoAdvance) {
+        const currentButton = document.querySelector(`[data-word-id="${this.currentWordId}"]`);
+        const hasNextWord = currentButton?.nextElementSibling?.classList.contains('word-block');
+        
+        if (hasNextWord) {
+          // Small delay to allow UI updates to complete
+          setTimeout(() => this.goToNextWord(), 100);
+        }
       }
     } catch (error) {
       console.error('Error updating word:', error);
