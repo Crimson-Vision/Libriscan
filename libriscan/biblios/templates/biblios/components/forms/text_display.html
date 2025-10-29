@@ -24,7 +24,8 @@
                   <!-- Word block with confidence indicators -->
                   <button 
                     class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
-                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
+                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
+                           {% if word.print_control == 'O' %}print-control-omit{% elif word.print_control == 'M' %}print-control-merge{% endif %}"
                     data-word-id="{{ word.id }}"
                     data-word-text="{{ word.text }}"
                     data-word-confidence="{{ word.confidence }}"

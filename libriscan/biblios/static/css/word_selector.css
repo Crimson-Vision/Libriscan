@@ -51,3 +51,14 @@
   position: relative;
 }
 
+/* Strikethrough for omitted words only */
+.word-block.print-control-omit {
+  text-decoration: line-through !important;
+  opacity: 0.6;
+}
+
+/* Ensure strikethrough persists even when active */
+.btn-active.print-control-omit {
+  text-decoration: line-through !important;
+}
+

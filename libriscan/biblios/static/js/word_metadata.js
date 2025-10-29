@@ -67,6 +67,12 @@ class WordMetadata {
       this._updatePrintControlDisplay(data.print_control);
       this._showPrintControlSuccess();
       LibriscanUtils.showToast('Print control updated', 'success');
+      
+      // Dispatch event to update word block styling
+      document.dispatchEvent(new CustomEvent('printControlUpdated', { 
+        detail: { wordId: this.currentWordId, printControl: data.print_control } 
+      }));
+      
       return data;
     } catch (error) {
       console.error('Error updating print control:', error);

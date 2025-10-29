@@ -89,6 +89,7 @@ class WordDetails {
 
   initializeEventListeners() {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
+    document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
     
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
@@ -298,6 +299,25 @@ class WordDetails {
     wordBlock.classList.add(`confidence-${data.confidence_level}`);
     
     this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
+  }
+
+  _handlePrintControlUpdate(detail) {
+    const { wordId, printControl } = detail;
+    const wordBlock = document.querySelector(`[data-word-id="${wordId}"]`);
+    if (!wordBlock) return;
+
+    wordBlock.dataset.wordPrintControl = printControl;
+    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
+    
+    if (printControl === 'O') {
+      wordBlock.classList.add('print-control-omit');
+    } else if (printControl === 'M') {
+      wordBlock.classList.add('print-control-merge');
+    }
+
+    document.dispatchEvent(new CustomEvent('wordUpdated', { 
+      detail: { wordId: wordId, data: { print_control: printControl } } 
+    }));
   }
 
   goToPrevWord() {
