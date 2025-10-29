@@ -9,6 +9,11 @@ from .models import Collection, Series, Document, Page, TextBlock, DublinCoreMet
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 
 
+admin.site.site_header = "Libriscan Administration"
+admin.site.site_title = "Libriscan Admin"
+admin.site.index_title = "Libriscan Admin"
+
+
 class SeriesInline(admin.TabularInline):
     model = Series
     extra = 1
