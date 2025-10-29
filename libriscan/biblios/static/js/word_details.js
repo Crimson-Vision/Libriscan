@@ -201,8 +201,11 @@ class WordDetails {
       
       const { progressValue, progressClass } = this._calculateSuggestionProgress(index, total);
       
+      // Add keyboard shortcut indicator for first 9 suggestions
+      const keyboardShortcut = index < 9 ? `<kbd class="kbd kbd-xs shrink-0">${index + 1}</kbd>` : '';
+      
       link.innerHTML = `
-        <span class="badge badge-neutral badge-sm shrink-0">${index + 1}</span>
+        ${keyboardShortcut}
         <span class="flex-1">${suggestion}</span>
         <progress class="progress w-20 ${progressClass}" value="${progressValue}" max="100"></progress>
       `;

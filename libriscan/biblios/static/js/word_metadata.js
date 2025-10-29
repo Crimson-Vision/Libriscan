@@ -207,10 +207,8 @@ class WordMetadata {
     this.markAcceptedBtn.disabled = isLoading;
     this.markAcceptedBtn.innerHTML = isLoading
       ? `<span class="loading loading-spinner loading-xs"></span>Saving...`
-      : `<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-        </svg>
-        Mark as Accepted`;
+      : `<span class="text-xs">Mark as Accepted</span>
+        <kbd class="kbd kbd-xs">A</kbd>`;
   }
 }
 

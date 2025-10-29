@@ -27,6 +27,12 @@ class WordKeyboard {
     } else if (key >= '1' && key <= '9') {
       e.preventDefault();
       this._applySuggestion(parseInt(key) - 1);
+    } else if (key === 'e' || key === 'E') {
+      e.preventDefault();
+      this.wordDetails.editor.enterEditMode();
+    } else if (key === 'a' || key === 'A') {
+      e.preventDefault();
+      this.wordDetails.metadata.markAsAccepted();
     }
   }
 
