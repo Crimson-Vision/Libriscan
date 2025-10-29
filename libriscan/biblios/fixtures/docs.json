@@ -1,10 +1,11 @@
 [
-{
-    "model": "biblios.document",
-    "pk": 1,
-    "fields": {
-        "series": 1,
-        "identifier": "TL12345"
+    {
+        "model": "biblios.document",
+        "pk": 1,
+        "fields": {
+            "collection": 1,
+            "series": 1,
+            "identifier": "TL12345"
+        }
     }
-}
 ]
