@@ -1,0 +1,57 @@
+/* Tutorial System CSS */
+
+/* Center icon in FAB button */
+#tutorialFab .btn-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#tutorialFab .btn-circle svg {
+  display: block;
+  margin: 0;
+}
+
+.driver-popover {
+  background-color: white;
+  color: oklch(var(--bc));
+  border-color: oklch(var(--p) / 0.3);
+}
+
+.driver-popover-title { color: oklch(var(--bc)); }
+.driver-popover-description { color: oklch(var(--bc)); }
+.driver-popover-description strong { color: oklch(var(--p)); }
+.driver-popover-footer { border-color: oklch(var(--b3)); }
+
+.driver-popover-next-btn {
+  background-color: oklch(var(--p));
+  color: oklch(var(--pc));
+  border-color: oklch(var(--p));
+}
+.driver-popover-next-btn:hover { background-color: oklch(var(--pf, var(--p))); }
+
+.driver-popover-prev-btn {
+  background-color: oklch(var(--b2));
+  color: oklch(var(--bc));
+  border-color: oklch(var(--b3));
+}
+
+.driver-popover-close-btn { color: oklch(var(--bc)); }
+.driver-popover-close-btn:hover { background-color: oklch(var(--b2)); }
+
+.driver-popover-progress-text {
+  background-color: oklch(var(--b2));
+  color: oklch(var(--bc));
+}
+
+.driver-active-element,
+.driver-stage-element {
+  box-shadow: 0 0 0 4px oklch(var(--p));
+}
+
+.driver-popover-arrow-side-top,
+.driver-popover-arrow-side-bottom,
+.driver-popover-arrow-side-left,
+.driver-popover-arrow-side-right {
+  border-color: oklch(var(--b1));
+}
