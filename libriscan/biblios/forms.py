@@ -1,8 +1,12 @@
+import logging
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from biblios.models import User, Collection, Series, Document, Page
+
+logger = logging.getLogger("django")
 
 
 # Custom user forms from https://testdriven.io/blog/django-custom-user-model/
@@ -33,7 +37,7 @@ class SeriesForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ("series", "identifier", "use_long_s_detection")
+        fields = ("collection", "series", "identifier", "use_long_s_detection")
 
 
 class PageForm(forms.ModelForm):
