@@ -297,6 +297,39 @@ const LibriscanUtils = {
       time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: tz })
     };
   },
+
+  /**
+   * Validate file for upload
+   */
+  validateFile(file, { maxSize = 5242880, allowedTypes = ['image/jpeg', 'image/png'], allowedExtensions = ['.jpg', '.jpeg', '.png'] } = {}) {
+    if (!file) return { valid: false, error: null };
+
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(ext)) {
+      return { valid: false, error: `Invalid format. Use ${allowedExtensions.join(', ').toUpperCase()}` };
+    }
+
+    if (file.size > maxSize) {
+      return { valid: false, error: `File too large (${(file.size / 1048576).toFixed(1)}MB). Max ${(maxSize / 1048576).toFixed(0)}MB` };
+    }
+
+    return { valid: true, error: null };
+  },
+
+  setupFileValidation(input, button, errorDiv, options = {}) {
+    const inp = typeof input === 'string' ? document.querySelector(input) : input;
+    const btn = typeof button === 'string' ? document.querySelector(button) : button;
+    const err = typeof errorDiv === 'string' ? document.querySelector(errorDiv) : errorDiv;
+
+    if (!inp || !btn || !err) return;
+
+    inp.addEventListener('change', (e) => {
+      const result = this.validateFile(e.target.files[0], options);
+      btn.disabled = !result.valid;
+      err.classList.toggle('hidden', result.valid);
+      if (result.error) err.querySelector('span').textContent = result.error;
+    });
+  },
 };
 
 // Make utils available globally
