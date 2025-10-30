@@ -11,3 +11,4 @@ pyspellchecker==0.8.3
 pymupdf==1.26.5
 django-_simple_history==3.10.1
 huey==2.5.4
+django-tailwind[reload]

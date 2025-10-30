@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import shutil
 
 from pathlib import Path
 from dotenv import load_dotenv
@@ -63,6 +64,8 @@ INSTALLED_APPS = [
     "huey.contrib.djhuey",
     "rules",
     "simple_history",
+    "tailwind",
+    "theme"
 ]
 
 MIDDLEWARE = [
@@ -98,6 +101,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "libriscan.wsgi.application"
 
+# Tailwind settings
+TAILWIND_APP_NAME = 'theme'
+
+# Dynamically find npm on any OS
+NPM_BIN_PATH = shutil.which("npm")
 
 # Email Settings
 # Not all of these are necessarily required, depending on your SMPT setup.

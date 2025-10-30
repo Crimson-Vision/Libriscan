@@ -71,6 +71,15 @@ Perform the following steps to get this repo up and running on your computer:
     python manage.py runserver
     ```
 
+## Working with Tailwind/DaisyUI Styles
+
+If you're adding or changing Tailwind/DaisyUI classes in any templates:
+
+1. Before committing: `python manage.py tailwind build`
+2. Commit both your templates and `theme/static/css/dist/styles.css`
+
+If you're not adding any net new CSS tailwind classes, you don't need to run any tailwind commands, as the existing CSS file should be good to go.
+
 ---
 
 ## Special Notes
