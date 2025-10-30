@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
@@ -800,6 +801,48 @@ def textblock_history(
         return JsonResponse({"error": "Failed to retrieve history"}, status=500)
 
 
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def revert_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Revert a word to its original value."""
+    try:
+        response = {}
+        status = 400
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        try:
+            # earliest() will be the creation record
+            original = word.history.earliest()
+            word = original.instance
+            word._change_reason = "Revert to original"
+            word.save()
+            response = {
+                "id": word.id,
+                "text": word.text,
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+                "suggestions": dict(word.suggestions)
+                if isinstance(word.suggestions, list)
+                else word.suggestions,
+            }
+            status = 200
+        except ObjectDoesNotExist:
+            # Some existing text blocks may not have an audit history
+            response = {"error": "No prior version to revert to"}
+            status = 400
+        return JsonResponse(response, status=status)
+
+    except Exception as e:
+        logger.error(f"Error reverting word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to revert word"}, status=500)
+      
 @require_http_methods(["POST"])
 def merge_blocks(request, short_name, collection_slug, identifier, number):
     """
@@ -867,3 +910,46 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
     except Exception as e:
         logger.error(f"Error merging text blocks: {e}")
         return JsonResponse({"error": "Failed to merge text"}, status=500)
+
+
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def revert_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Revert a word to its original value."""
+    try:
+        response = {}
+        status = 400
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        try:
+            # earliest() will be the creation record
+            original = word.history.earliest()
+            word = original.instance
+            word._change_reason = "Revert to original"
+            word.save()
+            response = {
+                "id": word.id,
+                "text": word.text,
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+                "suggestions": dict(word.suggestions)
+                if isinstance(word.suggestions, list)
+                else word.suggestions,
+            }
+            status = 200
+        except ObjectDoesNotExist:
+            # Some existing text blocks may not have an audit history
+            response = {"error": "No prior version to revert to"}
+            status = 400
+        return JsonResponse(response, status=status)
+
+    except Exception as e:
+        logger.error(f"Error reverting word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to revert word"}, status=500)
