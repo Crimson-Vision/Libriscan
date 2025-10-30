@@ -333,6 +333,7 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         """Add upload settings to template context"""
         import json
+
         context = super().get_context_data(**kwargs)
         context["allowed_upload_types"] = json.dumps(settings.ALLOWED_UPLOAD_TYPES)
         context["max_upload_size"] = settings.MAX_UPLOAD_SIZE
@@ -866,3 +867,29 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
     except Exception as e:
         logger.error(f"Error merging text blocks: {e}")
         return JsonResponse({"error": "Failed to merge text"}, status=500)
+
+
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def add_spellcheck_word(request):
+    """Add a new word to the spellcheck dictionary."""
+    from biblios.services.suggestions import spell
+
+    response = {}
+    status = 400
+
+    try:
+        word = request.POST.get("word")
+        frequency = request.POST.get("frequency", 50)
+
+        if not word:
+            response = {"error": "no word submitted"}
+        else:
+            if word not in spell:
+                spell.a
+
+        return JsonResponse(response, status)
+
+    except Exception as e:
+        logger.error(f"Error retrieving history for word  {e}")
+        return JsonResponse({"error": "Failed to retrieve history"}, status=500)

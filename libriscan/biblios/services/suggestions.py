@@ -11,14 +11,15 @@ spell = SpellChecker()
 # Regex: matches a lowercase 'f' or 'ſ' that's not after an f or s, before another f, or at the end of the word
 # (?<!f|s) = negative lookbehind, only match the next character if it's not after an 'f' or 's'
 # [fſ] = the exact letter 'f' or, just in case, the actual long-s 'ſ'
-# (?!f|-|\'|$) = negative lookahead, only match the previous character if it's not before another 'f', an 
+# (?!f|-|\'|$) = negative lookahead, only match the previous character if it's not before another 'f', an
 #                apostrophe, a hyphen, or the end of the string
-LONG_S_REGEX = re.compile('(?<!f|s)[fſ](?!f|-|\'|$)')
+LONG_S_REGEX = re.compile("(?<!f|s)[fſ](?!f|-|'|$)")
+
 
 def long_s_conversion(word, modern=True):
     """Replace every potential misidentified long-s with the correct version of the letter."""
     # The replacement letter is the real long-s character if modern = False, but s by default
-    s = 's' if modern else 'ſ'
+    s = "s" if modern else "ſ"
 
     return re.sub(LONG_S_REGEX, s, word)
 
@@ -34,7 +35,9 @@ def generate_suggestions(wrd, long_s_detect, s=3):
     Returns a list of (suggestion, frequency) tuples.
     """
 
-    words = [wrd,]
+    words = [
+        wrd,
+    ]
 
     # If the caller wants long s detection, find that variant
     if long_s_detect:
@@ -52,15 +55,15 @@ def generate_suggestions(wrd, long_s_detect, s=3):
             last_letter = word[-1]
             word = word[:-1]
         else:
-            last_letter = ''
+            last_letter = ""
 
         # Pyspellchecker will convert to lowercase, so check for common capitalization schemes.
         # Check for all lowercase first, since that's most common
         if word.islower():
-            case = None # nothing to do in this case
+            case = None  # nothing to do in this case
         elif not word:
-            case = None # We might have any characters left if the word was a single punctuation mark
-        elif word[0].isupper() and word[1:].islower(): # there's no iscapitalize method
+            case = None  # We might have any characters left if the word was a single punctuation mark
+        elif word[0].isupper() and word[1:].islower():  # there's no iscapitalize method
             case = str.capitalize
         elif word.isupper():
             case = str.upper
@@ -72,12 +75,19 @@ def generate_suggestions(wrd, long_s_detect, s=3):
         candidates = spell.candidates(word)
         if candidates:
             for candidate in candidates:
+                # Apply any casing rule identified above
                 if case:
                     candidate = case(candidate)
-                suggestions.add((F"{candidate}{last_letter}", spell.word_frequency[candidate]))
 
-    # Sort the suggestions by their frequency, descending
-    suggestions = sorted(suggestions, key=lambda c: c[1], reverse=True)
-    
-    return suggestions[:s]
-    
+                suggestions.add(
+                    (f"{candidate}{last_letter}", spell.word_frequency[candidate])
+                )
+
+    # If the *only* suggestion is an exact match for the word, don't return anything
+    if len(suggestions) == 1 and min(suggestions)[0] == wrd:
+        return []
+    else:
+        # Sort the suggestions by their frequency, descending
+        suggestions = sorted(suggestions, key=lambda c: c[1], reverse=True)
+
+        return suggestions[:s]

@@ -518,3 +518,14 @@ class UserRole(models.Model):
 
     def __str__(self):
         return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
+
+
+class Suggestion(models.Model):
+    word = models.CharField(max_length=50)
+    frequency = models.IntegerField(default=50)
+
+    def __str__(self):
+        return self.word
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["word"], name="unique_words")]
