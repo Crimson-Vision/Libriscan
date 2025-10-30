@@ -43,7 +43,6 @@ class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
         return Organization.objects.get(short_name=self.kwargs.get("short_name"))
 
 
-@login_not_required
 def index(request):
     context = {"app_name": "Libriscan"}
     if request.user.is_authenticated:
