@@ -39,15 +39,23 @@
   [data-theme="dark"] .btn-active { box-shadow: 0 1px 0 rgba(255,255,255,.08); }
 }
 
-/* Accepted status indicator positioning */
-.accepted-status {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-}
-
-/* Ensure parent button has relative positioning */
 .word-block {
   position: relative;
+}
+
+.word-block .accepted-word {
+  color: rgb(107 114 128);
+  opacity: 0.6;
+}
+
+/* Strikethrough for omitted words only */
+.word-block.print-control-omit {
+  text-decoration: line-through !important;
+  opacity: 0.6;
+}
+
+/* Ensure strikethrough persists even when active */
+.btn-active.print-control-omit {
+  text-decoration: line-through !important;
 }
 

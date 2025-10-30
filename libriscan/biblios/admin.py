@@ -63,6 +63,11 @@ class CollectionAdmin(SimpleHistoryAdmin):
     list_display = ["name", "owner"]
     prepopulated_fields = {"slug": ["name"]}
 
+@admin.register(Series)
+class SeriesAdmin(admin.ModelAdmin):
+    list_display = ["name", "collection"]
+    prepopulated_fields = {"slug": ["name"]}
+    list_select_related = ['collection']
 
 @admin.register(Document)
 class DocumentAdmin(SimpleHistoryAdmin):

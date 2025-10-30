@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
@@ -28,7 +29,7 @@ from .models import (
     DublinCoreMetadata,
     TextBlock,
 )
-from .forms import FilePondUploadForm
+from biblios.forms import DocumentForm, FilePondUploadForm
 
 logger = logging.getLogger("django")
 
@@ -52,7 +53,7 @@ def index(request):
         context["latest_doc"] = recent.latest() if recent.exists() else None
         # All docs in all orgs the user is a member of
         context["documents"] = Document.objects.filter(
-            series__collection__owner__in=request.user.userrole_set.values_list(
+            collection__owner__in=request.user.userrole_set.values_list(
                 "organization", flat=True
             )
         )
@@ -224,7 +225,41 @@ class DocumentDetail(OrgPermissionRequiredMixin, DetailView):
 
 class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Document
-    fields = ["series", "identifier", "use_long_s_detection"]
+    form_class = DocumentForm
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+
+        # Update the Series field so it only shows values owned by the current Collection
+        collection = Collection.objects.filter(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        ).first()
+        form.fields["series"].queryset = form.fields["series"].queryset.filter(
+            collection=collection
+        )
+
+        return form
+
+    def post(self, request, **kwargs):
+        self.object = None
+
+        # Create a mutable copy of the POST object and add the parent Collection to it
+        # Users shouldn't set this directly in the form -- it's based on the collection they're working from
+        post = request.POST.copy()
+        post.update(
+            {
+                "collection": Collection.objects.get(
+                    owner__short_name=self.kwargs.get("short_name"),
+                    slug=self.kwargs.get("collection_slug"),
+                )
+            }
+        )
+
+        # Bind the form data when we instantiate it
+        form = DocumentForm(post)
+
+        return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
 
 class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
@@ -249,8 +284,8 @@ class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
 
         try:
             doc = Document.objects.get(
-                series__collection__owner__short_name=owner,
-                series__collection__slug=collection,
+                collection__owner__short_name=owner,
+                collection__slug=collection,
                 identifier=identifier,
             )
             return doc.metadata
@@ -271,8 +306,8 @@ class MetadataUpdateView(OrgPermissionRequiredMixin, UpdateView):
 
         try:
             doc = Document.objects.get(
-                series__collection__owner__short_name=owner,
-                series__collection__slug=collection,
+                collection__owner__short_name=owner,
+                collection__slug=collection,
                 identifier=identifier,
             )
             return doc.metadata
@@ -295,6 +330,15 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         initial["number"] = number["number__max"] + 1
 
         return initial
+
+    def get_context_data(self, **kwargs):
+        """Add upload settings to template context"""
+        import json
+
+        context = super().get_context_data(**kwargs)
+        context["allowed_upload_types"] = json.dumps(settings.ALLOWED_UPLOAD_TYPES)
+        context["max_upload_size"] = settings.MAX_UPLOAD_SIZE
+        return context
 
     def post(self, request, **kwargs):
         from biblios.forms import PageForm
@@ -411,8 +455,8 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         doc = self.kwargs.get("identifier")
         number = self.kwargs.get("number")
         return self.get_queryset().get(
-            document__series__collection__owner__short_name=owner,
-            document__series__collection__slug=collection,
+            document__collection__owner__short_name=owner,
+            document__collection__slug=collection,
             document__identifier=doc,
             number=number,
         )
@@ -420,9 +464,9 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
 
 @require_http_methods(["POST"])
 def extract_text(request, short_name, collection_slug, identifier, number):
-    page = Page.objects.select_related("document__series__collection__owner").get(
-        document__series__collection__owner__short_name=short_name,
-        document__series__collection__slug=collection_slug,
+    page = Page.objects.select_related("document__collection__owner").get(
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
         document__identifier=identifier,
         number=number,
     )
@@ -459,8 +503,8 @@ def export_pdf(request, short_name, collection_slug, identifier, use_image=True)
         False: generate the PDF using just the extracted text
     """
     doc = Document.objects.get(
-        series__collection__owner__short_name=short_name,
-        series__collection__slug=collection_slug,
+        collection__owner__short_name=short_name,
+        collection__slug=collection_slug,
         identifier=identifier,
     )
     return doc.export_pdf(use_image)
@@ -471,8 +515,8 @@ def export_text(request, short_name, collection_slug, identifier):
     Generates a text file of a given doc ID.
     """
     doc = Document.objects.get(
-        series__collection__owner__short_name=short_name,
-        series__collection__slug=collection_slug,
+        collection__owner__short_name=short_name,
+        collection__slug=collection_slug,
         identifier=identifier,
     )
     return doc.export_text()
@@ -483,8 +527,8 @@ def export_xml(request, short_name, collection_slug, identifier):
     Generates a text file of a given doc ID.
     """
     doc = Document.objects.get(
-        series__collection__owner__short_name=short_name,
-        series__collection__slug=collection_slug,
+        collection__owner__short_name=short_name,
+        collection__slug=collection_slug,
         identifier=identifier,
     )
     return doc.export_xml()
@@ -507,8 +551,8 @@ def check_words(request, short_name, collection_slug, identifier, number):
         Page,
         number=number,
         document__identifier=identifier,
-        document__series__collection__slug=collection_slug,
-        document__series__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__collection__owner__short_name=short_name,
     )
 
     if page.words.exists():
@@ -545,8 +589,8 @@ def update_word(request, short_name, collection_slug, identifier, number, word_i
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
 
         # Update the word text and confidence
@@ -590,8 +634,8 @@ def update_print_control(
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
 
         # Get the new print_control value
@@ -646,8 +690,8 @@ def update_text_type(request, short_name, collection_slug, identifier, number, w
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
 
         # Get the new text_type value
@@ -698,8 +742,8 @@ def textblock_history(
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
 
         # Get all historical records for this TextBlock
@@ -757,6 +801,48 @@ def textblock_history(
         return JsonResponse({"error": "Failed to retrieve history"}, status=500)
 
 
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def revert_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Revert a word to its original value."""
+    try:
+        response = {}
+        status = 400
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        try:
+            # earliest() will be the creation record
+            original = word.history.earliest()
+            word = original.instance
+            word._change_reason = "Revert to original"
+            word.save()
+            response = {
+                "id": word.id,
+                "text": word.text,
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+                "suggestions": dict(word.suggestions)
+                if isinstance(word.suggestions, list)
+                else word.suggestions,
+            }
+            status = 200
+        except ObjectDoesNotExist:
+            # Some existing text blocks may not have an audit history
+            response = {"error": "No prior version to revert to"}
+            status = 400
+        return JsonResponse(response, status=status)
+
+    except Exception as e:
+        logger.error(f"Error reverting word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to revert word"}, status=500)
+      
 @require_http_methods(["POST"])
 def merge_blocks(request, short_name, collection_slug, identifier, number):
     """
@@ -824,3 +910,46 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
     except Exception as e:
         logger.error(f"Error merging text blocks: {e}")
         return JsonResponse({"error": "Failed to merge text"}, status=500)
+
+
+@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["GET"])
+def revert_word(request, short_name, collection_slug, identifier, number, word_id):
+    """Revert a word to its original value."""
+    try:
+        response = {}
+        status = 400
+        # Get the word with proper permissions check
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__series__collection__slug=collection_slug,
+            page__document__series__collection__owner__short_name=short_name,
+        )
+        try:
+            # earliest() will be the creation record
+            original = word.history.earliest()
+            word = original.instance
+            word._change_reason = "Revert to original"
+            word.save()
+            response = {
+                "id": word.id,
+                "text": word.text,
+                "confidence": float(word.confidence),
+                "confidence_level": word.confidence_level,
+                "suggestions": dict(word.suggestions)
+                if isinstance(word.suggestions, list)
+                else word.suggestions,
+            }
+            status = 200
+        except ObjectDoesNotExist:
+            # Some existing text blocks may not have an audit history
+            response = {"error": "No prior version to revert to"}
+            status = 400
+        return JsonResponse(response, status=status)
+
+    except Exception as e:
+        logger.error(f"Error reverting word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to revert word"}, status=500)
