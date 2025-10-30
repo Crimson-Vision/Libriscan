@@ -41,7 +41,7 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").
     ","
 )
 SESSION_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = not DEBUG
+SECURE_SSL_REDIRECT = os.environ.get("LB_SSL") == "True"
 USE_X_FORWARDED_HOST = True
 
 # This prevents the app from crashing for local development
