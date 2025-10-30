@@ -43,6 +43,7 @@ class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
         return Organization.objects.get(short_name=self.kwargs.get("short_name"))
 
 
+@login_not_required
 def index(request):
     context = {"app_name": "Libriscan"}
     if request.user.is_authenticated:
@@ -333,6 +334,7 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         """Add upload settings to template context"""
         import json
+
         context = super().get_context_data(**kwargs)
         context["allowed_upload_types"] = json.dumps(settings.ALLOWED_UPLOAD_TYPES)
         context["max_upload_size"] = settings.MAX_UPLOAD_SIZE
