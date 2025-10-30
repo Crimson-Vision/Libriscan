@@ -73,7 +73,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    # "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
