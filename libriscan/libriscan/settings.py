@@ -41,7 +41,11 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").
     ","
 )
 SESSION_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = not DEBUG
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    USE_X_FORWARDED_HOST = True
 
 # This prevents the app from crashing for local development
 # while ensuring a key is required for production
@@ -71,9 +75,9 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",

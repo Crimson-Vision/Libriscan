@@ -333,6 +333,7 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         """Add upload settings to template context"""
         import json
+
         context = super().get_context_data(**kwargs)
         context["allowed_upload_types"] = json.dumps(settings.ALLOWED_UPLOAD_TYPES)
         context["max_upload_size"] = settings.MAX_UPLOAD_SIZE
