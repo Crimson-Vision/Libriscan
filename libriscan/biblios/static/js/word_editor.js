@@ -29,6 +29,9 @@ class WordEditor {
     this.wordInput.onkeypress = (e) => { 
       if (e.key === 'Enter') this.save(); 
     };
+    this.wordInput.onkeydown = (e) => {
+      if (e.key === 'Escape') this.revert();
+    };
     
     // Double-click to edit
     this.wordElement.addEventListener('dblclick', () => this.enterEditMode());

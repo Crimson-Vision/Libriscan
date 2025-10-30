@@ -1,5 +1,5 @@
 <!-- Confidence Indicator Filter Dropdown for toggling confidence indicators -->
-<div class="dropdown dropdown-hover dropdown-end">
+<div id="confidenceFilter" class="dropdown dropdown-hover dropdown-end">
   <div tabindex="0" role="button" class="btn btn-sm btn-ghost gap-2">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
@@ -53,6 +53,16 @@
         <label class="label cursor-pointer justify-start gap-3 hover:bg-base-200 rounded-lg px-3 py-2">
           <input type="checkbox" class="checkbox checkbox-sm checkbox-confidence-accepted" id="toggle-accepted" checked />
           <span class="label-text confidence-label-accepted">Accepted</span>
+        </label>
+      </div>
+      
+      <div class="divider my-1"></div>
+      
+      <!-- Omit Toggle -->
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-3 hover:bg-base-200 rounded-lg px-3 py-2">
+          <input type="checkbox" class="checkbox checkbox-sm checkbox-confidence-omit" id="toggle-omit" checked />
+          <span class="label-text confidence-label-omit">Omit</span>
         </label>
       </div>
     </div>
