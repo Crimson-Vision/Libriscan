@@ -18,11 +18,11 @@
         <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-6">
           <div class="prose">
             <div class="h-[45vh] overflow-y-auto">
+              <!-- Word block with confidence indicators -->
+              <!-- Limits for geometry coordinates removed from data-words-json -->
               <div class="flex flex-wrap" id="word-container">
               {% if words %}
                 {% for word in words %}
-                  <!-- Word block with confidence indicators -->
-                  <!-- Limits for geometry coordinates removed from data-words-json -->
                   <button 
                     class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
                            {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
