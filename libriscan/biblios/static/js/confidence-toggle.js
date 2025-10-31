@@ -5,7 +5,7 @@
 
 class ConfidenceToggle {
   static STORAGE_KEY = 'confidenceTogglePrefs';
-  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit'];
+  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge'];
 
   constructor(containerId = 'word-container') {
     this.container = document.getElementById(containerId);

@@ -1,6 +1,7 @@
 <!-- Formatted Text Display Component
    - Displays formatted text from either 'formatted_text' variable or reconstructed from 'words'
-   - Excludes words with print_control = 'O' (Omit)
+   - Excludes words with print_control = 'O' (Omit) or 'M' (Merge)
+   - Only includes words with print_control = 'I' (Include)
    - Includes copy functionality via LibriscanUtils.initCopyButtons() from utils.js 
    - Auto-refreshes when words are updated via event
 -->
@@ -52,7 +53,8 @@
   
   /**
    * Refreshes the formatted text display
-   * Excludes words with print_control = 'O' (Omit)
+   * Excludes words with print_control = 'O' (Omit) or 'M' (Merge)
+   * Only includes words with print_control = 'I' (Include)
    */
   function refreshFormattedText() {
     if (!isStale) return;
@@ -61,9 +63,9 @@
     const wordBlocks = document.querySelectorAll('.word-block');
     if (!contentEl || !wordBlocks.length) return;
     
-    // Filter out omitted words and build text
+    // Filter out omitted and merged words, only include words with print_control = 'I'
     const text = Array.from(wordBlocks)
-      .filter(block => block.dataset.wordPrintControl !== PRINT_CONTROL.OMIT)
+      .filter(block => block.dataset.wordPrintControl === PRINT_CONTROL.INCLUDE)
       .map(block => block.dataset.wordText)
       .join(' ');
     
