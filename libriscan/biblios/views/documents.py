@@ -300,6 +300,9 @@ def extract_text(request, short_name, collection_slug, identifier, number):
             huey.get(page.extraction_key)
         logger.info(f"Extraction already in progress for page {page.id}")
     else:
+        # Put a handle for this page in the Huey store, and track the request time
+        huey.put(page.extraction_key, datetime.today())
+
         # Start the extraction process in the background
         page.generate_extraction()
 
