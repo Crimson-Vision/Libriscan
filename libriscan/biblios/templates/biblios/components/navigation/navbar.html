@@ -32,9 +32,28 @@
     <ul class="menu menu-horizontal px-1">
       <li><a href="{% url 'index' %}" class="hover:bg-base-200">Home</a></li>
       <li><a href="{% url 'organization-list' %}" class="hover:bg-base-200">Organizations</a></li>
-      <li>
-        <div class="tooltip tooltip-bottom" data-tip="Feature under development">
-          <a href="#" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Search</a>
+      <li class="dropdown dropdown-end">
+        <!-- Search Dropdown -->
+        <label tabindex="0" class="btn btn-ghost btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+        </label>
+        <div tabindex="0" class="dropdown-content mt-2 z-50 card card-compact w-96 bg-base-100 shadow-xl">
+          <div class="card-body p-2 gap-0">
+            <div class="form-control">
+              <input 
+                type="text" 
+                id="search-input"
+                placeholder="Search documents..." 
+                class="input input-bordered w-full"
+                autocomplete="off"
+              />
+            </div>
+            <div id="search-results" class="max-h-96 overflow-y-auto">
+              <!-- Results will be populated here -->
+            </div>
+          </div>
         </div>
       </li>
       <li>
@@ -61,3 +80,5 @@
     </ul>
   </div>
 </div>
+
+<script src="{% static 'js/search.js' %}"></script>

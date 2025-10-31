@@ -1,0 +1,6 @@
+/* For dropdown positioning fix in navbar */
+.navbar ul.menu .dropdown.dropdown-end .dropdown-content {
+  top: calc(100% + 0.5rem) !important;
+  bottom: auto !important;
+}
+
