@@ -2,6 +2,9 @@ import logging
 
 from django.conf import settings
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
 
 from rules.contrib.views import AutoPermissionRequiredMixin
 
@@ -60,3 +63,52 @@ def scan(request):
         "max_upload_size": settings.MAX_UPLOAD_SIZE,
     }
     return render(request, "biblios/scan.html", context)
+
+
+@require_http_methods(["GET"])
+def search_documents(request):
+    """
+    Search endpoint for documents with fuzzy matching.
+    Returns JSON list of documents matching the query.
+    Searches by document identifier, collection name, and series name.
+    """
+    query = request.GET.get("q", "").strip()
+    
+    if not query or not request.user.is_authenticated:
+        return JsonResponse({"results": []})
+    
+    user_orgs = request.user.userrole_set.values_list("organization", flat=True)
+    results = (
+        Document.objects
+        .filter(collection__owner__in=user_orgs)
+        .filter(
+            Q(identifier__icontains=query) |
+            Q(collection__name__icontains=query) |
+            Q(series__name__icontains=query)
+        )
+        .select_related("collection", "collection__owner", "series", "metadata")
+        .distinct()[:20]
+    )
+    
+    def get_title(doc):
+        try:
+            title = doc.metadata.title
+            if isinstance(title, list) and title:
+                return str(title[0])
+        except Document.metadata.RelatedObjectDoesNotExist:
+            pass
+        return doc.identifier
+    
+    return JsonResponse({
+        "results": [
+            {
+                "identifier": doc.identifier,
+                "title": get_title(doc),
+                "url": doc.get_absolute_url(),
+                "collection": doc.collection.name,
+                "series": doc.series.name if doc.series else None,
+                "organization": doc.collection.owner.short_name,
+            }
+            for doc in results
+        ]
+    })
