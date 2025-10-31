@@ -16,8 +16,6 @@ def queue_extraction(extractor):
     # Confirm that the requested page can still extract text
     if extractor.page.can_extract:
         try:
-            # Put a handle for this page in the Huey store, and track the request time
-            huey.put(extractor.page.extraction_key, datetime.today())
             return extractor.get_words()
         except Exception as e:
             logger.error(e)
