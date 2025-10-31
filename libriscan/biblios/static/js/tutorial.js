@@ -185,7 +185,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#acceptBtn',
+        element: '#confidenceStat',
         popover: {
           title: '✅ Press "A" to Accept',
           description: '<strong>Press the A key</strong> to accept the current word. This sets the confidence to 100% and automatically advances to the next word for faster workflow.',
@@ -243,7 +243,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#wordStatsContainer',
+        element: '#typeControlConfidenceStatContainer',
         popover: {
           title: '📊 Word Metadata',
           description: 'View and edit word properties including text type (Printed vs Handwriting), print control (how the word is handled in exports), and confidence level (OCR accuracy).',
