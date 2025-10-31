@@ -14,8 +14,8 @@
 
     input.addEventListener('input', (event) => {
       clearTimeout(timeout);
-      const q = event.target.value.trim();
-      timeout = setTimeout(() => q ? search(q, container) : container.innerHTML = '', 300);
+      const query = event.target.value.trim();
+      timeout = setTimeout(() => query ? search(query, container) : container.innerHTML = '', 300);
     });
 
     input.addEventListener('keydown', (event) => {
@@ -38,19 +38,19 @@
 
   async function search(query, container) {
     try {
-      const res = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+      const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      results = (await res.json()).results || [];
+      results = (await response.json()).results || [];
       container.innerHTML = results.length ? `
         <ul class="menu menu-compact w-full gap-0 p-1">
-          ${results.map(r => `
+          ${results.map(result => `
             <li>
-              <a href="${r.url}" class="px-2 py-1.5 rounded hover:bg-base-200 active:bg-base-300">
+              <a href="${result.url}" class="px-2 py-1.5 rounded hover:bg-base-200 active:bg-base-300">
                   <div class="flex flex-col">
-                    <span class="font-semibold text-sm leading-tight">${highlight(r.title, query)}</span>
-                    <span class="text-xs opacity-60 leading-tight">${highlight(r.identifier, query)} • ${r.collection}${r.series ? ` • ${r.series}` : ''}</span>
+                    <span class="font-semibold text-sm leading-tight">${highlight(result.title, query)}</span>
+                    <span class="text-xs opacity-60 leading-tight">${highlight(result.identifier, query)} • ${result.collection}${result.series ? ` • ${result.series}` : ''}</span>
                   </div>
               </a>
             </li>
