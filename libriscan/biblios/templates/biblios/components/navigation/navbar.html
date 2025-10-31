@@ -1,13 +1,17 @@
 {% load static %}
 
-<div class="navbar bg-base-100">
+<div class="navbar bg-base-100 shadow-md">
   <!-- Brand -->
-  <div class="flex-none flex items-center gap-2">
-    <a href="{% url 'index' %}" class="text-xl font-semibold" aria-label="LibriScan Home">LibriScan</a>
+  <div class="flex-none flex items-center gap-3 px-4">
+    <a href="{% url 'index' %}" class="text-2xl font-bold text-primary hover:text-secondary hover:scale-105 transition-all duration-200 drop-shadow-sm" aria-label="LibriScan Home">
+      LibriScan
+    </a>
     {% if user.is_authenticated %}
-      <span class="font-semibold text-base-content/80 text-sm md:text-base">
-        welcomes {{ user.get_full_name|default:user.username }} 👋
-      </span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
+        <span class="text-sm font-medium text-base-content/70">welcomes</span>
+        <span class="text-sm font-bold text-primary">{{ user.get_full_name|default:user.username }}</span>
+        <span class="text-lg animate-bounce">👋</span>
+      </div>
     {% endif %}
   </div>
 
@@ -19,7 +23,7 @@
     <ul class="menu menu-horizontal px-1">
     <!-- Theme Toggle -->
       <li>
-        <label class="swap swap-rotate relative inline-flex items-center hover:bg-base-200 rounded-lg p-2 cursor-pointer w-9 h-9 justify-center" aria-label="Toggle dark mode">
+        <label class="swap swap-rotate relative inline-flex items-center hover:bg-primary/10 hover:text-primary rounded-lg p-2 cursor-pointer w-9 h-9 justify-center transition-all duration-200" aria-label="Toggle dark mode">
           <input type="checkbox" onclick="toggleTheme()" aria-label="Theme toggle" />
       
       <!-- Sun icon -->
@@ -34,7 +38,7 @@
     </label>
       </li>
       <li>
-        <a href="{% url 'index' %}" class="hover:bg-base-200 inline-flex items-center gap-2" aria-label="Home">
+        <a href="{% url 'index' %}" class="hover:bg-primary/10 hover:text-primary rounded-lg px-3 py-2 transition-all duration-200 inline-flex items-center gap-2 font-medium" aria-label="Home">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
           </svg>
@@ -42,7 +46,7 @@
         </a>
       </li>
       <li>
-        <a href="{% url 'organization-list' %}" class="hover:bg-base-200 inline-flex items-center gap-2" aria-label="Organizations">
+        <a href="{% url 'organization-list' %}" class="hover:bg-primary/10 hover:text-primary rounded-lg px-3 py-2 transition-all duration-200 inline-flex items-center gap-2 font-medium" aria-label="Organizations">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
           </svg>
@@ -51,13 +55,13 @@
       </li>
       <li class="dropdown dropdown-end">
         <!-- Search Dropdown -->
-        <label tabindex="0" class="hover:bg-base-200 inline-flex items-center gap-2 rounded-lg px-2 py-2 cursor-pointer" aria-label="Search documents">
+        <label tabindex="0" class="hover:bg-primary/10 hover:text-primary rounded-lg px-3 py-2 transition-all duration-200 inline-flex items-center gap-2 cursor-pointer font-medium" aria-label="Search documents">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
           <span class="hidden md:inline">Search</span>
         </label>
-        <div tabindex="0" class="dropdown-content mt-2 z-50 card card-compact w-96 bg-base-100 shadow-xl" role="dialog" aria-label="Search dropdown">
+        <div tabindex="0" class="dropdown-content mt-2 z-50 card card-compact w-96 bg-base-100 shadow-2xl border border-primary/20" role="dialog" aria-label="Search dropdown">
           <div class="card-body p-2 gap-0 w-full">
             <div class="form-control w-full">
               <label for="search-input" class="sr-only">Search documents</label>
@@ -78,7 +82,7 @@
       </li>
       <li>
         {% if user.is_authenticated %}
-        <a href="#" onclick="document.getElementById('logout-form').submit();" class="hover:bg-base-200 inline-flex items-center gap-2" aria-label="Logout">
+        <a href="#" onclick="document.getElementById('logout-form').submit();" class="hover:bg-error/10 hover:text-error rounded-lg px-3 py-2 transition-all duration-200 inline-flex items-center gap-2 font-medium" aria-label="Logout">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
           </svg>
@@ -89,7 +93,7 @@
           <input type="hidden" name="next" value="{% url 'index' %}">
         </form>
         {% else %}
-        <a href="/login" class="hover:bg-base-200 inline-flex items-center gap-2" aria-label="Login">
+        <a href="/login" class="hover:bg-success/10 hover:text-success rounded-lg px-3 py-2 transition-all duration-200 inline-flex items-center gap-2 font-medium" aria-label="Login">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
           </svg>
