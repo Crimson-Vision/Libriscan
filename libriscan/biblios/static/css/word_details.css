@@ -19,17 +19,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
+  min-width: 0;
 }
 
 /* Word Input Field */
 #wordInput {
   word-break: break-all;
   overflow-wrap: anywhere;
-}
-
-#wordInput.hidden {
-  display: none;
 }
 
 /* Suggestions Section */
@@ -69,16 +65,4 @@
   opacity: 1;
 }
 
-/* Progress Bar Colors */
-.progress-error {
-  --progress-color: hsl(var(--er));
-}
-
-.progress-warning {
-  --progress-color: hsl(var(--wa));
-}
-
-.progress-success {
-  --progress-color: hsl(var(--su));
-}
 

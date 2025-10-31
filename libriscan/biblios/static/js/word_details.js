@@ -11,8 +11,6 @@ class WordDetails {
     this.editButton = document.getElementById('editButton');
     this.saveButton = document.getElementById('saveButton');
     this.revertButton = document.getElementById('revertButton');
-    this.scoreElement = document.getElementById('confidenceScore');
-    this.progressBar = document.getElementById('confidenceBar');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
     this.confidenceLevelSpan = document.getElementById('confidenceLevel');
     this.markAcceptedBtn = document.getElementById('markAcceptedBtn');
@@ -24,10 +22,6 @@ class WordDetails {
     this.wordActionsDropdown = document.getElementById('wordActionsDropdown');
     this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
     this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
-
-    // Stat container elements for full-width edit mode
-    this.typeControlStat = document.getElementById('typeControlStat');
-    this.confidenceStat = document.getElementById('confidenceStat');
 
     // Initialize data
     this.currentWordId = null;
@@ -41,9 +35,7 @@ class WordDetails {
       wordInput: this.wordInput,
       editButton: this.editButton,
       saveButton: this.saveButton,
-      revertButton: this.revertButton,
-      typeControlStat: this.typeControlStat,
-      confidenceStat: this.confidenceStat
+      revertButton: this.revertButton
     });
 
     this.metadata = new WordMetadata({
@@ -136,9 +128,6 @@ class WordDetails {
 
   _updateConfidenceDisplay(wordInfo) {
     const raw = parseFloat(wordInfo.confidence) || 0;
-    
-    if (this.scoreElement) this.scoreElement.style.display = 'none';
-    if (this.progressBar) this.progressBar.style.display = 'none';
     
     if (raw >= 99.999) {
       if (this.confidenceLevelSpan) {
