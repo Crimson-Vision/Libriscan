@@ -54,19 +54,21 @@ class AuditHistory {
     
     if (!hasHistory) return;
 
-    this.elements.wordText.textContent = data.current_text;
-    this.elements.wordId.textContent = data.word_id;
-    this.elements.count.textContent = `${data.history_count} ${data.history_count === 1 ? 'Change' : 'Changes'}`;
-    this.elements.timezone.textContent = LibriscanUtils.getUserTimezone();
+    if (this.elements.wordText) this.elements.wordText.textContent = data.current_text;
+    if (this.elements.wordId) this.elements.wordId.textContent = data.word_id;
+    if (this.elements.count) this.elements.count.textContent = `${data.history_count} ${data.history_count === 1 ? 'Change' : 'Changes'}`;
+    if (this.elements.timezone) this.elements.timezone.textContent = LibriscanUtils.getUserTimezone();
 
-    this.elements.container.innerHTML = data.history
-      .map((record, idx) => this.createTimelineItem(record, idx, data.history))
-      .join('');
+    if (this.elements.container) {
+      this.elements.container.innerHTML = data.history
+        .map((record, idx) => this.createTimelineItem(record, idx, data.history))
+        .join('');
+    }
   }
 
   createTimelineItem(record, index, allHistory) {
     const { isFirst, isLast, previous } = this._getRecordContext(index, allHistory);
-    const { relative, exact } = LibriscanUtils.formatDateTime(record.history_date);
+    const { relative, exact, time } = LibriscanUtils.formatDateTime(record.history_date);
     const changes = this._detectChanges(record, previous);
     const { EMOJI } = AuditHistory.CONFIG;
     
@@ -91,7 +93,7 @@ class AuditHistory {
         <div class="timeline-start pr-4" style="flex: 0 0 120px;">
           <div class="text-right">
             <time class="text-sm font-semibold text-primary block mb-0.5" datetime="${record.history_date}">${relative}</time>
-            <time class="text-xs text-base-content/50 font-mono block" datetime="${record.history_date}">${exact}</time>
+            <time class="text-xs text-base-content/50 font-mono block" datetime="${record.history_date}">${exact} ${time}</time>
           </div>
         </div>
         <div class="timeline-middle">
