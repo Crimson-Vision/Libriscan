@@ -19,17 +19,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
+  min-width: 0;
 }
 
 /* Word Input Field */
 #wordInput {
   word-break: break-all;
   overflow-wrap: anywhere;
-}
-
-#wordInput.hidden {
-  display: none;
 }
 
 /* Suggestions Section */
@@ -69,16 +65,16 @@
   opacity: 1;
 }
 
-/* Progress Bar Colors */
-.progress-error {
-  --progress-color: hsl(var(--er));
+/* Accept button kbd styling */
+#acceptBtn .kbd {
+  background-color: oklch(var(--pc) / 0.2);
+  border-color: oklch(var(--pc) / 0.3);
+  color: oklch(var(--pc));
 }
 
-.progress-warning {
-  --progress-color: hsl(var(--wa));
+#acceptBtn .kbd:hover {
+  background-color: oklch(var(--pc) / 0.3);
+  border-color: oklch(var(--pc) / 0.4);
 }
 
-.progress-success {
-  --progress-color: hsl(var(--su));
-}
 

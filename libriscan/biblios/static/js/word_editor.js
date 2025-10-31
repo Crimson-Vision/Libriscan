@@ -10,8 +10,6 @@ class WordEditor {
     this.editButton = elements.editButton;
     this.saveButton = elements.saveButton;
     this.revertButton = elements.revertButton;
-    this.typeControlStat = elements.typeControlStat;
-    this.confidenceStat = elements.confidenceStat;
     
     // State
     this.preEditWord = null;
@@ -90,34 +88,34 @@ class WordEditor {
   _setEditMode(enabled) {
     this.isEditing = enabled;
     
+    // Elements to show/hide for each mode
+    const displayModeElements = [this.wordElement, this.editButton];
+    const editModeElements = [this.wordInput, this.saveButton, this.revertButton];
+    
     if (enabled) {
       // Save current word before editing
       this.preEditWord = this.wordElement.textContent;
       
-      // Hide other stats to give input full width for extremely long words
-      if (this.typeControlStat) this.typeControlStat.classList.add('lg:hidden');
-      if (this.confidenceStat) this.confidenceStat.classList.add('lg:hidden');
+      // Switch to edit mode
+      this._toggleElements(displayModeElements, true);  // Hide
+      this._toggleElements(editModeElements, false);     // Show
       
-      // Show edit UI
-      this.wordElement.classList.add('hidden');
-      this.wordInput.classList.remove('hidden');
-      this.editButton.classList.add('hidden');
-      this.saveButton.classList.remove('hidden');
-      this.revertButton.classList.remove('hidden');
+      // Set input value and focus
       this.wordInput.value = this.wordElement.textContent;
       this.wordInput.focus();
     } else {
-      // Restore other stats visibility
-      if (this.typeControlStat) this.typeControlStat.classList.remove('lg:hidden');
-      if (this.confidenceStat) this.confidenceStat.classList.remove('lg:hidden');
-      
-      // Show display UI
-      this.wordElement.classList.remove('hidden');
-      this.wordInput.classList.add('hidden');
-      this.editButton.classList.remove('hidden');
-      this.saveButton.classList.add('hidden');
-      this.revertButton.classList.add('hidden');
+      // Switch to display mode
+      this._toggleElements(displayModeElements, false);  // Show
+      this._toggleElements(editModeElements, true);      // Hide
     }
+  }
+
+  _toggleElements(elements, hide) {
+    elements.forEach(element => {
+      if (element) {
+        element.classList.toggle('hidden', hide);
+      }
+    });
   }
 
   static isTyping() {

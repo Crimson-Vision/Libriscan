@@ -11,11 +11,9 @@ class WordDetails {
     this.editButton = document.getElementById('editButton');
     this.saveButton = document.getElementById('saveButton');
     this.revertButton = document.getElementById('revertButton');
-    this.scoreElement = document.getElementById('confidenceScore');
-    this.progressBar = document.getElementById('confidenceBar');
     this.suggestionsContainer = document.getElementById('wordSuggestions');
     this.confidenceLevelSpan = document.getElementById('confidenceLevel');
-    this.markAcceptedBtn = document.getElementById('markAcceptedBtn');
+    this.acceptBtn = document.getElementById('acceptBtn');
     this.prevWordBtn = document.getElementById('prevWordBtn');
     this.nextWordBtn = document.getElementById('nextWordBtn');
     this.wordPosition = document.getElementById('wordPosition');
@@ -24,10 +22,6 @@ class WordDetails {
     this.wordActionsDropdown = document.getElementById('wordActionsDropdown');
     this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
     this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
-
-    // Stat container elements for full-width edit mode
-    this.typeControlStat = document.getElementById('typeControlStat');
-    this.confidenceStat = document.getElementById('confidenceStat');
 
     // Initialize data
     this.currentWordId = null;
@@ -41,9 +35,7 @@ class WordDetails {
       wordInput: this.wordInput,
       editButton: this.editButton,
       saveButton: this.saveButton,
-      revertButton: this.revertButton,
-      typeControlStat: this.typeControlStat,
-      confidenceStat: this.confidenceStat
+      revertButton: this.revertButton
     });
 
     this.metadata = new WordMetadata({
@@ -55,7 +47,7 @@ class WordDetails {
       textTypeDisplay: document.getElementById('textTypeDisplay'),
       textTypeBadge: document.getElementById('textTypeBadge'),
       textTypeOptions: document.querySelectorAll('.text-type-option'),
-      markAcceptedBtn: this.markAcceptedBtn
+      acceptBtn: this.acceptBtn
     });
 
     // Setup editor callbacks
@@ -70,9 +62,9 @@ class WordDetails {
     };
 
     // Setup metadata callbacks
-    this.metadata.onMarkAccepted = async (wordText) => {
+    this.metadata.onAccept = async (wordText) => {
       await this._updateWordText(wordText, {
-        successMessage: 'Marked as accepted',
+        successMessage: 'Accepted',
         autoAdvance: true
       });
     };
@@ -137,14 +129,11 @@ class WordDetails {
   _updateConfidenceDisplay(wordInfo) {
     const raw = parseFloat(wordInfo.confidence) || 0;
     
-    if (this.scoreElement) this.scoreElement.style.display = 'none';
-    if (this.progressBar) this.progressBar.style.display = 'none';
-    
     if (raw >= 99.999) {
       if (this.confidenceLevelSpan) {
         this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Accepted</span>';
       }
-      if (this.markAcceptedBtn) this.markAcceptedBtn.classList.add('hidden');
+      if (this.acceptBtn) this.acceptBtn.classList.add('hidden');
     } else {
       if (this.confidenceLevelSpan) {
         const level = (wordInfo.confidence_level || 'none').toLowerCase();
@@ -152,9 +141,9 @@ class WordDetails {
         const badgeClass = this.getBadgeClass(level);
         this.confidenceLevelSpan.innerHTML = `<span class="badge ${badgeClass}">${levelText}</span>`;
       }
-      if (this.markAcceptedBtn) {
-        this.markAcceptedBtn.classList.remove('hidden');
-        this.metadata._setMarkAcceptedLoading(false);
+      if (this.acceptBtn) {
+        this.acceptBtn.classList.remove('hidden');
+        this.metadata._setAcceptLoading(false);
       }
     }
   }

@@ -32,7 +32,7 @@ class WordKeyboard {
       this.wordDetails.editor.enterEditMode();
     } else if (key === 'a' || key === 'A') {
       e.preventDefault();
-      this.wordDetails.metadata.markAsAccepted();
+      this.wordDetails.metadata.accept();
     }
   }
 
