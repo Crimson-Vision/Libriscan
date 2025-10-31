@@ -39,7 +39,7 @@
                     data-word-geo-y0="{{ word.geo_y_0 }}"
                     data-word-geo-x1="{{ word.geo_x_1 }}"
                     data-word-geo-y1="{{ word.geo_y_1 }}"
-                    data-word-suggestions="{{ word.suggestions|safe }}"
+                    data-word-suggestions="{{ word.suggestions_json }}"
                     title="Click to view details">
                     <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
                       {{ word.text }}
