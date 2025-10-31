@@ -12,12 +12,12 @@ class WordMetadata {
     this.textTypeDisplay = elements.textTypeDisplay;
     this.textTypeBadge = elements.textTypeBadge;
     this.textTypeOptions = elements.textTypeOptions;
-    this.markAcceptedBtn = elements.markAcceptedBtn;
+    this.acceptBtn = elements.acceptBtn;
     this.currentWordId = null;
     this.currentWordInfo = null;
     this.currentPrintControl = 'I';
     this.currentTextType = 'P';
-    this.onMarkAccepted = null;
+    this.onAccept = null;
   }
 
   initializeEventListeners() {
@@ -37,8 +37,8 @@ class WordMetadata {
       });
     });
     
-    if (this.markAcceptedBtn) {
-      this.markAcceptedBtn.onclick = () => this.markAsAccepted();
+    if (this.acceptBtn) {
+      this.acceptBtn.onclick = () => this.accept();
     }
   }
 
@@ -187,33 +187,33 @@ class WordMetadata {
     if (document.activeElement) document.activeElement.blur();
   }
   
-  async markAsAccepted() {
+  async accept() {
     if (!this.currentWordInfo?.word) {
       LibriscanUtils.showToast('No word selected', 'error');
       return;
     }
     
-    this._setMarkAcceptedLoading(true);
+    this._setAcceptLoading(true);
     
     try {
-      if (this.onMarkAccepted) {
-        await this.onMarkAccepted(this.currentWordInfo.word);
+      if (this.onAccept) {
+        await this.onAccept(this.currentWordInfo.word);
       }
     } catch (error) {
-      console.error('Error marking as accepted:', error);
-      LibriscanUtils.showToast('Failed to mark as accepted', 'error');
+      console.error('Error accepting:', error);
+      LibriscanUtils.showToast('Failed to accept', 'error');
     } finally {
-      this._setMarkAcceptedLoading(false);
+      this._setAcceptLoading(false);
     }
   }
   
-  _setMarkAcceptedLoading(isLoading) {
-    if (!this.markAcceptedBtn) return;
+  _setAcceptLoading(isLoading) {
+    if (!this.acceptBtn) return;
     
-    this.markAcceptedBtn.disabled = isLoading;
-    this.markAcceptedBtn.innerHTML = isLoading
+    this.acceptBtn.disabled = isLoading;
+    this.acceptBtn.innerHTML = isLoading
       ? `<span class="loading loading-spinner loading-xs"></span>Saving...`
-      : `<span class="text-xs">Mark as Accepted</span>
+      : `<span class="text-xs">Accept</span>
         <kbd class="kbd kbd-xs">A</kbd>`;
   }
 }

@@ -185,10 +185,10 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#markAcceptedBtn',
+        element: '#acceptBtn',
         popover: {
           title: '✅ Press "A" to Accept',
-          description: '<strong>Press the A key</strong> to mark the current word as accepted. This sets the confidence to 100% and automatically advances to the next word for faster workflow.',
+          description: '<strong>Press the A key</strong> to accept the current word. This sets the confidence to 100% and automatically advances to the next word for faster workflow.',
           side: 'top',
           align: 'center'
         }
@@ -211,7 +211,7 @@ class LibriscanTutorial {
             '• <kbd>E</kbd> - Edit current word<br/>' +
             '• <kbd>Enter</kbd> - Save changes<br/>' +
             '• <kbd>Esc</kbd> - Cancel editing<br/>' +
-            '• <kbd>A</kbd> - Mark as accepted<br/>' +
+            '• <kbd>A</kbd> - Accept<br/>' +
             '• <kbd>1-9</kbd> - Apply suggestions<br/><br/>' +
             '<strong>Pro tip:</strong> Accepting words or applying suggestions will automatically advance to the next word!',
           side: 'center',
@@ -276,7 +276,7 @@ class LibriscanTutorial {
         element: '#confidenceStat',
         popover: {
           title: '📈 Confidence Level',
-          description: 'Shows the OCR confidence level for this word. Lower confidence words may need review. Click "Mark as Accepted" (or press A) to set the confidence to 100%.',
+          description: 'Shows the OCR confidence level for this word. Lower confidence words may need review. Click "Accept" (or press A) to set the confidence to 100%.',
           side: 'left',
           align: 'start'
         }
