@@ -84,6 +84,7 @@ def generate_suggestions(wrd, long_s_detect, s=3):
                 )
 
     # If the *only* suggestion is an exact match for the word, don't return anything
+    # Sets don't allow subscripting, hence the use of min()
     if len(suggestions) == 1 and min(suggestions)[0] == wrd:
         return []
     else:
