@@ -204,6 +204,7 @@ def textblock_history(
                     "history_id": record.history_id,
                     "history_date": record.history_date.isoformat(),
                     "history_type": record.get_history_type_display(),
+                    "history_change_reason": record.history_change_reason,
                     "history_user": record.history_user.get_full_name()
                     or record.history_user.email
                     if record.history_user
