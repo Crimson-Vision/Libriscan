@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from huey.contrib.djhuey import db_task, periodic_task
 from huey.contrib.djhuey import HUEY as huey
@@ -16,10 +15,14 @@ def queue_extraction(extractor):
     # Confirm that the requested page can still extract text
     if extractor.page.can_extract:
         try:
+            logger.info(f"Running page {extractor.page.id} extractor")
             return extractor.get_words()
         except Exception as e:
             logger.error(e)
-    huey.get(extractor.page.extraction_key)
+            huey.get(extractor.page.extraction_key)
+    else:
+        logger.info(f"Couldn't extract page {extractor.page.id}")
+        huey.get(extractor.page.extraction_key)
 
 
 @periodic_task(crontab(minute="*/10"))
