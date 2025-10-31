@@ -70,7 +70,7 @@ class WordMetadata {
       
       // Dispatch event to update word block styling
       document.dispatchEvent(new CustomEvent('printControlUpdated', { 
-        detail: { wordId: this.currentWordId, printControl: data.print_control } 
+        detail: { wordId: this.currentWordId, printControl: data.print_control, data: data } 
       }));
       
       return data;
@@ -100,6 +100,12 @@ class WordMetadata {
       this._updateTextTypeDisplay(data.text_type);
       this._showTextTypeSuccess();
       LibriscanUtils.showToast('Text type updated', 'success');
+      
+      // Dispatch event to update word block styling
+      document.dispatchEvent(new CustomEvent('textTypeUpdated', { 
+        detail: { wordId: this.currentWordId, textType: data.text_type, data: data } 
+      }));
+      
       return data;
     } catch (error) {
       console.error('Error updating text type:', error);

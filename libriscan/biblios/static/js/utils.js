@@ -35,7 +35,7 @@ const LibriscanUtils = {
         if (headers['x-csrftoken']) {
           return headers['x-csrftoken'];
         }
-      } catch (e) {
+      } catch (error) {
         console.warn('Failed to parse HTMX headers');
       }
     }
@@ -133,6 +133,17 @@ const LibriscanUtils = {
   buildWordHistoryURL(wordId, pathname = window.location.pathname) {
     const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
     return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/history/`;
+  },
+
+  /**
+   * Build a word revert URL for the current page
+   * @param {number} wordId - Word ID to revert
+   * @param {string} pathname - URL pathname (default: current location)
+   * @returns {string} Revert URL
+   */
+  buildWordRevertURL(wordId, pathname = window.location.pathname) {
+    const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
+    return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/revert/`;
   },
 
   /**
@@ -323,12 +334,28 @@ const LibriscanUtils = {
 
     if (!inp || !btn || !err) return;
 
-    inp.addEventListener('change', (e) => {
-      const result = this.validateFile(e.target.files[0], options);
+    inp.addEventListener('change', (event) => {
+      const result = this.validateFile(event.target.files[0], options);
       btn.disabled = !result.valid;
       err.classList.toggle('hidden', result.valid);
       if (result.error) err.querySelector('span').textContent = result.error;
     });
+  },
+
+  setButtonLoading(button, isLoading, text) {
+    if (!button) return;
+    button.disabled = isLoading;
+    button.classList.toggle('loading', isLoading);
+    if (text) button.textContent = text;
+  },
+
+  scrollIntoViewSafe(element, options = { block: 'center', behavior: 'smooth' }) {
+    if (!element) return;
+    try {
+      element.scrollIntoView(options);
+    } catch (error) {
+      element.scrollIntoView();
+    }
   },
 };
 

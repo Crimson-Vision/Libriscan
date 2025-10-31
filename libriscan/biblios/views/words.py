@@ -204,6 +204,7 @@ def textblock_history(
                     "history_id": record.history_id,
                     "history_date": record.history_date.isoformat(),
                     "history_type": record.get_history_type_display(),
+                    "history_change_reason": record.history_change_reason,
                     "history_user": record.history_user.get_full_name()
                     or record.history_user.email
                     if record.history_user
@@ -240,8 +241,8 @@ def textblock_history(
         return JsonResponse({"error": "Failed to retrieve history"}, status=500)
 
 
-@permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
-@require_http_methods(["GET"])
+@permission_required("biblios.change_textblock", fn=get_org_by_word, raise_exception=True)
+@require_http_methods(["POST"])
 def revert_word(request, short_name, collection_slug, identifier, number, word_id):
     """Revert a word to its original value."""
     try:
@@ -270,6 +271,12 @@ def revert_word(request, short_name, collection_slug, identifier, number, word_i
                 "suggestions": dict(word.suggestions)
                 if isinstance(word.suggestions, list)
                 else word.suggestions,
+                "text_type": word.text_type,
+                "text_type_display": TextBlock.TEXT_TYPE_CHOICES.get(word.text_type),
+                "print_control": word.print_control,
+                "print_control_display": TextBlock.PRINT_CONTROL_CHOICES.get(
+                    word.print_control
+                ),
             }
             status = 200
         except ObjectDoesNotExist:
