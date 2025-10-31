@@ -87,8 +87,8 @@ class BibliosTests(TestCase):
 
         response = merge_blocks(
             request,
-            page.document.series.collection.owner.short_name,
-            page.document.series.collection.slug,
+            page.document.collection.owner.short_name,
+            page.document.collection.slug,
             page.document.identifier,
             page.number,
         )
@@ -108,8 +108,8 @@ class BibliosTests(TestCase):
 
         response = merge_blocks(
             request,
-            page.document.series.collection.owner.short_name,
-            page.document.series.collection.slug,
+            page.document.collection.owner.short_name,
+            page.document.collection.slug,
             page.document.identifier,
             page.number,
         )
