@@ -78,7 +78,7 @@ class CloudService(models.Model):
 
     @cached_property
     def extractor(self):
-        from .services.extractors import EXTRACTORS
+        from biblios.services.extractors import EXTRACTORS
 
         return EXTRACTORS[self.service]
 
