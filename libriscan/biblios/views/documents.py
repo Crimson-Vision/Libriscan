@@ -312,7 +312,7 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         "collection_slug": collection_slug,
         "identifier": identifier,
         "number": number,
-        "owner": page.document.series.collection.owner,
+        "owner": page.document.collection.owner,
     }
 
     # Return the loading template immediately
