@@ -65,4 +65,16 @@
   opacity: 1;
 }
 
+/* Accept button kbd styling */
+#acceptBtn .kbd {
+  background-color: oklch(var(--pc) / 0.2);
+  border-color: oklch(var(--pc) / 0.3);
+  color: oklch(var(--pc));
+}
+
+#acceptBtn .kbd:hover {
+  background-color: oklch(var(--pc) / 0.3);
+  border-color: oklch(var(--pc) / 0.4);
+}
+
 
