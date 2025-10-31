@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from . import views
+from .views.base import search_documents
 
 urlpatterns = [
     # Core pages
@@ -9,6 +10,8 @@ urlpatterns = [
     # File handling
     path("upload/", views.handle_upload, name="handle_upload"),
     path("organizations", views.organization_list, name="organization-list"),
+    # Search
+    path("api/search/", search_documents, name="search_documents"),
     # Organization details
     path(
         "<slug:short_name>/",
