@@ -83,6 +83,7 @@ class WordDetails {
   initializeEventListeners() {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
     document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
+    document.addEventListener('textTypeUpdated', (event) => this._handleTextTypeUpdate(event.detail));
     
     this.prevWordBtn.onclick = () => this.goToPrevWord();
     this.nextWordBtn.onclick = () => this.goToNextWord();
@@ -124,6 +125,9 @@ class WordDetails {
     this.metadata.updateTextTypeDisplay(wordInfo.text_type || 'P');
     this.metadata.updatePrintControlDisplay(wordInfo.print_control || 'I');
     this.updateSuggestions(wordInfo);
+    
+    // Check if revert button should be enabled
+    this._checkAndEnableRevertButton(wordInfo.id);
   }
 
   _updateConfidenceDisplay(wordInfo) {
@@ -236,6 +240,9 @@ class WordDetails {
         detail: { wordId: this.currentWordId, data } 
       }));
       
+      // Check if revert button should be enabled after text change
+      await this._checkAndEnableRevertButton(this.currentWordId);
+      
       // Handle callbacks and messages
       if (typeof callbackOrOptions === 'function') {
         LibriscanUtils.showToast('Word updated successfully');
@@ -269,6 +276,12 @@ class WordDetails {
     this.currentWordInfo.confidence = data.confidence;
     this.currentWordInfo.confidence_level = data.confidence_level;
     this.currentWordInfo.suggestions = data.suggestions;
+    if (data.text_type !== undefined) {
+      this.currentWordInfo.text_type = data.text_type;
+    }
+    if (data.print_control !== undefined) {
+      this.currentWordInfo.print_control = data.print_control;
+    }
   }
 
   _updateWordUI() {
@@ -281,21 +294,47 @@ class WordDetails {
     const wordBlock = document.querySelector(`[data-word-id="${this.currentWordInfo.id}"]`);
     if (!wordBlock) return;
 
+    // Update data attributes
     wordBlock.dataset.wordText = data.text;
     wordBlock.dataset.wordConfidence = data.confidence;
     wordBlock.dataset.wordConfidenceLevel = data.confidence_level;
     wordBlock.dataset.wordSuggestions = JSON.stringify(Object.entries(data.suggestions));
+    if (data.print_control !== undefined) {
+      wordBlock.dataset.wordPrintControl = data.print_control;
+    }
+    if (data.text_type !== undefined) {
+      wordBlock.dataset.wordType = data.text_type;
+    }
     
+    // Restore confidence CSS classes
     wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
     wordBlock.classList.add(`confidence-${data.confidence_level}`);
+    
+    // Restore print control CSS classes
+    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
+    if (data.print_control === 'O') {
+      wordBlock.classList.add('print-control-omit');
+    } else if (data.print_control === 'M') {
+      wordBlock.classList.add('print-control-merge');
+    }
     
     this.updateWordBlockContent(wordBlock, data.text, data.confidence, data.confidence_level);
   }
 
-  _handlePrintControlUpdate(detail) {
-    const { wordId, printControl } = detail;
+  async _handlePrintControlUpdate(detail) {
+    const { wordId, printControl, data } = detail;
     const wordBlock = document.querySelector(`[data-word-id="${wordId}"]`);
     if (!wordBlock) return;
+
+    // Update currentWordInfo if this is the current word
+    if (this.currentWordId === wordId && this.currentWordInfo) {
+      if (data && data.print_control !== undefined) {
+        this.currentWordInfo.print_control = data.print_control;
+      } else {
+        // If data is not provided, update from the printControl value
+        this.currentWordInfo.print_control = printControl;
+      }
+    }
 
     wordBlock.dataset.wordPrintControl = printControl;
     wordBlock.classList.remove('print-control-omit', 'print-control-merge');
@@ -309,6 +348,40 @@ class WordDetails {
     document.dispatchEvent(new CustomEvent('wordUpdated', { 
       detail: { wordId: wordId, data: { print_control: printControl } } 
     }));
+
+    // Check if revert button should be enabled after print control change
+    if (this.currentWordId === wordId) {
+      await this._checkAndEnableRevertButton(wordId);
+    }
+  }
+
+  async _handleTextTypeUpdate(detail) {
+    const { wordId, textType, data } = detail;
+    
+    // Update currentWordInfo if this is the current word
+    if (this.currentWordId === wordId && this.currentWordInfo) {
+      if (data && data.text_type !== undefined) {
+        this.currentWordInfo.text_type = data.text_type;
+      } else {
+        // If data is not provided, update from the textType value
+        this.currentWordInfo.text_type = textType;
+      }
+    }
+
+    const wordBlock = document.querySelector(`[data-word-id="${wordId}"]`);
+    const textTypeValue = data?.text_type !== undefined ? data.text_type : textType;
+    if (wordBlock && textTypeValue) {
+      wordBlock.dataset.wordType = textTypeValue;
+    }
+
+    document.dispatchEvent(new CustomEvent('wordUpdated', { 
+      detail: { wordId: wordId, data: { text_type: textType } } 
+    }));
+
+    // Check if revert button should be enabled after text type change
+    if (this.currentWordId === wordId) {
+      await this._checkAndEnableRevertButton(wordId);
+    }
   }
 
   goToPrevWord() {
@@ -372,12 +445,100 @@ class WordDetails {
     wordBlock.appendChild(textSpan);
   }
 
-  revertToOriginalWord() {
+  saveToDictionary() {
     // TODO: Implement functionality
   }
 
-  saveToDictionary() {
-    // TODO: Implement functionality
+  async revertToOriginalWord() {
+    if (!this.currentWordId) {
+      LibriscanUtils.showToast('No word selected', 'error');
+      return;
+    }
+
+    const button = this.revertToOriginalAction;
+    const originalText = button?.textContent;
+    
+    if (button) {
+      button.disabled = true;
+      button.classList.add('loading');
+      button.textContent = 'Reverting...';
+    }
+
+    try {
+      const data = await LibriscanUtils.postFormData(
+        LibriscanUtils.buildWordRevertURL(this.currentWordId), 
+        {}
+      );
+
+      this._updateWordData(data);
+      this._updateWordUI();
+      this._updateWordBlock(data);
+
+      if (data.text_type !== undefined) this.metadata.updateTextTypeDisplay(data.text_type);
+      if (data.print_control !== undefined) this.metadata.updatePrintControlDisplay(data.print_control);
+
+      document.dispatchEvent(new CustomEvent('wordUpdated', {
+        detail: { wordId: this.currentWordId, data }
+      }));
+
+      const auditHistoryTab = document.getElementById('wordAuditHistoryTab');
+      if (auditHistoryTab?.checked && this.auditHistory) {
+        await this.auditHistory.displayHistory(this.currentWordId);
+      }
+
+      await this._checkAndEnableRevertButton(this.currentWordId);
+      LibriscanUtils.showToast('Word reverted to original', 'success');
+    } catch (error) {
+      console.error('Error reverting word:', error);
+      LibriscanUtils.showToast(error.message || 'Failed to revert word', 'error');
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.classList.remove('loading');
+        button.textContent = originalText || 'Revert to Original';
+      }
+    }
+  }
+
+  async _checkAndEnableRevertButton(wordId) {
+    if (!this.revertToOriginalAction) return;
+
+    try {
+      const data = await LibriscanUtils.fetchJSON(LibriscanUtils.buildWordHistoryURL(wordId));
+      const history = data.history || [];
+      
+      if (!history.length || !this.currentWordInfo) {
+        this._disableRevertButton();
+        return;
+      }
+
+      const earliestRecord = history[history.length - 1];
+      const current = this.currentWordInfo;
+      
+      const isSameAsOriginal = 
+        current.word === earliestRecord.text &&
+        parseFloat(current.confidence) === parseFloat(earliestRecord.confidence) &&
+        current.text_type === earliestRecord.text_type &&
+        current.print_control === earliestRecord.print_control;
+
+      isSameAsOriginal ? this._disableRevertButton() : this._enableRevertButton();
+    } catch (error) {
+      this._disableRevertButton();
+    }
+  }
+
+  _enableRevertButton() {
+    if (!this.revertToOriginalAction) return;
+    this.revertToOriginalAction.classList.remove('opacity-50', 'pointer-events-none');
+    this.revertToOriginalAction.removeAttribute('aria-disabled');
+    this.revertToOriginalAction.removeAttribute('tabindex');
+  }
+
+  _disableRevertButton() {
+    if (!this.revertToOriginalAction) return;
+    this.revertToOriginalAction.classList.add('opacity-50', 'pointer-events-none');
+    this.revertToOriginalAction.setAttribute('aria-disabled', 'true');
+    this.revertToOriginalAction.setAttribute('tabindex', '-1');
   }
 
   async loadAuditHistory() {
@@ -391,6 +552,9 @@ class WordDetails {
     }
 
     await this.auditHistory.displayHistory(this.currentWordId);
+    
+    // Re-check button state after loading history
+    this._checkAndEnableRevertButton(this.currentWordId);
   }
 
   selectFirstWord() {

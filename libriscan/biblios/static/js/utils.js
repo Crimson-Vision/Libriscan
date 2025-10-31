@@ -136,6 +136,17 @@ const LibriscanUtils = {
   },
 
   /**
+   * Build a word revert URL for the current page
+   * @param {number} wordId - Word ID to revert
+   * @param {string} pathname - URL pathname (default: current location)
+   * @returns {string} Revert URL
+   */
+  buildWordRevertURL(wordId, pathname = window.location.pathname) {
+    const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
+    return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/revert/`;
+  },
+
+  /**
    * Fetch JSON data from a URL with optional authentication
    * @param {string} url - Request URL
    * @param {Object} options - Request options
