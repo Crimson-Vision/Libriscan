@@ -19,10 +19,7 @@ def queue_extraction(extractor):
             return extractor.get_words()
         except Exception as e:
             logger.error(e)
-            huey.get(extractor.page.extraction_key)
-            return
-    else:
-        return
+    huey.get(extractor.page.extraction_key)
 
 
 @periodic_task(crontab(minute="*/10"))
