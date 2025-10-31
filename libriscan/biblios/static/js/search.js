@@ -50,7 +50,7 @@
               <a href="${result.url}" class="px-2 py-1.5 rounded hover:bg-base-200 active:bg-base-300">
                   <div class="flex flex-col">
                     <span class="font-semibold text-sm leading-tight">${highlight(result.title, query)}</span>
-                    <span class="text-xs opacity-60 leading-tight">${highlight(result.identifier, query)} • ${result.collection}${result.series ? ` • ${result.series}` : ''}</span>
+                    <span class="text-xs opacity-60 leading-tight">${highlight(result.identifier, query)} • ${highlight(result.collection, query)}${result.series ? ` • ${highlight(result.series, query)}` : ''}</span>
                   </div>
               </a>
             </li>
