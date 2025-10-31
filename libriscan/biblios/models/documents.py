@@ -202,9 +202,10 @@ class Page(BibliosModel):
 
     @property
     def can_extract(self):
+        from biblios.models.organizations import CloudService
         return (
             not self.has_extraction
-            and "biblios.CloudService".objects.filter(
+            and CloudService.objects.filter(
                 organization=self.document.series.collection.owner
             ).exists()
             and huey.get(self.extraction_key, peek=True) is None
