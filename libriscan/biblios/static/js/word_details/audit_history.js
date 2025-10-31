@@ -6,6 +6,7 @@ class AuditHistory {
     EMOJI: {
       CREATED: '✨',
       CHANGED: '📝',
+      REVERT: '↩️',
       EDIT: '✏️',
       USER: '👤',
       ARROW: '→',
@@ -73,19 +74,69 @@ class AuditHistory {
     const { EMOJI } = AuditHistory.CONFIG;
     
     const isCreated = record.history_type === 'Created';
+    const isRevert = record.history_change_reason?.toLowerCase().includes('revert');
+    
+    // Determine icon style
+    let iconStyle;
+    if (isFirst) {
+      iconStyle = 'bg-primary text-primary-content shadow-md';
+    } else if (isCreated) {
+      iconStyle = 'bg-success text-success-content';
+    } else if (isRevert) {
+      iconStyle = 'bg-warning text-warning-content';
+    } else {
+      iconStyle = 'bg-base-300 text-base-content';
+    }
+    
+    // Determine card style
+    let cardStyle;
+    if (isFirst) {
+      cardStyle = 'border-primary shadow-md bg-primary/5';
+    } else if (isRevert) {
+      cardStyle = 'border-warning shadow-md bg-warning/5';
+    } else {
+      cardStyle = 'border-base-200 hover:border-primary/30';
+    }
+    
+    // Determine badge style
+    let badgeStyle;
+    if (isFirst) {
+      badgeStyle = 'badge-primary';
+    } else if (isCreated) {
+      badgeStyle = 'badge-success';
+    } else if (isRevert) {
+      badgeStyle = 'badge-warning';
+    } else {
+      badgeStyle = 'badge-ghost';
+    }
+    
     const styles = {
-      icon: isFirst 
-        ? 'bg-primary text-primary-content shadow-md' 
-        : isCreated 
-        ? 'bg-success text-success-content' 
-        : 'bg-base-300 text-base-content',
-      card: isFirst ? 'border-primary shadow-md bg-primary/5' : 'border-base-200 hover:border-primary/30',
-      badge: isFirst ? 'badge-primary' : isCreated ? 'badge-success' : 'badge-ghost'
+      icon: iconStyle,
+      card: cardStyle,
+      badge: badgeStyle
     };
     
-    const emoji = isCreated ? EMOJI.CREATED : EMOJI.CHANGED;
-    const content = changes.length ? this._renderChanges(changes) : 
-                    isCreated ? this._renderCreation(record) : '';
+    // Determine emoji based on record type
+    let emoji;
+    if (isCreated) {
+      emoji = EMOJI.CREATED;
+    } else if (isRevert) {
+      emoji = EMOJI.REVERT;
+    } else {
+      emoji = EMOJI.CHANGED;
+    }
+    
+    // Determine content to display
+    let content;
+    if (changes.length) {
+      content = this._renderChanges(changes, isRevert);
+    } else if (isCreated) {
+      content = this._renderCreation(record);
+    } else if (isRevert) {
+      content = this._renderRevert(record);
+    } else {
+      content = '';
+    }
 
     return `
       <li>
@@ -97,8 +148,10 @@ class AuditHistory {
           </div>
         </div>
         <div class="timeline-middle">
-          <div class="flex items-center justify-center w-8 h-8 rounded-full ${styles.icon} transition-all duration-200 text-lg">
-            ${emoji}
+          <div class="tooltip tooltip-bottom" data-tip="${isCreated ? 'Created' : isRevert ? 'Reverted' : 'Changed'}">
+            <div class="flex items-center justify-center w-8 h-8 rounded-full ${styles.icon} transition-all duration-200 text-lg">
+              ${emoji}
+            </div>
           </div>
         </div>
         <div class="timeline-end pl-4 pb-8" style="flex: 1;">
@@ -106,9 +159,10 @@ class AuditHistory {
             <div class="card-body p-4">
               <div class="flex items-center justify-between gap-3 mb-3">
                 <div class="flex items-center gap-1.5 text-xs text-base-content/60">
-                  <span>${EMOJI.USER}</span>
+                  <span class="tooltip tooltip-bottom" data-tip="Changed by">${EMOJI.USER}</span>
                   <span class="font-medium">${record.history_user}</span>
                   ${record.history_user_role ? `<span class="badge badge-xs badge-outline">${record.history_user_role}</span>` : ''}
+                  ${isRevert ? `<span class="badge badge-xs badge-warning">${record.history_change_reason}</span>` : ''}
                 </div>
               </div>
               ${content}
@@ -133,13 +187,13 @@ class AuditHistory {
     return `<div class="space-y-2">${changes.map(c => `
       <div class="bg-base-200/50 rounded-md p-2.5 hover:bg-base-200 transition-colors">
         <div class="flex items-center gap-2 mb-2">
-          <span class="text-primary">${EMOJI.EDIT}</span>
+          <span class="text-primary tooltip tooltip-bottom" data-tip="Field changed">${EMOJI.EDIT}</span>
           <span class="font-semibold text-xs text-base-content">${c.field}</span>
         </div>
         ${c.from ? `
           <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center ml-5">
             <span class="badge badge-error badge-xs line-through opacity-75 justify-start truncate" title="${c.from}">${c.from}</span>
-            <span class="text-base-content/40">${EMOJI.ARROW}</span>
+            <span class="text-base-content/40 tooltip tooltip-bottom" data-tip="Changed to">${EMOJI.ARROW}</span>
             <span class="badge badge-success badge-xs font-semibold justify-start truncate" title="${c.to}">${c.to}</span>
           </div>
         ` : `<div class="ml-5"><span class="badge badge-success badge-xs">${c.to}</span></div>`}
@@ -153,7 +207,7 @@ class AuditHistory {
     return `
       <div class="bg-success/10 rounded-md p-2.5 border border-success/20">
         <div class="flex items-center gap-1.5 mb-2">
-          <span class="text-success">${EMOJI.PLUS}</span>
+          <span class="text-success tooltip tooltip-bottom" data-tip="Initial creation">${EMOJI.PLUS}</span>
           <span class="font-semibold text-xs text-success">Initial Values</span>
         </div>
         <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 ml-5 text-xs">
@@ -163,6 +217,21 @@ class AuditHistory {
           <span class="badge badge-outline badge-xs">${confidence}%</span>
           <span class="text-base-content/60">Type:</span>
           <span class="badge badge-ghost badge-xs">${record.text_type_display || 'N/A'}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  _renderRevert(record) {
+    const { EMOJI } = AuditHistory.CONFIG;
+    return `
+      <div class="bg-warning/10 rounded-md p-2.5 border border-warning/20">
+        <div class="flex items-center gap-1.5 mb-2">
+          <span class="text-warning tooltip tooltip-bottom" data-tip="Reverted to original">${EMOJI.REVERT}</span>
+          <span class="font-semibold text-xs text-warning">Reverted</span>
+        </div>
+        <div class="text-xs text-base-content/70 ml-5">
+          ${record.history_change_reason || 'Word reverted to its original state'}
         </div>
       </div>
     `;
