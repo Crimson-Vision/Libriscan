@@ -193,8 +193,8 @@ class Page(BibliosModel):
 
     def get_absolute_url(self):
         keys = {
-            "short_name": self.document.series.collection.owner.short_name,
-            "collection_slug": self.document.series.collection.slug,
+            "short_name": self.document.collection.owner.short_name,
+            "collection_slug": self.document.collection.slug,
             "identifier": self.document.identifier,
             "number": self.number,
         }
@@ -206,7 +206,7 @@ class Page(BibliosModel):
         return (
             not self.has_extraction
             and CloudService.objects.filter(
-                organization=self.document.series.collection.owner
+                organization=self.document.collection.owner
             ).exists()
             and huey.get(self.extraction_key, peek=True) is None
         )
@@ -221,7 +221,7 @@ class Page(BibliosModel):
 
     # Hand off this work to the Huey background task
     def generate_extraction(self):
-        extractor = self.document.series.collection.owner.cloudservice.extractor
+        extractor = self.document.collection.owner.cloudservice.extractor
         q = queue_extraction(extractor(self))
         logger.info(f"Queuing {q.id}")
 
