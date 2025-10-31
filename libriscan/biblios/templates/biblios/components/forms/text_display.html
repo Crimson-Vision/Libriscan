@@ -35,10 +35,11 @@
                     data-word-type="{{ word.text_type }}"
                     data-word-print-control="{{ word.print_control }}"
                     data-word-extraction-id="{{ word.extraction_id }}"
-                    data-word-geo-x0="{{ word.geo_x_0 }}"
-                    data-word-geo-y0="{{ word.geo_y_0 }}"
-                    data-word-geo-x1="{{ word.geo_x_1 }}"
-                    data-word-geo-y1="{{ word.geo_y_1 }}"
+                    <!-- Limits for geometry coordinates removed from data-words-json -->
+                    {# data-word-geo-x0="{{ word.geo_x_0 }}" #}
+                    {# data-word-geo-y0="{{ word.geo_y_0 }}" #}
+                    {# data-word-geo-x1="{{ word.geo_x_1 }}" #}
+                    {# data-word-geo-y1="{{ word.geo_y_1 }}" #}
                     data-word-suggestions="{{ word.suggestions_json }}"
                     title="Click to view details">
                     <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">

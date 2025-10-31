@@ -2,7 +2,8 @@
 <!-- Word Details Component -->
 
 <div id="clickedWordsContainer" class="mt-8 hidden"
-     data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.geo_x_0 }},{{ word.geo_y_0 }},{{ word.geo_x_1 }},{{ word.geo_y_1 }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}"
+     {# Geo coordinates (geo_x_0, geo_y_0, geo_x_1, geo_y_1) removed from data-words-json #}
+     data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}"
      data-last-edited-word-id="{{ last_edited_word_id|default:'' }}">
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body p-0">

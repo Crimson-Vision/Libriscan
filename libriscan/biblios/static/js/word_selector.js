@@ -38,12 +38,13 @@ class WordSelector {
       print_control: wordBlock.dataset.wordPrintControl,
       extraction_id: wordBlock.dataset.wordExtractionId,
       suggestions: this._parseSuggestions(wordBlock.dataset.wordSuggestions),
-      geometry: {
-        x0: parseFloat(wordBlock.dataset.wordGeoX0),
-        y0: parseFloat(wordBlock.dataset.wordGeoY0),
-        x1: parseFloat(wordBlock.dataset.wordGeoX1),
-        y1: parseFloat(wordBlock.dataset.wordGeoY1)
-      }
+      // Limits for geometry coordinates removed from data-words-json
+      // geometry: {
+      //   x0: parseFloat(wordBlock.dataset.wordGeoX0),
+      //   y0: parseFloat(wordBlock.dataset.wordGeoY0),
+      //   x1: parseFloat(wordBlock.dataset.wordGeoX1),
+      //   y1: parseFloat(wordBlock.dataset.wordGeoY1)
+      // }
     };
   }
 
