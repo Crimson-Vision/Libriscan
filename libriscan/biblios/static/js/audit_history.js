@@ -34,9 +34,12 @@ class AuditHistory {
 
   async displayHistory(wordId) {
     try {
-      const data = await LibriscanUtils.fetchJSON(LibriscanUtils.buildWordHistoryURL(wordId));
+      // Always fetch fresh data with cache-busting to ensure latest history
+      const baseUrl = LibriscanUtils.buildWordHistoryURL(wordId);
+      // Add timestamp query parameter to bypass cache and get latest data
+      const url = `${baseUrl}?_t=${Date.now()}`;
+      const data = await LibriscanUtils.fetchJSON(url);
       this.renderTimeline(data);
-      LibriscanUtils.showToast('History loaded', 'success');
     } catch (error) {
       console.error('Error loading audit history:', error);
       LibriscanUtils.showToast('Error loading history', 'error');
