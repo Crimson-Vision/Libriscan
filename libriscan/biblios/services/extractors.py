@@ -132,7 +132,7 @@ class AWSExtractor(BaseExtractor):
     def __get_extraction__(self):
         import boto3
 
-        service = self.page.document.series.collection.owner.cloudservice
+        service = self.page.document.collection.owner.cloudservice
         client = boto3.client(
             "textract",
             region_name="us-east-1",
