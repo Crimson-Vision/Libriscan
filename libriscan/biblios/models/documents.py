@@ -342,3 +342,16 @@ class TextBlock(BibliosModel):
             return "low"
         else:
             return "none"
+
+    @property
+    def suggestions_json(self):
+        """Returns suggestions as a JSON string for template rendering"""
+        import json
+        if not self.suggestions:
+            return "[]"
+        try:
+            # Serialize directly - suggestions is either a list or dict
+            # Handled by the JavaScript parser
+            return json.dumps(self.suggestions)
+        except (TypeError, ValueError):
+            return "[]"

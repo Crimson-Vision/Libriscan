@@ -38,30 +38,50 @@ class WordSelector {
       print_control: wordBlock.dataset.wordPrintControl,
       extraction_id: wordBlock.dataset.wordExtractionId,
       suggestions: this._parseSuggestions(wordBlock.dataset.wordSuggestions),
-      geometry: {
-        x0: parseFloat(wordBlock.dataset.wordGeoX0),
-        y0: parseFloat(wordBlock.dataset.wordGeoY0),
-        x1: parseFloat(wordBlock.dataset.wordGeoX1),
-        y1: parseFloat(wordBlock.dataset.wordGeoY1)
-      }
+      // Limits for geometry coordinates removed from data-words-json
+      // geometry: {
+      //   x0: parseFloat(wordBlock.dataset.wordGeoX0),
+      //   y0: parseFloat(wordBlock.dataset.wordGeoY0),
+      //   x1: parseFloat(wordBlock.dataset.wordGeoX1),
+      //   y1: parseFloat(wordBlock.dataset.wordGeoY1)
+      // }
     };
   }
 
-  _parseSuggestions(suggestionsStr) {
-    if (!suggestionsStr) return {};
+  _parseSuggestions(suggestionsString) {
+    // Handle empty, null, or whitespace-only strings
+    if (!suggestionsString || !suggestionsString.trim()) {
+      return {};
+    }
+    
+    const trimmedString = suggestionsString.trim();
+    
+    // Handle empty JSON arrays/objects
+    if (trimmedString === '[]' || trimmedString === '{}') {
+      return {};
+    }
     
     try {
-      // Try JSON.parse first (for JavaScript-updated data with double quotes)
-      return Object.fromEntries(JSON.parse(suggestionsStr));
-    } catch (jsonError) {
-      try {
-        // Fallback to eval for template-generated data with single quotes
-        return Object.fromEntries(eval(suggestionsStr));
-      } catch (evalError) {
-        console.error('Error parsing suggestions:', evalError);
-        LibriscanUtils.showToast('Failed to load suggestions', 'error');
-        return {};
+      const parsedData = JSON.parse(trimmedString);
+      
+      // If parsed data is already an object/dictionary, return it directly
+      if (typeof parsedData === 'object' && parsedData !== null && !Array.isArray(parsedData)) {
+        return parsedData;
       }
+      
+      // If parsed data is an array of [word, frequency] tuples, convert to object
+      if (Array.isArray(parsedData)) {
+        return Object.fromEntries(parsedData);
+      }
+      
+      return {};
+    } catch (parseError) {
+      // Data should always be valid JSON, but handle gracefully if parsing fails
+      console.warn('Failed to parse suggestions data:', trimmedString, parseError);
+      if (typeof LibriscanUtils !== 'undefined' && LibriscanUtils.showToast) {
+        LibriscanUtils.showToast('Failed to load word suggestions', 'warning');
+      }
+      return {};
     }
   }
 
