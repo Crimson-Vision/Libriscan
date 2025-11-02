@@ -20,6 +20,14 @@ class WordBlockManager {
     wordBlock.className = wordBlock.className.replace(/confidence-\w+/g, '');
     wordBlock.classList.add(`confidence-${data.confidence_level}`);
     
+    // Update btn-ghost/btn-dash classes for accepted words
+    const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
+                      parseFloat(data.confidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+    const acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible('accepted') ?? true;
+    
+    wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
+    wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
+    
     // Update print control classes
     wordBlock.classList.remove('print-control-omit', 'print-control-merge');
     if (data.print_control === 'O') {

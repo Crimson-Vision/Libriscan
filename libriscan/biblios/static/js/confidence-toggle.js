@@ -36,9 +36,29 @@ class ConfidenceToggle {
       const isVisible = prefs[level] ?? true;
       checkbox.checked = isVisible;
       this.container.classList.toggle(`hide-confidence-${level}`, !isVisible);
+      
+      if (level === 'accepted') {
+        this._updateAcceptedButtonClasses(isVisible);
+      }
     });
     
     this.syncToggleAll();
+  }
+  
+  /**
+   * Update btn-dash/btn-ghost classes for accepted words
+   */
+  _updateAcceptedButtonClasses(isVisible) {
+    if (!this.container) return;
+    
+    this.container.querySelectorAll('.word-block').forEach(block => {
+      const isAccepted = block.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
+                        parseFloat(block.dataset.wordConfidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+      if (!isAccepted) return;
+      
+      block.classList.toggle('btn-dash', isVisible);
+      block.classList.toggle('btn-ghost', !isVisible);
+    });
   }
 
   attachEventListeners() {
@@ -76,6 +96,11 @@ class ConfidenceToggle {
 
   toggleIndicator(level, isVisible) {
     this.container.classList.toggle(`hide-confidence-${level}`, !isVisible);
+    
+    // For accepted level, also toggle button-dash/btn-ghost classes
+    if (level === 'accepted') {
+      this._updateAcceptedButtonClasses(isVisible);
+    }
   }
 
   syncToggleAll() {
@@ -110,6 +135,14 @@ class ConfidenceToggle {
       }
       return {};
     }
+  }
+
+  /**
+   * Check if a specific confidence level toggle is checked
+   */
+  isLevelVisible(level) {
+    const checkbox = this.toggles[level];
+    return checkbox ? checkbox.checked : true;
   }
 
   /**
