@@ -131,12 +131,12 @@ class WordDetails {
 
     if (this.confidenceLevelSpan) {
       if (isAccepted) {
-        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-primary">Accepted</span>';
+        this.confidenceLevelSpan.innerHTML = '<span class="badge badge-sm badge-primary">Accepted</span>';
       } else {
         const level = (wordInfo.confidence_level || WordDetailsConfig.CONFIDENCE_LEVELS.NONE).toLowerCase();
         const levelText = WordDetailsConfig.LEVEL_TEXT[level] || WordDetailsConfig.LEVEL_TEXT.none;
         const badgeClass = WordDetailsConfig.BADGE_CLASSES[level] || WordDetailsConfig.BADGE_CLASSES.none;
-        this.confidenceLevelSpan.innerHTML = `<span class="badge ${badgeClass}">${levelText}</span>`;
+        this.confidenceLevelSpan.innerHTML = `<span class="badge badge-sm ${badgeClass}">${levelText}</span>`;
       }
     }
 
