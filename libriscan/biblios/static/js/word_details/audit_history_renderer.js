@@ -33,11 +33,13 @@ class AuditHistoryRenderer {
           <div class="card bg-base-100 border ${styles.card} transition-all duration-200 w-full">
             <div class="card-body p-3 sm:p-4">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
-                <div class="flex items-center gap-1.5 text-xs text-base-content/60 flex-wrap">
-                  <span class="tooltip tooltip-bottom hidden sm:inline" data-tip="Changed by">${this.config.EMOJI.USER}</span>
-                  <span class="font-medium break-words min-w-0">${record.history_user}</span>
-                  ${record.history_user_role ? `<span class="badge badge-xs badge-outline whitespace-nowrap">${record.history_user_role}</span>` : ''}
-                  ${context.isRevert ? `<span class="badge badge-xs badge-warning whitespace-nowrap">${record.history_change_reason}</span>` : ''}
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center gap-1.5 text-xs text-base-content/60 flex-wrap">
+                    <span class="tooltip tooltip-bottom hidden sm:inline" data-tip="Changed by">${this.config.EMOJI.USER}</span>
+                    <span class="font-medium break-words min-w-0">${record.history_user}</span>
+                    ${record.history_user_role ? `<span class="badge badge-xs badge-outline whitespace-nowrap">${record.history_user_role}</span>` : ''}
+                  </div>
+                  ${context.isRevert ? `<div><span class="badge badge-xs badge-warning whitespace-nowrap">${record.history_change_reason}</span></div>` : ''}
                 </div>
               </div>
               ${content}
@@ -119,7 +121,7 @@ class AuditHistoryRenderer {
   _getTooltipText(context) {
     // Match priority order from _getStyles
     if (context.isOriginal) return 'Original Word';
-    if (context.isRevert) return 'Reverted';
+    if (context.isRevert) return 'Reverted to Original Word';
     if (context.isFirstChange) return 'First Change';
     if (context.isCreated) return 'Created';
     if (context.isFirst) return 'Current';
