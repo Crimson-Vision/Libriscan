@@ -23,7 +23,13 @@ class WordBlockManager {
     // Update btn-ghost/btn-dash classes for accepted words
     const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
                       parseFloat(data.confidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
-    const acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible('accepted') ?? true;
+    let acceptedToggleVisible = true;
+    try {
+      acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
+    } catch (error) {
+      console.warn('Error checking accepted toggle visibility:', error);
+      LibriscanUtils.showToast('Error checking accepted toggle visibility', 'error');
+    }
     
     wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
     wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
