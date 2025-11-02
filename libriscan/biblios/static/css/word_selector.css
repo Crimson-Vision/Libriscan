@@ -36,18 +36,34 @@
   color: var(--color-accepted);
 }
 
-/* Print control - Omit (red strikethrough) */
-.word-block.print-control-omit {
-  text-decoration: line-through !important;
+/* Print control - Omit (red) and Merge (gray) strikethrough */
+.word-block.print-control-omit,
+.word-block.print-control-merge {
+  position: relative;
   opacity: 0.6;
-  color: var(--color-omit);
 }
 
-/* Print control - Merge (gray strikethrough) */
+.word-block.print-control-omit {
+  color: var(--color-omit);
+  --strikethrough-color: var(--color-omit);
+}
+
 .word-block.print-control-merge {
-  text-decoration: line-through !important;
-  opacity: 0.6;
   color: var(--color-merge);
+  --strikethrough-color: var(--color-merge);
+}
+
+.word-block.print-control-omit::after,
+.word-block.print-control-merge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background-color: var(--strikethrough-color);
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .btn-active {
@@ -77,7 +93,31 @@
 /* Ensure strikethrough persists when active */
 .btn-active.print-control-omit,
 .btn-active.print-control-merge {
-  text-decoration: line-through !important;
+  position: relative;
+}
+
+.btn-active.print-control-omit::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 50%;
+  height: 3px;
+  background-color: currentColor;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.btn-active.print-control-merge::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 50%;
+  height: 3px;
+  background-color: currentColor;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 /* Dark theme */
