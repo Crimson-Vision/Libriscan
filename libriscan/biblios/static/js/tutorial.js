@@ -11,18 +11,18 @@ class LibriscanTutorial {
   }
 
   init() {
-    document.getElementById('startTutorial')?.addEventListener('click', (e) => {
-      e.preventDefault();
+    document.getElementById('startTutorial')?.addEventListener('click', (event) => {
+      event.preventDefault();
       this.startPageWalkthrough();
     });
 
-    document.getElementById('startKeyboardShortcuts')?.addEventListener('click', (e) => {
-      e.preventDefault();
+    document.getElementById('startKeyboardShortcuts')?.addEventListener('click', (event) => {
+      event.preventDefault();
       this.startKeyboardShortcuts();
     });
 
-    document.getElementById('startWordEditingTutorial')?.addEventListener('click', (e) => {
-      e.preventDefault();
+    document.getElementById('startWordEditingTutorial')?.addEventListener('click', (event) => {
+      event.preventDefault();
       this.startWordEditing();
     });
   }

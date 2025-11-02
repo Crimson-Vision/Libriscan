@@ -2,7 +2,7 @@
 class WordKeyboard {
   constructor(wordDetails) {
     this.wordDetails = wordDetails;
-    this.handler = (e) => this._handleKeydown(e);
+    this.handler = (event) => this._handleKeydown(event);
   }
 
   initialize() {
@@ -13,25 +13,25 @@ class WordKeyboard {
     document.removeEventListener('keydown', this.handler);
   }
 
-  _handleKeydown(e) {
+  _handleKeydown(event) {
     if (WordEditor.isTyping() || this.wordDetails.editor.isEditingMode()) return;
 
-    const { key } = e;
+    const { key } = event;
     
     if (key === 'ArrowLeft') {
-      e.preventDefault();
+      event.preventDefault();
       this.wordDetails.goToPrevWord();
     } else if (key === 'ArrowRight') {
-      e.preventDefault();
+      event.preventDefault();
       this.wordDetails.goToNextWord();
     } else if (key >= '1' && key <= '9') {
-      e.preventDefault();
+      event.preventDefault();
       this._applySuggestion(parseInt(key) - 1);
     } else if (key === 'e' || key === 'E') {
-      e.preventDefault();
+      event.preventDefault();
       this.wordDetails.editor.enterEditMode();
     } else if (key === 'a' || key === 'A') {
-      e.preventDefault();
+      event.preventDefault();
       this.wordDetails.metadata.accept();
     }
   }
