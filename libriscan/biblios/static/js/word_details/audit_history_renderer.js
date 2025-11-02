@@ -124,7 +124,7 @@ class AuditHistoryRenderer {
 
   _getContent(record, context, changes) {
     if (context.isOriginal) {
-      return this._renderCreation(record, true);
+      return this._renderCreation(record);
     }
     
     if (context.isRevert) {
@@ -151,54 +151,50 @@ class AuditHistoryRenderer {
   _renderChanges(changes, isFirstChange = false, isRevert = false) {
     const { EMOJI } = this.config;
     
-    let stylingConfig;
+    // Determine styling based on change type
+    let containerClass, headerClass, badgeClass, emoji, tooltipText, textClass;
+    
     if (isRevert) {
-      stylingConfig = {
-        containerClass: 'bg-warning/10 border border-warning/20 rounded-md p-2 sm:p-2.5 hover:bg-warning/15 transition-colors',
-        headerClass: 'text-warning',
-        badgeClass: 'badge-warning',
-        emoji: EMOJI.REVERT,
-        tooltipText: 'Field reverted',
-        textClass: 'text-warning'
-      };
+      containerClass = 'bg-warning/10 border border-warning/20 rounded-md p-2 sm:p-2.5 hover:bg-warning/15 transition-colors';
+      headerClass = 'text-warning';
+      badgeClass = 'badge-warning';
+      emoji = EMOJI.REVERT;
+      tooltipText = 'Field reverted';
+      textClass = 'text-warning';
     } else if (isFirstChange) {
-      stylingConfig = {
-        containerClass: 'bg-info/10 border border-info/20 rounded-md p-2 sm:p-2.5 hover:bg-info/15 transition-colors',
-        headerClass: 'text-info',
-        badgeClass: 'badge-info',
-        emoji: EMOJI.EDIT,
-        tooltipText: 'First change from original',
-        textClass: 'text-info'
-      };
+      containerClass = 'bg-info/10 border border-info/20 rounded-md p-2 sm:p-2.5 hover:bg-info/15 transition-colors';
+      headerClass = 'text-info';
+      badgeClass = 'badge-info';
+      emoji = EMOJI.EDIT;
+      tooltipText = 'First change from original';
+      textClass = 'text-info';
     } else {
-      stylingConfig = {
-        containerClass: 'bg-base-200/50 rounded-md p-2 sm:p-2.5 hover:bg-base-200 transition-colors',
-        headerClass: 'text-primary',
-        badgeClass: 'badge-success',
-        emoji: EMOJI.EDIT,
-        tooltipText: 'Field changed',
-        textClass: 'text-base-content'
-      };
+      containerClass = 'bg-base-200/50 rounded-md p-2 sm:p-2.5 hover:bg-base-200 transition-colors';
+      headerClass = 'text-primary';
+      badgeClass = 'badge-success';
+      emoji = EMOJI.EDIT;
+      tooltipText = 'Field changed';
+      textClass = 'text-base-content';
     }
     
     return `<div class="space-y-2 ${isFirstChange ? 'mt-2' : ''}">${changes.map(change => `
-      <div class="${stylingConfig.containerClass}">
+      <div class="${containerClass}">
         <div class="flex items-center gap-2 mb-2 flex-wrap">
-          <span class="${stylingConfig.headerClass} tooltip tooltip-bottom flex-shrink-0" data-tip="${stylingConfig.tooltipText}">${stylingConfig.emoji}</span>
-          <span class="font-semibold text-xs ${stylingConfig.textClass} break-words min-w-0">${change.field}</span>
+          <span class="${headerClass} tooltip tooltip-bottom flex-shrink-0" data-tip="${tooltipText}">${emoji}</span>
+          <span class="font-semibold text-xs ${textClass} break-words min-w-0">${change.field}</span>
         </div>
         ${change.from ? `
           <div class="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-2 sm:gap-2 items-start sm:items-center ml-0 sm:ml-5">
             <span class="badge badge-error badge-xs line-through opacity-75 justify-start truncate max-w-full sm:max-w-none" title="${change.from}">${change.from}</span>
             <span class="text-base-content/40 tooltip tooltip-bottom hidden sm:inline self-center" data-tip="Changed to">${EMOJI.ARROW}</span>
-            <span class="badge ${stylingConfig.badgeClass} badge-xs justify-start truncate max-w-full sm:max-w-none" title="${change.to}">${change.to}</span>
+            <span class="badge ${badgeClass} badge-xs justify-start truncate max-w-full sm:max-w-none" title="${change.to}">${change.to}</span>
           </div>
-        ` : `<div class="ml-0 sm:ml-5"><span class="badge ${stylingConfig.badgeClass} badge-xs break-words">${change.to}</span></div>`}
+        ` : `<div class="ml-0 sm:ml-5"><span class="badge ${badgeClass} badge-xs break-words">${change.to}</span></div>`}
       </div>
     `).join('')}</div>`;
   }
 
-  _renderCreation(record, isOriginal = false) {
+  _renderCreation(record) {
     const confidence = parseFloat(record.confidence).toFixed(2);
     
     return `
@@ -254,4 +250,3 @@ class AuditHistoryRenderer {
 }
 
 window.AuditHistoryRenderer = AuditHistoryRenderer;
-
