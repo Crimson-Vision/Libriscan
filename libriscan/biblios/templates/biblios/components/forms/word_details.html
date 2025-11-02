@@ -63,48 +63,47 @@
               </div>
             </div>
           </div>
-          <div class="stats shadow overflow-visible w-full mb-4" id="typeControlConfidenceStatContainer">
-            <div class="stat overflow-visible" id="typeControlStat">
-              <div class="stat-title">Print Control</div>
-              <div class="flex flex-col gap-2 mt-1">
-                <div class="dropdown w-full">
-                  <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-8 min-h-8" id="printControlDropdownBtn">
-                    <div class="flex items-center gap-2">
-                      <span id="printControlBadge" class="badge badge-sm"></span>
-                      <span id="printControlDisplay">Include</span>
-                    </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <!-- Print Control Section -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-base-content/70">Print Control</label>
+              <div class="dropdown w-full">
+                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-9 min-h-9" id="printControlDropdownBtn">
+                  <div class="flex items-center gap-2">
+                    <span id="printControlBadge" class="badge badge-sm"></span>
+                    <span id="printControlDisplay">Include</span>
                   </div>
-                  <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
-                    <li><a data-value="I" class="print-control-option">
-                      <span class="badge badge-success badge-sm">I</span>
-                      <span>Include</span>
-                    </a></li>
-                    <li><a data-value="M" class="print-control-option">
-                      <span class="badge badge-warning badge-sm">M</span>
-                      <span>Merge with Prior</span>
-                    </a></li>
-                    <li><a data-value="O" class="print-control-option">
-                      <span class="badge badge-error badge-sm">O</span>
-                      <span>Omit</span>
-                    </a></li>
-                  </ul>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
+                  <li><a data-value="I" class="print-control-option">
+                    <span class="badge badge-success badge-sm">I</span>
+                    <span>Include</span>
+                  </a></li>
+                  <li><a data-value="M" class="print-control-option">
+                    <span class="badge badge-warning badge-sm">M</span>
+                    <span>Merge with Prior</span>
+                  </a></li>
+                  <li><a data-value="O" class="print-control-option">
+                    <span class="badge badge-error badge-sm">O</span>
+                    <span>Omit</span>
+                  </a></li>
+                </ul>
               </div>
             </div>
-            <div class="stat" id="confidenceStat">
-              <div class="stat-title">Confidence Level</div>
-              <div class="flex items-center justify-center gap-2 mt-1">
-                <span id="confidenceLevel" class="badge badge-lg"></span>
+            
+            <!-- Confidence Level Section -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="text-sm font-medium text-base-content/70">Confidence Level</label>
+                <span id="confidenceLevel" class="badge badge-sm"></span>
               </div>
-              <div class="stat-desc mt-2">
-                <button id="acceptBtn" class="btn btn-sm btn-primary w-full hidden gap-1 tooltip tooltip-top" data-tip="Accept (A)">
-                  <span class="text-xs">Accept</span>
-                  <kbd class="kbd kbd-xs">A</kbd>
-                </button>
-              </div>
+              <button id="acceptBtn" class="btn btn-sm btn-primary w-full hidden gap-1.5 tooltip tooltip-top" data-tip="Accept (A)">
+                <span class="text-xs">Accept</span>
+                <kbd class="kbd kbd-xs">A</kbd>
+              </button>
             </div>
           </div>
           
@@ -157,3 +156,31 @@
     </div>
   </div>
 </div>
+
+<!-- Revert to Original Confirmation Modal -->
+<dialog id="revertConfirmationModal" class="modal">
+  <div class="modal-box">
+    <div class="flex items-center gap-3 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-warning">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+      </svg>
+      <h3 class="font-bold text-lg">Confirm Revert to Original</h3>
+    </div>
+    <p class="py-2">
+      Are you sure you want to revert this word to its original value?
+    </p>
+    <div class="alert alert-warning mt-4">
+      <span class="text-sm font-semibold">This action cannot be undone.</span>
+    </div>
+    <p class="text-sm text-base-content/70 mt-4">
+      All current changes will be permanently lost.
+    </p>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-ghost" value="cancel">Cancel</button>
+        <button class="btn btn-error" value="confirm">Revert to Original</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
