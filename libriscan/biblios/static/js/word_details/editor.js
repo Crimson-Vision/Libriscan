@@ -21,21 +21,30 @@ class WordEditor {
   }
 
   initializeEventListeners() {
-    this.editButton.onclick = () => this.enterEditMode();
-    this.saveButton.onclick = () => this.save();
-    this.revertButton.onclick = () => this.revert();
-    this.wordInput.onkeypress = (e) => { 
-      if (e.key === 'Enter') this.save(); 
-    };
-    this.wordInput.onkeydown = (e) => {
-      if (e.key === 'Escape') this.revert();
-    };
+    if (this.editButton) {
+      this.editButton.onclick = () => this.enterEditMode();
+    }
+    if (this.saveButton) {
+      this.saveButton.onclick = () => this.save();
+    }
+    if (this.revertButton) {
+      this.revertButton.onclick = () => this.revert();
+    }
+    if (this.wordInput) {
+      this.wordInput.onkeypress = (event) => { 
+        if (event.key === 'Enter') this.save(); 
+      };
+      this.wordInput.onkeydown = (event) => {
+        if (event.key === 'Escape') this.revert();
+      };
+    }
     
     // Double-click to edit
-    this.wordElement.addEventListener('dblclick', () => this.enterEditMode());
-    
-    // Visual feedback
-    this.wordElement.style.cursor = 'pointer';
+    if (this.wordElement) {
+      this.wordElement.addEventListener('dblclick', () => this.enterEditMode());
+      // Visual feedback
+      this.wordElement.style.cursor = 'pointer';
+    }
   }
 
   enterEditMode() {
@@ -61,9 +70,13 @@ class WordEditor {
 
   revert() {
     if (this.preEditWord !== null) {
-      this.wordInput.value = this.preEditWord;
-      this.wordElement.textContent = this.preEditWord;
-      this.wordElement.title = this.preEditWord;
+      if (this.wordInput) {
+        this.wordInput.value = this.preEditWord;
+      }
+      if (this.wordElement) {
+        this.wordElement.textContent = this.preEditWord;
+        this.wordElement.title = this.preEditWord;
+      }
       
       if (this.onRevert) {
         this.onRevert(this.preEditWord);
@@ -73,9 +86,11 @@ class WordEditor {
   }
 
   updateWord(word) {
-    this.wordElement.textContent = word;
-    // Add title attribute to show full word on hover when truncated
-    this.wordElement.title = word;
+    if (this.wordElement) {
+      this.wordElement.textContent = word;
+      // Add title attribute to show full word on hover when truncated
+      this.wordElement.title = word;
+    }
   }
 
   isEditingMode() {
@@ -94,15 +109,19 @@ class WordEditor {
     
     if (enabled) {
       // Save current word before editing
-      this.preEditWord = this.wordElement.textContent;
+      if (this.wordElement) {
+        this.preEditWord = this.wordElement.textContent;
+      }
       
       // Switch to edit mode
       this._toggleElements(displayModeElements, true);  // Hide
       this._toggleElements(editModeElements, false);     // Show
       
       // Set input value and focus
-      this.wordInput.value = this.wordElement.textContent;
-      this.wordInput.focus();
+      if (this.wordInput && this.wordElement) {
+        this.wordInput.value = this.wordElement.textContent;
+        this.wordInput.focus();
+      }
     } else {
       // Switch to display mode
       this._toggleElements(displayModeElements, false);  // Show

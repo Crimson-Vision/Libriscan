@@ -27,9 +27,15 @@ class WordNavigation {
       button = button.previousElementSibling;
     }
 
-    this.wordDetails.prevWordBtn.disabled = !WordBlockManager.getAdjacentWordBlock(this.wordDetails.currentWordId, 'prev');
-    this.wordDetails.nextWordBtn.disabled = !WordBlockManager.getAdjacentWordBlock(this.wordDetails.currentWordId, 'next');
-    this.wordDetails.wordPosition.textContent = `${currentPosition} of ${this.wordDetails.totalWords}`;
+    if (this.wordDetails.prevWordBtn) {
+      this.wordDetails.prevWordBtn.disabled = !WordBlockManager.getAdjacentWordBlock(this.wordDetails.currentWordId, 'prev');
+    }
+    if (this.wordDetails.nextWordBtn) {
+      this.wordDetails.nextWordBtn.disabled = !WordBlockManager.getAdjacentWordBlock(this.wordDetails.currentWordId, 'next');
+    }
+    if (this.wordDetails.wordPosition) {
+      this.wordDetails.wordPosition.textContent = `${currentPosition} of ${this.wordDetails.totalWords}`;
+    }
   }
 
   selectFirstWord() {

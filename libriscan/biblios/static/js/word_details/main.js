@@ -82,8 +82,12 @@ class WordDetails {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
     document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
     
-    this.prevWordBtn.onclick = () => this.navigation.goToPrevWord();
-    this.nextWordBtn.onclick = () => this.navigation.goToNextWord();
+    if (this.prevWordBtn) {
+      this.prevWordBtn.onclick = () => this.navigation.goToPrevWord();
+    }
+    if (this.nextWordBtn) {
+      this.nextWordBtn.onclick = () => this.navigation.goToNextWord();
+    }
     
     if (this.revertToOriginalAction) {
       this.revertToOriginalAction.onclick = () => this.revert.revertToOriginalWord();
