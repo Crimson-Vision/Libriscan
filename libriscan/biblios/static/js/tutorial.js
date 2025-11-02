@@ -246,18 +246,9 @@ class LibriscanTutorial {
         element: '#typeControlConfidenceStatContainer',
         popover: {
           title: '📊 Word Metadata',
-          description: 'View and edit word properties including text type (Printed vs Handwriting), print control (how the word is handled in exports), and confidence level (OCR accuracy).',
+          description: 'View and edit word properties including print control (how the word is handled in exports) and confidence level (OCR accuracy).',
           side: 'top',
           align: 'center'
-        }
-      },
-      {
-        element: '#textTypeDropdownBtn',
-        popover: {
-          title: '🔤 Text Type',
-          description: 'Specify whether the word is <strong>Printed (P)</strong> or <strong>Handwriting (H)</strong>. This helps with proper formatting and export processing.',
-          side: 'left',
-          align: 'start'
         }
       },
       {

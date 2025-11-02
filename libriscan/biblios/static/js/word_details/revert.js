@@ -25,7 +25,6 @@ class WordRevert {
 
       this.wordDetails.updateHandler.applyWordUpdate(data);
 
-      if (data.text_type !== undefined) this.wordDetails.metadata.updateTextTypeDisplay(data.text_type);
       if (data.print_control !== undefined) this.wordDetails.metadata.updatePrintControlDisplay(data.print_control);
 
       const auditHistoryTab = document.getElementById('wordAuditHistoryTab');

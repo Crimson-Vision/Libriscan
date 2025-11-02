@@ -29,7 +29,6 @@ from .documents import (
 from .words import (
     update_word,
     update_print_control,
-    update_text_type,
     textblock_history,
     revert_word,
     merge_blocks,

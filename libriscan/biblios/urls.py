@@ -142,11 +142,6 @@ urlpatterns = [
                                             name="revert_word",
                                         ),
                                         path(
-                                            "page<int:number>/word/<int:word_id>/text-type/",
-                                            views.update_text_type,
-                                            name="update_text_type",
-                                        ),
-                                        path(
                                             "page<int:number>/word/<int:word_id>/history/",
                                             views.textblock_history,
                                             name="textblock_history",
