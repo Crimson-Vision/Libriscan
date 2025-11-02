@@ -1,6 +1,6 @@
 /**
  * WordMetadata - Handles word metadata updates
- * Manages text type, print control, and accepted status functionality
+ * Manages print control and accepted status functionality
  */
 class WordMetadata {
   constructor(elements) {
@@ -8,15 +8,10 @@ class WordMetadata {
     this.printControlDisplay = elements.printControlDisplay;
     this.printControlBadge = elements.printControlBadge;
     this.printControlOptions = elements.printControlOptions;
-    this.textTypeDropdownBtn = elements.textTypeDropdownBtn;
-    this.textTypeDisplay = elements.textTypeDisplay;
-    this.textTypeBadge = elements.textTypeBadge;
-    this.textTypeOptions = elements.textTypeOptions;
     this.acceptBtn = elements.acceptBtn;
     this.currentWordId = null;
     this.currentWordInfo = null;
     this.currentPrintControl = 'I';
-    this.currentTextType = 'P';
     this.onAccept = null;
   }
 
@@ -26,14 +21,6 @@ class WordMetadata {
         e.preventDefault();
         this.updatePrintControl(option.getAttribute('data-value'));
         this._closeDropdown(this.printControlDropdownBtn);
-      });
-    });
-    
-    this.textTypeOptions.forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.updateTextType(option.getAttribute('data-value'));
-        this._closeDropdown(this.textTypeDropdownBtn);
       });
     });
     
@@ -84,47 +71,9 @@ class WordMetadata {
     }
   }
 
-  async updateTextType(textTypeValue) {
-    if (!this.currentWordId) {
-      console.error('No word selected');
-      LibriscanUtils.showToast('No word selected', 'error');
-      return;
-    }
-    
-    this.textTypeDisplay.textContent = 'Updating...';
-    this.textTypeDropdownBtn.disabled = true;
-    
-    try {
-      const data = await this._sendTextTypeUpdate(textTypeValue);
-      this.currentTextType = data.text_type;
-      this._updateTextTypeDisplay(data.text_type);
-      this._showTextTypeSuccess();
-      LibriscanUtils.showToast('Text type updated', 'success');
-      
-      // Dispatch event to update word block styling
-      document.dispatchEvent(new CustomEvent('textTypeUpdated', { 
-        detail: { wordId: this.currentWordId, textType: data.text_type, data: data } 
-      }));
-      
-      return data;
-    } catch (error) {
-      console.error('Error updating text type:', error);
-      LibriscanUtils.showToast(error.message || 'Failed to update text type', 'error');
-      this._updateTextTypeDisplay(this.currentTextType);
-      throw error;
-    } finally {
-      this.textTypeDropdownBtn.disabled = false;
-    }
-  }
-
   updatePrintControlDisplay(printControlValue) {
     this.currentPrintControl = printControlValue;
     this._updatePrintControlDisplay(printControlValue);
-  }
-
-  updateTextTypeDisplay(textTypeValue) {
-    this.currentTextType = textTypeValue;
-    this._updateTextTypeDisplay(textTypeValue);
   }
 
   async _sendPrintControlUpdate(printControlValue) {
@@ -133,15 +82,6 @@ class WordMetadata {
     
     return await LibriscanUtils.postFormData(url, { 
       print_control: printControlValue 
-    });
-  }
-
-  async _sendTextTypeUpdate(textTypeValue) {
-    const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
-    const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/text-type/`;
-    
-    return await LibriscanUtils.postFormData(url, { 
-      text_type: textTypeValue 
     });
   }
 
@@ -160,32 +100,11 @@ class WordMetadata {
     }
   }
 
-  _updateTextTypeDisplay(textTypeValue) {
-    const config = {
-      'P': { text: 'Printed', badge: 'badge-info' },
-      'H': { text: 'Handwriting', badge: 'badge-secondary' }
-    }[textTypeValue] || { text: 'Printed', badge: 'badge-info' };
-    
-    if (this.textTypeDisplay) this.textTypeDisplay.textContent = config.text;
-    
-    if (this.textTypeBadge) {
-      this.textTypeBadge.textContent = textTypeValue;
-      this.textTypeBadge.className = `badge badge-xs ${config.badge}`;
-    }
-  }
-
   _showPrintControlSuccess() {
     if (!this.printControlBadge) return;
     
     this.printControlBadge.classList.add('badge-outline');
     setTimeout(() => this.printControlBadge.classList.remove('badge-outline'), 300);
-  }
-
-  _showTextTypeSuccess() {
-    if (!this.textTypeBadge) return;
-    
-    this.textTypeBadge.classList.add('badge-outline');
-    setTimeout(() => this.textTypeBadge.classList.remove('badge-outline'), 300);
   }
 
   _closeDropdown(dropdownBtn) {
