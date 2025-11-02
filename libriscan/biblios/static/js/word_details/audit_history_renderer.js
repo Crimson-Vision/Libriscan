@@ -67,14 +67,7 @@ class AuditHistoryRenderer {
   _getStyles(context) {
     const { EMOJI } = this.config;
     
-    if (context.isFirst) {
-      return {
-        icon: 'bg-primary text-primary-content shadow-md',
-        card: 'border-primary shadow-md bg-primary/5',
-        emoji: EMOJI.CHANGED
-      };
-    }
-    
+    // Priority order: Original > Revert > FirstChange > Created > First > Default
     if (context.isOriginal) {
       return {
         icon: 'bg-success text-success-content shadow-md',
@@ -83,6 +76,15 @@ class AuditHistoryRenderer {
       };
     }
     
+    if (context.isRevert) {
+      return {
+        icon: 'bg-warning text-warning-content',
+        card: 'border-warning shadow-md bg-warning/5',
+        emoji: EMOJI.REVERT
+      };
+    }
+    
+    // Check FirstChange before isFirst - if it's both, prioritize showing as FirstChange
     if (context.isFirstChange) {
       return {
         icon: 'bg-info text-info-content shadow-md',
@@ -99,11 +101,11 @@ class AuditHistoryRenderer {
       };
     }
     
-    if (context.isRevert) {
+    if (context.isFirst) {
       return {
-        icon: 'bg-warning text-warning-content',
-        card: 'border-warning shadow-md bg-warning/5',
-        emoji: EMOJI.REVERT
+        icon: 'bg-primary text-primary-content shadow-md',
+        card: 'border-primary shadow-md bg-primary/5',
+        emoji: EMOJI.CHANGED
       };
     }
     
@@ -115,10 +117,12 @@ class AuditHistoryRenderer {
   }
 
   _getTooltipText(context) {
+    // Match priority order from _getStyles
     if (context.isOriginal) return 'Original Word';
+    if (context.isRevert) return 'Reverted';
     if (context.isFirstChange) return 'First Change';
     if (context.isCreated) return 'Created';
-    if (context.isRevert) return 'Reverted';
+    if (context.isFirst) return 'Current';
     return 'Changed';
   }
 
@@ -152,35 +156,25 @@ class AuditHistoryRenderer {
     const { EMOJI } = this.config;
     
     // Determine styling based on change type
-    let containerClass, headerClass, badgeClass, emoji, tooltipText, textClass;
+    let containerClass, badgeClass, textClass;
     
     if (isRevert) {
       containerClass = 'bg-warning/10 border border-warning/20 rounded-md p-2 sm:p-2.5 hover:bg-warning/15 transition-colors';
-      headerClass = 'text-warning';
       badgeClass = 'badge-warning';
-      emoji = EMOJI.REVERT;
-      tooltipText = 'Field reverted';
       textClass = 'text-warning';
     } else if (isFirstChange) {
       containerClass = 'bg-info/10 border border-info/20 rounded-md p-2 sm:p-2.5 hover:bg-info/15 transition-colors';
-      headerClass = 'text-info';
       badgeClass = 'badge-info';
-      emoji = EMOJI.EDIT;
-      tooltipText = 'First change from original';
       textClass = 'text-info';
     } else {
       containerClass = 'bg-base-200/50 rounded-md p-2 sm:p-2.5 hover:bg-base-200 transition-colors';
-      headerClass = 'text-primary';
       badgeClass = 'badge-success';
-      emoji = EMOJI.EDIT;
-      tooltipText = 'Field changed';
       textClass = 'text-base-content';
     }
     
     return `<div class="space-y-2 ${isFirstChange ? 'mt-2' : ''}">${changes.map(change => `
       <div class="${containerClass}">
         <div class="flex items-center gap-2 mb-2 flex-wrap">
-          <span class="${headerClass} tooltip tooltip-bottom flex-shrink-0" data-tip="${tooltipText}">${emoji}</span>
           <span class="font-semibold text-xs ${textClass} break-words min-w-0">${change.field}</span>
         </div>
         ${change.from ? `
