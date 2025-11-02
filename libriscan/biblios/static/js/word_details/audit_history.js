@@ -10,248 +10,94 @@ class AuditHistory {
       EDIT: '✏️',
       USER: '👤',
       ARROW: '→',
-      PLUS: '➕'
+      ORIGINAL: '🏁',
+      FIRST_CHANGE: '🔰'
     },
     FIELDS: [
-      { key: 'text', label: 'Text', getValue: (r) => r.text },
-      { key: 'confidence', label: 'Confidence', getValue: (r) => parseFloat(r.confidence).toFixed(2), format: (v) => `${v}%` },
-      { key: 'text_type', label: 'Type', getValue: (r) => r.text_type_display },
-      { key: 'print_control', label: 'Print Control', getValue: (r) => r.print_control_display }
+      { 
+        key: 'text', 
+        label: 'Text', 
+        getValue: (record) => record.text 
+      },
+      { 
+        key: 'confidence', 
+        label: 'Confidence', 
+        getValue: (record) => parseFloat(record.confidence).toFixed(2), 
+        format: (value) => `${value}%` 
+      },
+      { 
+        key: 'text_type', 
+        label: 'Type', 
+        getValue: (record) => record.text_type_display 
+      },
+      { 
+        key: 'print_control', 
+        label: 'Print Control', 
+        getValue: (record) => record.print_control_display 
+      }
     ]
   };
 
   constructor(containerSelector = '#auditHistoryContent') {
-    const base = document.querySelector(containerSelector);
+    const baseContainer = document.querySelector(containerSelector);
     this.elements = {
-      container: base?.querySelector('ul.timeline'),
-      emptyState: base?.querySelector('#auditHistoryEmpty'),
-      timeline: base?.querySelector('#auditHistoryTimeline'),
-      wordText: base?.querySelector('#historyWordText'),
-      wordId: base?.querySelector('#historyWordId'),
-      count: base?.querySelector('#historyCount'),
-      timezone: base?.querySelector('#userTimezone')
+      container: baseContainer?.querySelector('ul.timeline'),
+      emptyState: baseContainer?.querySelector('#auditHistoryEmpty'),
+      timeline: baseContainer?.querySelector('#auditHistoryTimeline'),
+      wordText: baseContainer?.querySelector('#historyWordText'),
+      wordId: baseContainer?.querySelector('#historyWordId'),
+      count: baseContainer?.querySelector('#historyCount'),
+      timezone: baseContainer?.querySelector('#userTimezone')
     };
+    this.renderer = new AuditHistoryRenderer(AuditHistory.CONFIG);
   }
 
   async displayHistory(wordId) {
     try {
-      // Always fetch fresh data with cache-busting to ensure latest history
       const baseUrl = LibriscanUtils.buildWordHistoryURL(wordId);
-      // Add timestamp query parameter to bypass cache and get latest data
       const url = `${baseUrl}?_t=${Date.now()}`;
-      const data = await LibriscanUtils.fetchJSON(url);
-      this.renderTimeline(data);
+      const historyData = await LibriscanUtils.fetchJSON(url);
+      this.renderTimeline(historyData);
     } catch (error) {
       console.error('Error loading audit history:', error);
       LibriscanUtils.showToast('Error loading history', 'error');
     }
   }
 
-  renderTimeline(data) {
-    const hasHistory = data.history?.length > 0;
+  renderTimeline(historyData) {
+    const hasHistory = historyData.history?.length > 0;
     
     this.elements.emptyState?.classList.toggle('hidden', hasHistory);
     this.elements.timeline?.classList.toggle('hidden', !hasHistory);
     
     if (!hasHistory) return;
 
-    if (this.elements.wordText) this.elements.wordText.textContent = data.current_text;
-    if (this.elements.wordId) this.elements.wordId.textContent = data.word_id;
-    if (this.elements.count) this.elements.count.textContent = `${data.history_count} ${data.history_count === 1 ? 'Change' : 'Changes'}`;
-    if (this.elements.timezone) this.elements.timezone.textContent = LibriscanUtils.getUserTimezone();
+    this._updateHeader(historyData);
 
     if (this.elements.container) {
-      this.elements.container.innerHTML = data.history
-        .map((record, idx) => this.createTimelineItem(record, idx, data.history))
+      this.elements.container.innerHTML = historyData.history
+        .map((record, index) => 
+          this.renderer.renderTimelineItem(record, index, historyData.history)
+        )
         .join('');
     }
   }
 
-  createTimelineItem(record, index, allHistory) {
-    const { isFirst, isLast, previous } = this._getRecordContext(index, allHistory);
-    const { relative, exact, time } = LibriscanUtils.formatDateTime(record.history_date);
-    const changes = this._detectChanges(record, previous);
-    const { EMOJI } = AuditHistory.CONFIG;
-    
-    const isCreated = record.history_type === 'Created';
-    const isRevert = record.history_change_reason?.toLowerCase().includes('revert');
-    
-    // Determine icon style
-    let iconStyle;
-    if (isFirst) {
-      iconStyle = 'bg-primary text-primary-content shadow-md';
-    } else if (isCreated) {
-      iconStyle = 'bg-success text-success-content';
-    } else if (isRevert) {
-      iconStyle = 'bg-warning text-warning-content';
-    } else {
-      iconStyle = 'bg-base-300 text-base-content';
+  _updateHeader(historyData) {
+    if (this.elements.wordText) {
+      this.elements.wordText.textContent = historyData.current_text;
     }
-    
-    // Determine card style
-    let cardStyle;
-    if (isFirst) {
-      cardStyle = 'border-primary shadow-md bg-primary/5';
-    } else if (isRevert) {
-      cardStyle = 'border-warning shadow-md bg-warning/5';
-    } else {
-      cardStyle = 'border-base-200 hover:border-primary/30';
+    if (this.elements.wordId) {
+      this.elements.wordId.textContent = historyData.word_id;
     }
-    
-    // Determine badge style
-    let badgeStyle;
-    if (isFirst) {
-      badgeStyle = 'badge-primary';
-    } else if (isCreated) {
-      badgeStyle = 'badge-success';
-    } else if (isRevert) {
-      badgeStyle = 'badge-warning';
-    } else {
-      badgeStyle = 'badge-ghost';
+    if (this.elements.count) {
+      const changeCount = historyData.history_count;
+      this.elements.count.textContent = `${changeCount} ${changeCount === 1 ? 'Change' : 'Changes'}`;
     }
-    
-    const styles = {
-      icon: iconStyle,
-      card: cardStyle,
-      badge: badgeStyle
-    };
-    
-    // Determine emoji based on record type
-    let emoji;
-    if (isCreated) {
-      emoji = EMOJI.CREATED;
-    } else if (isRevert) {
-      emoji = EMOJI.REVERT;
-    } else {
-      emoji = EMOJI.CHANGED;
+    if (this.elements.timezone) {
+      this.elements.timezone.textContent = LibriscanUtils.getUserTimezone();
     }
-    
-    // Determine content to display
-    let content;
-    if (changes.length) {
-      content = this._renderChanges(changes, isRevert);
-    } else if (isCreated) {
-      content = this._renderCreation(record);
-    } else if (isRevert) {
-      content = this._renderRevert(record);
-    } else {
-      content = '';
-    }
-
-    return `
-      <li>
-        ${!isFirst ? '<hr class="bg-base-300"/>' : ''}
-        <div class="timeline-start pr-4" style="flex: 0 0 120px;">
-          <div class="text-right">
-            <time class="text-sm font-semibold text-primary block mb-0.5" datetime="${record.history_date}">${relative}</time>
-            <time class="text-xs text-base-content/50 font-mono block" datetime="${record.history_date}">${exact} ${time}</time>
-          </div>
-        </div>
-        <div class="timeline-middle">
-          <div class="tooltip tooltip-bottom" data-tip="${isCreated ? 'Created' : isRevert ? 'Reverted' : 'Changed'}">
-            <div class="flex items-center justify-center w-8 h-8 rounded-full ${styles.icon} transition-all duration-200 text-lg">
-              ${emoji}
-            </div>
-          </div>
-        </div>
-        <div class="timeline-end pl-4 pb-8" style="flex: 1;">
-          <div class="card bg-base-100 border ${styles.card} transition-all duration-200">
-            <div class="card-body p-4">
-              <div class="flex items-center justify-between gap-3 mb-3">
-                <div class="flex items-center gap-1.5 text-xs text-base-content/60">
-                  <span class="tooltip tooltip-bottom" data-tip="Changed by">${EMOJI.USER}</span>
-                  <span class="font-medium">${record.history_user}</span>
-                  ${record.history_user_role ? `<span class="badge badge-xs badge-outline">${record.history_user_role}</span>` : ''}
-                  ${isRevert ? `<span class="badge badge-xs badge-warning">${record.history_change_reason}</span>` : ''}
-                </div>
-              </div>
-              ${content}
-            </div>
-          </div>
-        </div>
-        ${!isLast ? '<hr class="bg-base-300"/>' : ''}
-      </li>
-    `;
-  }
-
-  _getRecordContext(index, allHistory) {
-    return {
-      isFirst: index === 0,
-      isLast: index === allHistory.length - 1,
-      previous: index < allHistory.length - 1 ? allHistory[index + 1] : null
-    };
-  }
-
-  _renderChanges(changes) {
-    const { EMOJI } = AuditHistory.CONFIG;
-    return `<div class="space-y-2">${changes.map(c => `
-      <div class="bg-base-200/50 rounded-md p-2.5 hover:bg-base-200 transition-colors">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-primary tooltip tooltip-bottom" data-tip="Field changed">${EMOJI.EDIT}</span>
-          <span class="font-semibold text-xs text-base-content">${c.field}</span>
-        </div>
-        ${c.from ? `
-          <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center ml-5">
-            <span class="badge badge-error badge-xs line-through opacity-75 justify-start truncate" title="${c.from}">${c.from}</span>
-            <span class="text-base-content/40 tooltip tooltip-bottom" data-tip="Changed to">${EMOJI.ARROW}</span>
-            <span class="badge badge-success badge-xs font-semibold justify-start truncate" title="${c.to}">${c.to}</span>
-          </div>
-        ` : `<div class="ml-5"><span class="badge badge-success badge-xs">${c.to}</span></div>`}
-      </div>
-    `).join('')}</div>`;
-  }
-
-  _renderCreation(record) {
-    const { EMOJI } = AuditHistory.CONFIG;
-    const confidence = parseFloat(record.confidence).toFixed(2);
-    return `
-      <div class="bg-success/10 rounded-md p-2.5 border border-success/20">
-        <div class="flex items-center gap-1.5 mb-2">
-          <span class="text-success tooltip tooltip-bottom" data-tip="Initial creation">${EMOJI.PLUS}</span>
-          <span class="font-semibold text-xs text-success">Initial Values</span>
-        </div>
-        <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 ml-5 text-xs">
-          <span class="text-base-content/60">Text:</span>
-          <span class="badge badge-success badge-xs font-semibold">${record.text}</span>
-          <span class="text-base-content/60">Confidence:</span>
-          <span class="badge badge-outline badge-xs">${confidence}%</span>
-          <span class="text-base-content/60">Type:</span>
-          <span class="badge badge-ghost badge-xs">${record.text_type_display || 'N/A'}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  _renderRevert(record) {
-    const { EMOJI } = AuditHistory.CONFIG;
-    return `
-      <div class="bg-warning/10 rounded-md p-2.5 border border-warning/20">
-        <div class="flex items-center gap-1.5 mb-2">
-          <span class="text-warning tooltip tooltip-bottom" data-tip="Reverted to original">${EMOJI.REVERT}</span>
-          <span class="font-semibold text-xs text-warning">Reverted</span>
-        </div>
-        <div class="text-xs text-base-content/70 ml-5">
-          ${record.history_change_reason || 'Word reverted to its original state'}
-        </div>
-      </div>
-    `;
-  }
-
-  _detectChanges(current, previous) {
-    if (!previous) return [];
-    return AuditHistory.CONFIG.FIELDS
-      .map(field => {
-        const curr = field.getValue(current);
-        const prev = field.getValue(previous);
-        return curr !== prev ? { 
-          field: field.label, 
-          from: field.format ? field.format(prev) : prev, 
-          to: field.format ? field.format(curr) : curr 
-        } : null;
-      })
-      .filter(Boolean);
   }
 }
 
 window.AuditHistory = AuditHistory;
-
