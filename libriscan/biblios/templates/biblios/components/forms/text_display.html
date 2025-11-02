@@ -10,10 +10,10 @@
         <!-- Raw Text Tab -->
         <label class="tab">
           <input type="radio" name="text_tabs" checked="checked" />
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
-          Raw Text
+          <span class="hidden sm:inline">Raw Text</span>
         </label>
         <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-6">
           <div class="prose">
@@ -61,10 +61,10 @@
         <!-- Formatted Tab -->
         <label class="tab">
           <input type="radio" name="text_tabs" />
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
           </svg>
-          Formatted
+          <span class="hidden sm:inline">Formatted</span>
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
           {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
@@ -73,10 +73,10 @@
         <!-- Metadata Tab -->
         <label class="tab">
           <input type="radio" name="text_tabs" />
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
-          Metadata
+          <span class="hidden sm:inline">Metadata</span>
         </label>
         <div class="tab-content bg-base-100 border-base-300 p-6">
           <div class="prose">
