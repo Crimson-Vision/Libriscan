@@ -1,71 +1,4 @@
-/* Word Details Container */
-#clickedWordsContainer {
-  margin-top: 2rem;
-}
-
-/* Word Stat Container - Prevent overflow */
-#wordStat {
-  min-width: 0;
-}
-
-#wordStat .flex {
-  min-width: 0;
-}
-
-/* Word Value Section */
-#clickedWord {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-/* Word Input Field */
-#wordInput {
-  word-break: break-all;
-  overflow-wrap: anywhere;
-}
-
-/* Suggestions Section */
-.suggestions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-/* Suggestions List */
-.suggestions-list {
-  width: 100%;
-  border-radius: 0.5rem;
-}
-
-.suggestion-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 1rem;
-}
-
-/* Dropdown Menu */
-.dropdown-menu {
-  z-index: 1;
-  width: 13rem;
-}
-
-/* Word Actions Dropdown */
-#wordActionsDropdown {
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-
-#wordActionsDropdown:hover {
-  opacity: 1;
-}
-
-/* Accept button kbd styling */
+/* Accept Button - Custom kbd colors using oklch color space */
 #acceptBtn .kbd {
   background-color: oklch(var(--pc) / 0.2);
   border-color: oklch(var(--pc) / 0.3);
@@ -76,5 +9,3 @@
   background-color: oklch(var(--pc) / 0.3);
   border-color: oklch(var(--pc) / 0.4);
 }
-
-

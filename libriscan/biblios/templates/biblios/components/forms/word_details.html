@@ -38,8 +38,8 @@
           <div class="stats shadow-lg overflow-visible w-full mb-4 bg-base-300" id="wordStatsContainer">
             <div class="stat overflow-visible min-w-0 w-full" id="wordStat">
               <div class="flex items-center gap-2 min-w-0 mt-1">
-                <div id="clickedWord" class="stat-value text-2xl truncate min-w-0 flex-1 tooltip tooltip-top" data-tip="Double-click to edit"></div>
-                <input type="text" id="wordInput" class="input input-bordered input-sm hidden min-w-0 flex-1" />
+                <div id="clickedWord" class="stat-value text-2xl truncate min-w-0 flex-1 tooltip tooltip-top overflow-hidden text-ellipsis whitespace-nowrap" data-tip="Double-click to edit"></div>
+                <input type="text" id="wordInput" class="input input-bordered input-sm hidden min-w-0 flex-1 break-all" style="overflow-wrap: anywhere;" />
                 <div class="flex gap-1 flex-shrink-0">
                   <button id="editButton" class="btn btn-ghost btn-sm tooltip tooltip-top flex items-center gap-1" data-tip="Edit word (E)">
                     <kbd class="kbd kbd-xs">E</kbd>
@@ -138,7 +138,7 @@
 
       <!-- Actions Dropdown -->
         <div id="wordActionsDropdownContainer" class="absolute top-2 right-4 z-10 dropdown dropdown">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm" id="wordActionsDropdown">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm opacity-70 hover:opacity-100 transition-opacity duration-200" id="wordActionsDropdown">
             <!-- Kebab icon -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
