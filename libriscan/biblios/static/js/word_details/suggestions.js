@@ -7,11 +7,28 @@ class WordSuggestions {
   }
 
   updateSuggestions(wordInfo) {
-    this.wordDetails.suggestionsContainer.innerHTML = '';
+    if (!this.wordDetails) return;
+    
+    // Get or find the container
+    const container = this.wordDetails.suggestionsContainer || 
+                     document.getElementById('wordSuggestions');
+    
+    if (!container) {
+      console.warn('wordSuggestions container not found in DOM');
+      LibriscanUtils.showToast('wordSuggestions container not found in DOM', 'error');
+      return;
+    }
+
+    if (!this.wordDetails.suggestionsContainer && container) {
+      this.wordDetails.suggestionsContainer = container;
+    }
+    
+    // Clear and update content
+    container.innerHTML = '';
     const entries = Object.entries(wordInfo.suggestions || {});
     
     if (entries.length === 0) {
-      this.wordDetails.suggestionsContainer.textContent = 'No suggestions available';
+      container.textContent = 'No suggestions available';
       return;
     }
 
@@ -37,7 +54,7 @@ class WordSuggestions {
     });
 
     suggestionsList.appendChild(frag);
-    this.wordDetails.suggestionsContainer.appendChild(suggestionsList);
+    container.appendChild(suggestionsList);
   }
 
   async applySuggestion(suggestion, suggestionsList, clickedLink) {
