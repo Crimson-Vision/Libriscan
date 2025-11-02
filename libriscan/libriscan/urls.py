@@ -20,14 +20,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
+from debug_toolbar.toolbar import debug_toolbar_urls
 
-urlpatterns = [
-    path(
-        "login/",
-        auth_views.LoginView.as_view(template_name="registration/login.html"),
-        name="login",
-    ),
-    path("admin/", admin.site.urls, name="admin"),
-    path("account/", include("django.contrib.auth.urls")),
-    path("", include("biblios.urls")),  # put the Biblios app at root
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns = debug_toolbar_urls() + (
+    [
+        path(
+            "login/",
+            auth_views.LoginView.as_view(template_name="registration/login.html"),
+            name="login",
+        ),
+        path("admin/", admin.site.urls, name="admin"),
+        path("account/", include("django.contrib.auth.urls")),
+        path("", include("biblios.urls")),  # put the Biblios app at root
+    ]
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)

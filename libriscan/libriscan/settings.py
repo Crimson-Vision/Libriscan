@@ -67,12 +67,14 @@ INSTALLED_APPS = [
     "huey.contrib.djhuey",
     "rules",
     "simple_history",
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -244,3 +246,9 @@ LOGOUT_REDIRECT_URL = "/"
 # File upload settings
 ALLOWED_UPLOAD_TYPES = ["image/tiff", "image/jpeg", "image/png"]
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5 MB
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
