@@ -49,10 +49,6 @@ class WordDetails {
       printControlDisplay: document.getElementById('printControlDisplay'),
       printControlBadge: document.getElementById('printControlBadge'),
       printControlOptions: document.querySelectorAll('.print-control-option'),
-      textTypeDropdownBtn: document.getElementById('textTypeDropdownBtn'),
-      textTypeDisplay: document.getElementById('textTypeDisplay'),
-      textTypeBadge: document.getElementById('textTypeBadge'),
-      textTypeOptions: document.querySelectorAll('.text-type-option'),
       acceptBtn: this.acceptBtn
     });
 
@@ -85,7 +81,6 @@ class WordDetails {
   initializeEventListeners() {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
     document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
-    document.addEventListener('textTypeUpdated', (event) => this._handleTextTypeUpdate(event.detail));
     
     this.prevWordBtn.onclick = () => this.navigation.goToPrevWord();
     this.nextWordBtn.onclick = () => this.navigation.goToNextWord();
@@ -124,7 +119,6 @@ class WordDetails {
     WordBlockManager.syncActiveWordButton(this.currentWordId);
     this.navigation.updateNavigationState();
     this._updateConfidenceDisplay(wordInfo);
-    this.metadata.updateTextTypeDisplay(wordInfo.text_type || 'P');
     this.metadata.updatePrintControlDisplay(wordInfo.print_control || 'I');
     this.suggestions.updateSuggestions(wordInfo);
     
@@ -184,12 +178,6 @@ class WordDetails {
     await this.updateHandler.handleMetadataChange(detail, 'print_control', (wordBlock, value) => {
       wordBlock.dataset.wordPrintControl = value;
       WordBlockManager.updatePrintControlClasses(wordBlock, value);
-    });
-  }
-
-  async _handleTextTypeUpdate(detail) {
-    await this.updateHandler.handleMetadataChange(detail, 'text_type', (wordBlock, value) => {
-      wordBlock.dataset.wordType = value;
     });
   }
 

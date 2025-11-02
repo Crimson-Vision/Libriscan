@@ -83,7 +83,7 @@ class WordUpdateHandler {
   }
 
   async handleMetadataChange(detail, metadataKey, updateBlockFn) {
-    const { wordId, [metadataKey === 'text_type' ? 'textType' : 'printControl']: value, data } = detail;
+    const { wordId, printControl: value, data } = detail;
     const wordBlock = WordBlockManager.getWordBlock(wordId);
     if (!wordBlock) return;
 
