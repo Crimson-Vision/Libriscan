@@ -6,10 +6,26 @@ class WordRevert {
     this.wordDetails = wordDetails;
   }
 
+  async showConfirmationDialog() {
+    const modal = document.getElementById('revertConfirmationModal');
+    if (!modal) return true;
+    
+    return new Promise((resolve) => {
+      modal.addEventListener('close', () => resolve(modal.returnValue === 'confirm'), { once: true });
+      modal.showModal();
+    });
+  }
+
   async revertToOriginalWord() {
     if (!this.wordDetails.currentWordId) {
       LibriscanUtils.showToast('No word selected', 'error');
       return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = await this.showConfirmationDialog();
+    if (!confirmed) {
+      return; // User cancelled
     }
 
     const button = this.wordDetails.revertToOriginalAction;

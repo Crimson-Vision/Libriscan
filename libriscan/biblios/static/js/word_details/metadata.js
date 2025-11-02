@@ -118,16 +118,24 @@ class WordMetadata {
       return;
     }
     
+    if (this.acceptBtn?.disabled) {
+      return; // Prevent double-clicking
+    }
+    
     this._setAcceptLoading(true);
     
     try {
       if (this.onAccept) {
         await this.onAccept(this.currentWordInfo.word);
+        // Keep button disabled after successful accept
+        if (this.acceptBtn) {
+          this.acceptBtn.disabled = true;
+        }
       }
     } catch (error) {
       console.error('Error accepting:', error);
       LibriscanUtils.showToast('Failed to accept', 'error');
-    } finally {
+      // Re-enable on error
       this._setAcceptLoading(false);
     }
   }
@@ -136,10 +144,13 @@ class WordMetadata {
     if (!this.acceptBtn) return;
     
     this.acceptBtn.disabled = isLoading;
-    this.acceptBtn.innerHTML = isLoading
-      ? `<span class="loading loading-spinner loading-xs"></span>Saving...`
-      : `<span class="text-xs">Accept</span>
+    if (isLoading) {
+      this.acceptBtn.innerHTML = `<span class="loading loading-spinner loading-xs"></span>Saving...`;
+    } else {
+      this.acceptBtn.innerHTML = `<span class="text-xs">Accept</span>
         <kbd class="kbd kbd-xs">A</kbd>`;
+      this.acceptBtn.disabled = false;
+    }
   }
 }
 
