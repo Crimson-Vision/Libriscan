@@ -8,6 +8,10 @@ class ConfidenceToggle {
   static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge'];
 
   constructor(containerId = 'word-container') {
+    // Initialize toggles as empty object first to prevent undefined errors
+    this.toggles = {};
+    this.toggleAll = null;
+    
     this.container = document.getElementById(containerId);
     if (!this.container) return;
     
@@ -20,6 +24,7 @@ class ConfidenceToggle {
   }
 
   init() {
+    if (!this.container) return;
     this.applyPreferencesImmediately();
     this.attachEventListeners();
   }
@@ -141,6 +146,7 @@ class ConfidenceToggle {
    * Check if a specific confidence level toggle is checked
    */
   isLevelVisible(level) {
+    if (!this.toggles) return true;
     const checkbox = this.toggles[level];
     return checkbox ? checkbox.checked : true;
   }
