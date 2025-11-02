@@ -17,8 +17,8 @@ class WordMetadata {
 
   initializeEventListeners() {
     this.printControlOptions.forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
+      option.addEventListener('click', (event) => {
+        event.preventDefault();
         this.updatePrintControl(option.getAttribute('data-value'));
         this._closeDropdown(this.printControlDropdownBtn);
       });
