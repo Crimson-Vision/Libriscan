@@ -24,7 +24,7 @@
               {% if words %}
                 {% for word in words %}
                   <button 
-                    class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
+                    class="btn {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash{% else %}btn-ghost{% endif %} btn-sm word-block no-animation normal-case text-sm relative
                            {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
                            {% if word.print_control == 'O' %}print-control-omit{% elif word.print_control == 'M' %}print-control-merge{% endif %}"
                     data-word-id="{{ word.id }}"
