@@ -34,7 +34,6 @@
 /* Accepted words */
 .word-block .accepted-word {
   color: var(--color-accepted);
-  opacity: 0.9;
 }
 
 /* Print control - Omit (red) and Merge (gray) strikethrough */
