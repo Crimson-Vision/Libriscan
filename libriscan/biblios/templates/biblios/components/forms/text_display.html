@@ -2,85 +2,96 @@
 <!-- Text Display Component Template -->
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
-<div class="card bg-base-100 shadow-sm h-full">
+<div id="textDisplay" class="card bg-base-100 shadow-sm h-full">
   <div class="card-body p-0">
-    <div class="tabs tabs-lift">
-      <!-- Raw Text Tab -->
-      <label class="tab">
-        <input type="radio" name="text_tabs" checked="checked" />
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-        Raw Text
-      </label>
-      <div class="tab-content bg-base-100 border-base-300 p-6">
-        <div class="prose">
-          <div class="h-[45vh] overflow-y-auto">
-            <div class="flex flex-wrap">
-            {% if words %}
-              {% for word in words %}
-                <!-- Word block with confidence indicators -->
-                <button 
-                  class="btn btn-ghost btn-sm word-block no-animation normal-case text-sm relative
-                         {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}"
-                  data-word-id="{{ word.id }}"
-                  data-word-text="{{ word.text }}"
-                  data-word-confidence="{{ word.confidence }}"
-                  data-word-confidence-level="{{ word.confidence_level }}"
-                  data-word-line="{{ word.line }}"
-                  data-word-number="{{ word.number }}"
-                  data-word-type="{{ word.text_type }}"
-                  data-word-print-control="{{ word.print_control }}"
-                  data-word-extraction-id="{{ word.extraction_id }}"
-                  data-word-geo-x0="{{ word.geo_x_0 }}"
-                  data-word-geo-y0="{{ word.geo_y_0 }}"
-                  data-word-geo-x1="{{ word.geo_x_1 }}"
-                  data-word-geo-y1="{{ word.geo_y_1 }}"
-                  data-word-suggestions="{{ word.suggestions|safe }}"
-                  title="Click to view details">
-                  {{ word.text }}
-                  {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}
-                    <div aria-label="status" class="status status-primary accepted-status"></div>
-                  {% endif %}
-                </button>
-              {% endfor %}
+    <!-- Tabs with Filter Dropdown -->
+    <div class="relative">
+      <div class="tabs tabs-lift">
+        <!-- Raw Text Tab -->
+        <label class="tab">
+          <input type="radio" name="text_tabs" checked="checked" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          <span class="hidden sm:inline">Raw Text</span>
+        </label>
+        <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="prose">
+            <div class="h-[45vh] overflow-y-auto">
+              <!-- Word block with confidence indicators -->
+              <!-- Limits for geometry coordinates removed from data-words-json -->
+              <div class="flex flex-wrap" id="word-container">
+              {% if words %}
+                {% for word in words %}
+                  <button 
+                    class="btn {% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash{% else %}btn-ghost{% endif %} btn-sm word-block no-animation normal-case text-sm relative
+                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
+                           {% if word.print_control == 'O' %}print-control-omit{% elif word.print_control == 'M' %}print-control-merge{% endif %}"
+                    data-word-id="{{ word.id }}"
+                    data-word-text="{{ word.text }}"
+                    data-word-confidence="{{ word.confidence }}"
+                    data-word-confidence-level="{{ word.confidence_level }}"
+                    data-word-line="{{ word.line }}"
+                    data-word-number="{{ word.number }}"
+                    data-word-type="{{ word.text_type }}"
+                    data-word-print-control="{{ word.print_control }}"
+                    data-word-extraction-id="{{ word.extraction_id }}"
+                    {# data-word-geo-x0="{{ word.geo_x_0 }}" #}
+                    {# data-word-geo-y0="{{ word.geo_y_0 }}" #}
+                    {# data-word-geo-x1="{{ word.geo_x_1 }}" #}
+                    {# data-word-geo-y1="{{ word.geo_y_1 }}" #}
+                    data-word-suggestions="{{ word.suggestions_json }}"
+                    title="Click to view details">
+                    <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
+                      {{ word.text }}
+                    </span>
+                  </button>
+                {% endfor %}
+              {% elif error %}
+              <p class="text-base-content/60">{{ error }}</p>            
             {% else %}
-              <p class="text-base-content/60">No text extracted yet.</p>
-            {% endif %}
+                <p class="text-base-content/60">No text extracted yet.</p>
+              {% endif %}
+              </div>
             </div>
+            {% include 'biblios/components/forms/word_details.html' with words=words %}
           </div>
-          {% include 'biblios/components/forms/word_details.html' with words=words %}
+        </div>
+
+        <!-- Formatted Tab -->
+        <label class="tab">
+          <input type="radio" name="text_tabs" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+          </svg>
+          <span class="hidden sm:inline">Formatted</span>
+        </label>
+        <div class="tab-content bg-base-100 border-base-300 p-6">
+          {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
+        </div>
+
+        <!-- Metadata Tab -->
+        <label class="tab">
+          <input type="radio" name="text_tabs" />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          <span class="hidden sm:inline">Metadata</span>
+        </label>
+        <div class="tab-content bg-base-100 border-base-300 p-6">
+          <div class="prose">
+            <ul>
+              <li>Language: English</li>
+              <li>Word Count: 150</li>
+              <li>Date Scanned: 2025-09-19</li>
+            </ul>
+          </div>
         </div>
       </div>
 
-      <!-- Formatted Tab -->
-      <label class="tab">
-        <input type="radio" name="text_tabs" />
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-        </svg>
-        Formatted
-      </label>
-      <div class="tab-content bg-base-100 border-base-300 p-6">
-        {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
-      </div>
-
-      <!-- Metadata Tab -->
-      <label class="tab">
-        <input type="radio" name="text_tabs" />
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 me-2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-        </svg>
-        Metadata
-      </label>
-      <div class="tab-content bg-base-100 border-base-300 p-6">
-        <div class="prose">
-          <ul>
-            <li>Language: English</li>
-            <li>Word Count: 150</li>
-            <li>Date Scanned: 2025-09-19</li>
-          </ul>
-        </div>
+      <!-- Filter Dropdown (Absolute Positioned Top Right) -->
+      <div class="absolute top-2 right-4 z-10">
+        {% include 'biblios/components/forms/confidence_toggle.html' %}
       </div>
     </div>
   </div>

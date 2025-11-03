@@ -1,0 +1,128 @@
+/**
+ * Confidence Indicator Toggle Styles
+ * Controls visibility of confidence indicators and print control indicators
+ */
+
+:root {
+  --color-high: #10b981;
+  --color-medium: #ffd700;
+  --color-medium-text: #d4a017;
+  --color-low: #ff0000;
+  --color-accepted: oklch(var(--p));
+  --color-omit: #ff0000;
+  --color-merge: #6b7280;
+  --color-text-dark: #1f2937;
+  --color-text-light: white;
+}
+
+/* Checkbox Colors */
+.checkbox-confidence-high { 
+  --chkbg: var(--color-high); 
+  --chkfg: var(--color-text-light); 
+}
+
+.checkbox-confidence-medium { 
+  --chkbg: var(--color-medium); 
+  --chkfg: var(--color-text-dark); 
+}
+
+.checkbox-confidence-low { 
+  --chkbg: var(--color-low); 
+  --chkfg: var(--color-text-light); 
+}
+
+.checkbox-confidence-accepted { 
+  --chkbg: var(--color-accepted); 
+  --chkfg: oklch(var(--pc)); 
+}
+
+.checkbox-confidence-omit { 
+  --chkbg: var(--color-omit); 
+  --chkfg: var(--color-text-light); 
+}
+
+.checkbox-confidence-merge { 
+  --chkbg: var(--color-merge); 
+  --chkfg: var(--color-text-light); 
+}
+
+/* Label Colors */
+.confidence-label-high { 
+  color: var(--color-high); 
+  font-weight: 600; 
+}
+
+.confidence-label-medium { 
+  color: var(--color-medium-text); 
+  font-weight: 600; 
+  border-bottom: 2px dotted var(--color-medium); 
+  padding-bottom: 2px; 
+}
+
+.confidence-label-low { 
+  color: var(--color-low); 
+  font-weight: 600; 
+  border-bottom: 3px dashed var(--color-low); 
+  padding-bottom: 2px; 
+}
+
+.confidence-label-accepted { 
+  color: var(--color-accepted); 
+  font-weight: 600; 
+  display: inline-flex; 
+  align-items: center; 
+}
+
+.confidence-label-omit,
+.confidence-label-merge {
+  position: relative;
+  font-weight: 600;
+}
+
+.confidence-label-omit {
+  color: var(--color-omit);
+  --strikethrough-color: var(--color-omit);
+}
+
+.confidence-label-merge {
+  color: var(--color-merge);
+  --strikethrough-color: var(--color-merge);
+}
+
+.confidence-label-omit::after,
+.confidence-label-merge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background-color: var(--strikethrough-color);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Hide Indicators - Confidence Levels */
+.hide-confidence-medium .word-block.confidence-medium,
+.hide-confidence-low .word-block.confidence-low,
+.hide-confidence-low .word-block.confidence-none {
+  border-bottom: none !important;
+}
+
+.hide-confidence-accepted .word-block .accepted-word {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+
+/* Hide Indicators - Print Control */
+.hide-confidence-omit .word-block.print-control-omit,
+.hide-confidence-merge .word-block.print-control-merge {
+  opacity: 1 !important;
+  color: inherit !important;
+}
+
+.hide-confidence-omit .word-block.print-control-omit::after,
+.hide-confidence-merge .word-block.print-control-merge::after {
+  display: none !important;
+}
+

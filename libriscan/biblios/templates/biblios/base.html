@@ -21,10 +21,18 @@
   <!-- OpenSeadragon Dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
   
+  <!-- Driver.js for Tutorials -->
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.js.iife.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css"/>
+  
+  
   <!-- Application CSS -->
   <link rel="stylesheet" href="{% static 'css/openseadragon-viewer.css' %}">
   <link rel="stylesheet" href="{% static 'css/word_selector.css' %}">
+  <link rel="stylesheet" href="{% static 'css/confidence-toggle.css' %}">
   <link rel="stylesheet" href="{% static 'css/word_details.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tutorial.css' %}">
+  <link rel="stylesheet" href="{% static 'css/search.css' %}">
   
   <!-- Theme Toggle Script -->
   <script>
@@ -72,7 +80,24 @@
   <script src="{% static 'js/utils.js' %}"></script>
   <script src="{% static 'js/openseadragon-viewer.js' %}"></script>
   <script src="{% static 'js/word_selector.js' %}"></script>
-  <script src="{% static 'js/word_details.js' %}"></script>
+  <script src="{% static 'js/confidence-toggle.js' %}"></script>
+  <!-- Word details modules - load in dependency order -->
+  <script src="{% static 'js/word_details/config.js' %}"></script>
+  <script src="{% static 'js/word_details/block_manager.js' %}"></script>
+  <script src="{% static 'js/word_details/update_handler.js' %}"></script>
+  <script src="{% static 'js/word_details/navigation.js' %}"></script>
+  <script src="{% static 'js/word_details/suggestions.js' %}"></script>
+  <script src="{% static 'js/word_details/revert.js' %}"></script>
+  <script src="{% static 'js/word_details/editor.js' %}"></script>
+  <script src="{% static 'js/word_details/metadata.js' %}"></script>
+  <script src="{% static 'js/word_details/keyboard.js' %}"></script>
+  <script src="{% static 'js/word_details/audit_history_renderer.js' %}"></script>
+  <script src="{% static 'js/word_details/audit_history.js' %}"></script>
+  <script src="{% static 'js/word_details/main.js' %}"></script>
+  <script src="{% static 'js/tutorial.js' %}"></script>
+  
+  <!-- Page-specific scripts -->
+  {% block scripts %}{% endblock %}
 </body>
 
 </html>

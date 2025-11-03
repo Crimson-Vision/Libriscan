@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from . import views
+from .views.base import search_documents
 
 urlpatterns = [
     # Core pages
@@ -9,6 +10,8 @@ urlpatterns = [
     # File handling
     path("upload/", views.handle_upload, name="handle_upload"),
     path("organizations", views.organization_list, name="organization-list"),
+    # Search
+    path("api/search/", search_documents, name="search_documents"),
     # Organization details
     path(
         "<slug:short_name>/",
@@ -114,6 +117,11 @@ urlpatterns = [
                                             name="page_extract",
                                         ),
                                         path(
+                                            "page<int:number>/merge/",
+                                            views.merge_blocks,
+                                            name="merge_blocks",
+                                        ),
+                                        path(
                                             "page<int:number>/words/",
                                             views.check_words,
                                             name="page_words",
@@ -122,6 +130,21 @@ urlpatterns = [
                                             "page<int:number>/word/<int:word_id>/update/",
                                             views.update_word,
                                             name="update_word",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/print-control/",
+                                            views.update_print_control,
+                                            name="update_print_control",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/revert/",
+                                            views.revert_word,
+                                            name="revert_word",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/history/",
+                                            views.textblock_history,
+                                            name="textblock_history",
                                         ),
                                     ]
                                 ),

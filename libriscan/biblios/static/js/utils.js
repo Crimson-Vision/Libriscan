@@ -35,7 +35,7 @@ const LibriscanUtils = {
         if (headers['x-csrftoken']) {
           return headers['x-csrftoken'];
         }
-      } catch (e) {
+      } catch (error) {
         console.warn('Failed to parse HTMX headers');
       }
     }
@@ -125,6 +125,74 @@ const LibriscanUtils = {
   },
 
   /**
+   * Build a word history URL for the current page
+   * @param {number} wordId - Word ID to get history for
+   * @param {string} pathname - URL pathname (default: current location)
+   * @returns {string} History URL
+   */
+  buildWordHistoryURL(wordId, pathname = window.location.pathname) {
+    const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
+    return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/history/`;
+  },
+
+  /**
+   * Build a word revert URL for the current page
+   * @param {number} wordId - Word ID to revert
+   * @param {string} pathname - URL pathname (default: current location)
+   * @returns {string} Revert URL
+   */
+  buildWordRevertURL(wordId, pathname = window.location.pathname) {
+    const { shortName, collectionSlug, identifier, pageNumber } = this.parseLibriscanURL(pathname);
+    return `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${wordId}/revert/`;
+  },
+
+  /**
+   * Fetch JSON data from a URL with optional authentication
+   * @param {string} url - Request URL
+   * @param {Object} options - Request options
+   * @param {string} options.method - HTTP method (default: 'GET')
+   * @param {boolean} options.includeCSRF - Whether to include CSRF token (default: false for GET)
+   * @returns {Promise<Object>} Parsed JSON response
+   */
+  async fetchJSON(url, options = {}) {
+    const {
+      method = 'GET',
+      includeCSRF = method !== 'GET'
+    } = options;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    };
+
+    if (includeCSRF) {
+      const csrfToken = this.getCSRFToken();
+      if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      credentials: 'same-origin'
+    });
+
+    if (!response.ok) {
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // If JSON parsing fails, use default error message
+      }
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
+  /**
    * Post form data to a URL with CSRF protection
    * @param {string} url - Target URL
    * @param {Object} data - Data to send as form fields
@@ -206,6 +274,88 @@ const LibriscanUtils = {
         this.copyElementText(content);
       });
     });
+  },
+
+  /**
+   * Get user's timezone from browser settings
+   */
+  getUserTimezone() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  },
+
+  /**
+   * Format date/time for audit history display
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl
+   */
+  formatDateTime(dateString) {
+    const date = new Date(dateString);
+    const seconds = Math.floor((Date.now() - date) / 1000);
+    const tz = this.getUserTimezone();
+
+    // Calculate relative time
+    const units = [[2592000, 'month'], [604800, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+    let relative = 'Just now';
+    for (const [limit, unit] of units) {
+      if (seconds >= limit) {
+        relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-Math.floor(seconds / limit), unit);
+        break;
+      }
+    }
+
+    return {
+      relative,
+      exact: date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', timeZone: tz }),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: tz })
+    };
+  },
+
+  /**
+   * Validate file for upload
+   */
+  validateFile(file, { maxSize = 5242880, allowedTypes = ['image/jpeg', 'image/png'], allowedExtensions = ['.jpg', '.jpeg', '.png'] } = {}) {
+    if (!file) return { valid: false, error: null };
+
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(ext)) {
+      return { valid: false, error: `Invalid format. Use ${allowedExtensions.join(', ').toUpperCase()}` };
+    }
+
+    if (file.size > maxSize) {
+      return { valid: false, error: `File too large (${(file.size / 1048576).toFixed(1)}MB). Max ${(maxSize / 1048576).toFixed(0)}MB` };
+    }
+
+    return { valid: true, error: null };
+  },
+
+  setupFileValidation(input, button, errorDiv, options = {}) {
+    const inp = typeof input === 'string' ? document.querySelector(input) : input;
+    const btn = typeof button === 'string' ? document.querySelector(button) : button;
+    const err = typeof errorDiv === 'string' ? document.querySelector(errorDiv) : errorDiv;
+
+    if (!inp || !btn || !err) return;
+
+    inp.addEventListener('change', (event) => {
+      const result = this.validateFile(event.target.files[0], options);
+      btn.disabled = !result.valid;
+      err.classList.toggle('hidden', result.valid);
+      if (result.error) err.querySelector('span').textContent = result.error;
+    });
+  },
+
+  setButtonLoading(button, isLoading, text) {
+    if (!button) return;
+    button.disabled = isLoading;
+    button.classList.toggle('loading', isLoading);
+    if (text) button.textContent = text;
+  },
+
+  scrollIntoViewSafe(element, options = { block: 'center', behavior: 'smooth' }) {
+    if (!element) return;
+    try {
+      element.scrollIntoView(options);
+    } catch (error) {
+      element.scrollIntoView();
+    }
   },
 };
 

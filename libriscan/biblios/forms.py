@@ -1,8 +1,12 @@
+import logging
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 from biblios.models import User, Collection, Series, Document, Page
+
+logger = logging.getLogger("django")
 
 
 # Custom user forms from https://testdriven.io/blog/django-custom-user-model/
@@ -33,7 +37,7 @@ class SeriesForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ("series", "identifier", "use_long_s_detection")
+        fields = ("collection", "series", "identifier", "use_long_s_detection")
 
 
 class PageForm(forms.ModelForm):
@@ -53,14 +57,15 @@ class FilePondUploadForm(forms.Form):
         # Check file type
         if image.content_type not in getattr(settings, "ALLOWED_UPLOAD_TYPES", []):
             raise forms.ValidationError(
-                "Invalid file type. Please upload TIFF, JPEG, or PNG files only."
+                "Invalid file type. Only JPG and PNG images are accepted."
             )
 
         # Check file size
         max_size = getattr(settings, "MAX_UPLOAD_SIZE", 5 * 1024 * 1024)
         if image.size > max_size:
+            max_size_mb = max_size / (1024 * 1024)
             raise forms.ValidationError(
-                "File size exceeds limit. Please upload a smaller file."
+                f"File size exceeds the {max_size_mb:.0f}MB limit. Please upload a smaller file."
             )
 
         return image

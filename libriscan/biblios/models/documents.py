@@ -1,174 +1,21 @@
 import logging
 
-import rules
-from rules.contrib.models import RulesModelMixin, RulesModelBase
+
+from huey.contrib.djhuey import HUEY as huey
 
 from django.db import models
 from django.urls import reverse
-
-from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
 
-from localflavor.us.us_states import STATE_CHOICES
-from localflavor.us.models import USStateField
 
 from simple_history.models import HistoricalRecords
 
-from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
-from biblios.managers import CustomUserManager
+from biblios.access_rules import is_org_editor, is_org_viewer
+from biblios.models.base import BibliosModel
 from biblios.tasks import queue_extraction
 
-logger = logging.getLogger(__name__)
-
-
-# Customized for email-based usernames per https://testdriven.io/blog/django-custom-user-model/
-class User(AbstractUser):
-    username = None
-    email = models.EmailField(_("email address"), unique=True)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    history = HistoricalRecords()
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
-
-    objects = CustomUserManager()
-
-    def __str__(self):
-        return self.email
-
-
-# Custom model in case there's a need for anything more than just the rules meta class
-class BibliosModel(models.Model, RulesModelMixin, metaclass=RulesModelBase):
-    class Meta:
-        abstract = True
-
-
-# This model is what we'll use for libraries, but calling it Org for two reasons:
-# Trying to avoid ambiguity with software libraries, and maybe non-library orgs could use this someday
-class Organization(BibliosModel):
-    name = models.CharField(max_length=75)
-    short_name = models.SlugField(max_length=10)
-    city = models.CharField(max_length=25)
-    state = USStateField(choices=STATE_CHOICES)
-    primary = models.BooleanField(default=False)
-    history = HistoricalRecords()
-
-    class Meta:
-        rules_permissions = {
-            "add": rules.is_superuser,
-            "view": is_org_viewer,
-            "change": is_org_archivist,
-            "delete": rules.is_superuser,
-        }
-        constraints = [
-            models.UniqueConstraint(fields=["short_name"], name="unique_org_shortname")
-        ]
-
-    def __str__(self):
-        return self.name
-
-    def clean(self, *args, **kwargs):
-        # If this instance is set as primary, confirm there are no others already
-        if self.primary and (prim_org := Organization.get_primary()):
-            # But it's not a problem if this already *is* the primary
-            if self is not prim_org:
-                raise ValidationError(
-                    "There can be only one primary organization at a time."
-                )
-        super().clean(*args, **kwargs)
-
-    def get_absolute_url(self):
-        keys = {"short_name": self.short_name}
-        return reverse("organization", kwargs=keys)
-
-    def get_primary():
-        """Return the primary organization"""
-        return Organization.objects.filter(primary=True).first()
-
-
-class CloudService(models.Model):
-    TEST = "T"
-    AWS = "A"
-    SERVICE_CHOICES = {TEST: "Test", AWS: "Amazon Web Services"}
-
-    organization = models.OneToOneField(Organization, on_delete=models.CASCADE)
-    service = models.CharField(max_length=1, choices=SERVICE_CHOICES)
-    client_id = models.CharField(max_length=100)
-    client_secret = models.CharField(max_length=100)
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return self.SERVICE_CHOICES[self.service]
-
-    @cached_property
-    def extractor(self):
-        from .services.extractors import EXTRACTORS
-
-        return EXTRACTORS[self.service]
-
-
-class Collection(BibliosModel):
-    owner = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="collections"
-    )
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50)
-    history = HistoricalRecords()
-
-    class Meta:
-        rules_permissions = {
-            "add": is_org_archivist,
-            "change": is_org_archivist,
-            "delete": is_org_archivist,
-            "view": is_org_viewer,
-        }
-        constraints = [
-            models.UniqueConstraint(
-                fields=["owner", "slug"], name="unique_collection_slug"
-            )
-        ]
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        keys = {"short_name": self.owner.short_name, "collection_slug": self.slug}
-        return reverse("collection", kwargs=keys)
-
-
-class Series(BibliosModel):
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50)
-    history = HistoricalRecords()
-
-    class Meta:
-        rules_permissions = {
-            "add": is_org_editor,
-            "view": is_org_viewer,
-            "change": is_org_editor,
-            "delete": is_org_editor,
-        }
-        constraints = [
-            models.UniqueConstraint(
-                fields=["collection", "slug"], name="unique_series_slug"
-            )
-        ]
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        keys = {
-            "short_name": self.collection.owner.short_name,
-            "collection_slug": self.collection.slug,
-            "series_slug": self.slug,
-        }
-        return reverse("series", kwargs=keys)
+logger = logging.getLogger("django")
 
 
 class Document(BibliosModel):
@@ -182,9 +29,15 @@ class Document(BibliosModel):
         REVIEW: "Ready for Review",
         APPROVED: "Approved",
     }
-
+    collection = models.ForeignKey(
+        "biblios.Collection", on_delete=models.CASCADE, related_name="documents"
+    )
     series = models.ForeignKey(
-        Series, on_delete=models.CASCADE, related_name="documents"
+        "biblios.Series",
+        on_delete=models.CASCADE,
+        related_name="documents",
+        blank=True,
+        null=True,
     )
     identifier = models.SlugField(max_length=25)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=NEW)
@@ -195,10 +48,9 @@ class Document(BibliosModel):
     use_long_s_detection = models.BooleanField(default=True)
 
     class Meta:
-        # In theory this would be better as a unique identifer per collection
         constraints = [
             models.UniqueConstraint(
-                fields=["series", "identifier"], name="unique_doc_per_org"
+                fields=["collection", "identifier"], name="unique_doc_per_org"
             )
         ]
         rules_permissions = {
@@ -230,8 +82,8 @@ class Document(BibliosModel):
 
     def get_absolute_url(self):
         keys = {
-            "short_name": self.series.collection.owner.short_name,
-            "collection_slug": self.series.collection.slug,
+            "short_name": self.collection.owner.short_name,
+            "collection_slug": self.collection.slug,
             "identifier": self.identifier,
         }
         return reverse("document", kwargs=keys)
@@ -341,8 +193,8 @@ class Page(BibliosModel):
 
     def get_absolute_url(self):
         keys = {
-            "short_name": self.document.series.collection.owner.short_name,
-            "collection_slug": self.document.series.collection.slug,
+            "short_name": self.document.collection.owner.short_name,
+            "collection_slug": self.document.collection.slug,
             "identifier": self.document.identifier,
             "number": self.number,
         }
@@ -350,22 +202,29 @@ class Page(BibliosModel):
 
     @property
     def can_extract(self):
+        from biblios.models.organizations import CloudService
+
         return (
             not self.has_extraction
             and CloudService.objects.filter(
-                organization=self.document.series.collection.owner
+                organization=self.document.collection.owner
             ).exists()
+            # and huey.get(self.extraction_key, peek=True) is None
         )
 
     @property
     def has_extraction(self):
         return self.words.exists()
 
+    @cached_property
+    def extraction_key(self):
+        return f"extracting-{self.id}"
+
     # Hand off this work to the Huey background task
     def generate_extraction(self):
-        extractor = self.document.series.collection.owner.cloudservice.extractor
+        extractor = self.document.collection.owner.cloudservice.extractor
         q = queue_extraction(extractor(self))
-        logger.info(f"Queuing {q}")
+        logger.info(f"Queuing {q.id}")
 
 
 class TextBlock(BibliosModel):
@@ -378,7 +237,7 @@ class TextBlock(BibliosModel):
     OMIT = "O"
     PRINT_CONTROL_CHOICES = {
         INCLUDE: "Include",
-        MERGE: "Merge With Prior",
+        MERGE: "Merged",
         OMIT: "Omit",
     }
 
@@ -484,25 +343,15 @@ class TextBlock(BibliosModel):
         else:
             return "none"
 
-
-class UserRole(models.Model):
-    EDITOR = "E"
-    ARCHIVIST = "A"
-    GUEST = "G"
-
-    ROLE_CHOICES = {EDITOR: "Editor", ARCHIVIST: "Archivist", GUEST: "Guest"}
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
-    history = HistoricalRecords()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["user", "organization", "role"], name="unique_roles"
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.organization} {UserRole.ROLE_CHOICES[self.role]}"
+    @property
+    def suggestions_json(self):
+        """Returns suggestions as a JSON string for template rendering"""
+        import json
+        if not self.suggestions:
+            return "[]"
+        try:
+            # Serialize directly - suggestions is either a list or dict
+            # Handled by the JavaScript parser
+            return json.dumps(self.suggestions)
+        except (TypeError, ValueError):
+            return "[]"

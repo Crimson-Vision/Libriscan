@@ -15,6 +15,7 @@ services:
       - ~/appdata/caddy/caddy:/etc/caddy
       - ~/appdata/caddy/data:/data
       - ~/appdata/caddy/config:/config
+      - ~/appdata/libriscan/images:/media:ro
     environment:
       - TZ=America/New_York
 

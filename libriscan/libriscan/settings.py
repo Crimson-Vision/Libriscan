@@ -40,7 +40,11 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").
     ","
 )
 SESSION_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = not DEBUG
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    USE_X_FORWARDED_HOST = True
 
 # Application definition
 
@@ -65,9 +69,9 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
@@ -142,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/logging/
 
 # Configure INFO logging as default, but can override with this env variable
-log_level = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+log_level = os.getenv("LB_LOG_LEVEL", "INFO")
 
 # Make sure the logging folder exists, or else we get a FileNotFoundError
 if not os.path.exists(LOCAL_DIR / "logs/"):

@@ -1,14 +1,71 @@
+/**
+ * Word Selector Styles
+ * Styles for word blocks, confidence indicators, and print control
+ */
+
+:root {
+  --color-high: #10b981;
+  --color-medium: #ffd700;
+  --color-low: #ff0000;
+  --color-accepted: oklch(var(--p));
+  --color-omit: #ff0000;
+  --color-merge: #6b7280;
+  --color-active-bg: #0ea5e9;
+  --color-active-bg-dark: #1fb6ff;
+  --color-active-text: #fff;
+  --color-active-text-dark: #0f172a;
+}
+
+/* Base word block */
+.word-block {
+  position: relative;
+}
+
 /* Confidence level indicators */
 .word-block.confidence-medium {
-  border-bottom: 2px dotted #ffd700; /* Yellow dotted underline */
+  border-bottom: 2px dotted var(--color-medium);
 }
 
 .word-block.confidence-low,
 .word-block.confidence-none {
-  border-bottom: 3px dashed #ff0000; /* Red dashed underline, thicker for low confidence */
+  border-bottom: 3px dashed var(--color-low);
 }
 
-/* Active word button: lightweight, matches DaisyUI 'info' look */
+/* Accepted words */
+.word-block .accepted-word {
+  color: var(--color-accepted);
+}
+
+/* Print control - Omit (red) and Merge (gray) strikethrough */
+.word-block.print-control-omit,
+.word-block.print-control-merge {
+  position: relative;
+  opacity: 0.6;
+}
+
+.word-block.print-control-omit {
+  color: var(--color-omit);
+  --strikethrough-color: var(--color-omit);
+}
+
+.word-block.print-control-merge {
+  color: var(--color-merge);
+  --strikethrough-color: var(--color-merge);
+}
+
+.word-block.print-control-omit::after,
+.word-block.print-control-merge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background-color: var(--strikethrough-color);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
 .btn-active {
   display: inline-flex;
   align-items: center;
@@ -16,38 +73,58 @@
   padding: .375rem .75rem;
   border-radius: .375rem;
   font-weight: 500;
-  background: #0ea5e9;
-  color: #fff;
-  border: 1px solid rgba(0,0,0,.08);
+  background: var(--color-active-bg);
+  color: var(--color-active-text);
+  border: 1px solid rgba(0, 0, 0, .08);
   cursor: pointer;
   text-decoration: none;
   transition: filter .12s, box-shadow .12s;
 }
 
-.btn-active:hover { filter: brightness(.95); }
-.btn-active:focus { outline: 2px solid rgba(14,165,233,.25); outline-offset: 2px; }
-
-/* Dark theme tweak */
-[data-theme="dark"] .btn-active {
-  background: #1fb6ff;
-  color: #0f172a;
-  border-color: rgba(255,255,255,.08);
+.btn-active:hover {
+  filter: brightness(.95);
 }
 
-@media (prefers-contrast: more) {
-  .btn-active { box-shadow: 0 1px 0 rgba(0,0,0,.2); }
-  [data-theme="dark"] .btn-active { box-shadow: 0 1px 0 rgba(255,255,255,.08); }
+.btn-active:focus {
+  outline: 2px solid rgba(14, 165, 233, .25);
+  outline-offset: 2px;
 }
 
-/* Accepted status indicator positioning */
-.accepted-status {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  z-index: 10;
-}
-
-/* Ensure parent button has relative positioning */
-.word-block {
+/* Ensure strikethrough persists when active */
+.btn-active.print-control-omit,
+.btn-active.print-control-merge {
   position: relative;
 }
+
+.btn-active.print-control-omit::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 50%;
+  height: 3px;
+  background-color: currentColor;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.btn-active.print-control-merge::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  top: 50%;
+  height: 3px;
+  background-color: currentColor;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+/* Dark theme */
+[data-theme="dark"] .btn-active {
+  background: var(--color-active-bg-dark);
+  color: var(--color-active-text-dark);
+  border-color: rgba(255, 255, 255, .08);
+}
+
+
