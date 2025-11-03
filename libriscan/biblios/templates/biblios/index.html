@@ -136,8 +136,8 @@
                 <td>{{ doc.collection.name|default:"-" }}</td>
                 <td>{{ doc.series.name|default:"-" }}</td>
                 <td>
-                  {% if doc._last_updated %}
-                    {{ doc._last_updated|timesince }} ago
+                  {% if last_edit %}
+                    {{ last_edit.history_date|timesince }} ago
                   {% else %}
                     Never
                   {% endif %}
