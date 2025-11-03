@@ -3,353 +3,222 @@
 
 {% block title %}All Documents - LibriScan{% endblock %}
 
-{% block extra_css %}
-<style>
-/* Minimal custom styles - let daisyUI do the work */
-.view-toggle-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container mx-auto px-4 py-6 max-w-7xl">
-    <!-- Toolbar -->
-    <form method="get" action="{% url 'index' %}" id="filter-form" class="mb-6">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <!-- Search Input -->
-            <div class="flex-1 w-full sm:w-auto">
-                <input type="text" 
-                       name="search" 
-                       value="{{ request.GET.search }}"
-                       placeholder="Search by ID, identifier, or collection..."
-                       class="input input-bordered w-full max-w-md input-sm">
-            </div>
-            
-            <!-- View Toggle & Filter -->
-            <div class="flex items-center gap-2">
-                <div class="join">
-                    <button type="button" 
-                            class="btn btn-sm join-item view-toggle-btn {% if current_view != 'grid' %}btn-primary{% endif %}" 
-                            id="btn-list">
-                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="8" y1="6" x2="21" y2="6"></line>
-                            <line x1="8" y1="12" x2="21" y2="12"></line>
-                            <line x1="8" y1="18" x2="21" y2="18"></line>
-                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                        </svg>
-                        <span>List</span>
-                    </button>
-                    
-                    <button type="button" 
-                            class="btn btn-sm join-item view-toggle-btn {% if current_view == 'grid' %}btn-primary{% endif %}" 
-                            id="btn-grid">
-                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        <span>Grid</span>
-                    </button>
-                </div>
-                
-                <select name="filter" 
-                        class="select select-bordered select-sm w-full max-w-xs" 
-                        onchange="document.getElementById('filter-form').submit()">
-                    <option value="">All</option>
-                    <option value="collections" {% if current_filter == 'collections' %}selected{% endif %}>Collections</option>
-                    <option value="documents" {% if current_filter == 'documents' %}selected{% endif %}>Documents</option>
-                    <option value="series" {% if current_filter == 'series' %}selected{% endif %}>Series</option>
-                </select>
-            </div>
-        </div>
-    </form>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <h1 class="text-3xl font-bold mb-6">All Documents</h1>
+
+  {% if user.is_authenticated %}
     
-    <!-- Continue Working Banner -->
+    <!-- Banner: Continue Working (only shows if user has edited docs and not searching) -->
     {% if latest_doc and not current_search %}
     <div class="alert alert-info shadow-sm py-2 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div class="flex-1">
-            <span class="text-sm">
-                <span class="font-semibold">Continue:</span> 
-                Document #{{ latest_doc.id }}
-                {% if latest_doc.instance.identifier %}
-                    - {{ latest_doc.instance.identifier }}
-                {% endif %}
-                <span class="opacity-70 ml-2 text-xs">{{ latest_doc.history_date|timesince }} ago</span>
-            </span>
-        </div>
-        <a href="{{ latest_doc.instance.get_absolute_url }}" class="btn btn-primary btn-xs">
-            Open
-        </a>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <div class="flex-1">
+        <span class="text-sm">
+          Continue: Document #{{ latest_doc.id }} - {{ latest_doc.instance.identifier }}
+          <span class="opacity-70">{{ latest_doc.history_date|timesince }} ago</span>
+        </span>
+      </div>
+      <a href="{{ latest_doc.instance.get_absolute_url }}" class="btn btn-primary btn-xs">Open</a>
     </div>
     {% endif %}
-    
+
+    <!-- Toolbar: Search, View Toggle, Filter -->
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+      
+      <!-- Search Input -->
+      <div class="flex-1 w-full sm:w-auto">
+        <input 
+          type="text" 
+          name="search" 
+          value="{{ current_search }}"
+          placeholder="Filter documents below..."
+          class="input input-bordered input-sm w-full max-w-md"
+          hx-get="{% url 'index' %}"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#document-table-container"
+          hx-include="[name='view'],[name='filter']">
+      </div>
+
+      <!-- View Toggle (List/Grid) -->
+      <div class="join">
+        <button class="join-item btn btn-sm {% if current_view == 'list' %}btn-active{% endif %}"
+                hx-get="{% url 'index' %}?view=list&{{ keep_params }}"
+                hx-target="#document-table-container">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          List
+        </button>
+        <button class="join-item btn btn-sm {% if current_view == 'grid' %}btn-active{% endif %}"
+                hx-get="{% url 'index' %}?view=grid&{{ keep_params }}"
+                hx-target="#document-table-container">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+          </svg>
+          Grid
+        </button>
+      </div>
+
+      <!-- Filter Dropdown -->
+      <select name="filter" 
+              class="select select-bordered select-sm"
+              hx-get="{% url 'index' %}"
+              hx-trigger="change"
+              hx-target="#document-table-container"
+              hx-include="[name='search'],[name='view']">
+        <option value="all" {% if current_filter == 'all' %}selected{% endif %}>All</option>
+        <option value="collections" {% if current_filter == 'collections' %}selected{% endif %}>Collections</option>
+        <option value="series" {% if current_filter == 'series' %}selected{% endif %}>Series</option>
+        <option value="documents" {% if current_filter == 'documents' %}selected{% endif %}>Documents</option>
+      </select>
+
+    </div>
+
     <!-- Document Count -->
     <div class="text-sm text-base-content/70 mb-4">
-        Showing <span class="font-semibold text-base-content">{{ documents|length }} document{{ documents|length|pluralize }}</span>
+      Showing {{ paginator.count }} document{{ paginator.count|pluralize }}
     </div>
-    
-    <!-- List View -->
-    <div id="list-view" class="{% if current_view == 'grid' %}hidden{% endif %}">
-        <div class="card bg-base-100 shadow-md">
-            <div class="overflow-x-auto">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" 
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    ID
-                                    {% if current_sort == 'id' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=identifier&dir={% if current_sort == 'identifier' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    Document Title
-                                    {% if current_sort == 'identifier' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=collection&dir={% if current_sort == 'collection' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    Collection
-                                    {% if current_sort == 'collection' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=series&dir={% if current_sort == 'series' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    Series
-                                    {% if current_sort == 'series' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=updated&dir={% if current_sort == 'updated' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    Last Updated
-                                    {% if current_sort == 'updated' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort=updated_by&dir={% if current_sort == 'updated_by' and current_dir == 'asc' %}desc{% else %}asc{% endif %}"
-                                   class="flex items-center gap-1 hover:text-primary">
-                                    Updated By
-                                    {% if current_sort == 'updated_by' %}
-                                        <span class="text-xs opacity-100">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                                    {% else %}
-                                        <span class="text-xs opacity-30">⇅</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if documents %}
-                            {% for doc in documents %}
-                            <tr class="hover">
-                                <td>
-                                    <a href="{{ doc.get_absolute_url }}" class="link link-primary font-medium">
-                                        DOC-{{ doc.id|stringformat:"03d" }}
-                                    </a>
-                                </td>
-                                <td>{{ doc.identifier|default:"-" }}</td>
-                                <td>{{ doc.collection.name|default:"-" }}</td>
-                                <td>{{ doc.series.name|default:"-" }}</td>
-                                <td>
-                                    {% with last_edit=doc.history.first %}
-                                        {% if last_edit %}{{ last_edit.history_date|timesince }} ago{% else %}-{% endif %}
-                                    {% endwith %}
-                                </td>
-                                <td>
-                                    {% with last_edit=doc.history.first %}
-                                        {% if last_edit and last_edit.history_user %}
-                                            <div class="badge badge-ghost badge-sm">{{ last_edit.history_user.username }}</div>
-                                        {% else %}
-                                            <div class="badge badge-ghost badge-sm">System</div>
-                                        {% endif %}
-                                    {% endwith %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center py-12">
-                                    <div class="text-base-content/40">
-                                        <h3 class="text-lg font-semibold mb-2">No Documents Found</h3>
-                                        <p class="text-sm">Try adjusting your search or filters</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            {% if page_obj and page_obj.paginator.num_pages > 1 %}
-            <div class="card-body pt-4">
-                <div class="flex justify-center">
-                    <div class="join">
-                        {% if page_obj.has_previous %}
-                            <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort={{ current_sort }}&dir={{ current_dir }}&page={{ page_obj.previous_page_number }}"
-                               class="join-item btn btn-sm">
-                                «
-                            </a>
-                        {% else %}
-                            <button class="join-item btn btn-sm btn-disabled">«</button>
-                        {% endif %}
 
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if num == page_obj.number %}
-                                <button class="join-item btn btn-sm btn-active">{{ num }}</button>
-                            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort={{ current_sort }}&dir={{ current_dir }}&page={{ num }}"
-                                   class="join-item btn btn-sm">
-                                    {{ num }}
-                                </a>
-                            {% elif num == 1 or num == page_obj.paginator.num_pages %}
-                                <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort={{ current_sort }}&dir={{ current_dir }}&page={{ num }}"
-                                   class="join-item btn btn-sm">
-                                    {{ num }}
-                                </a>
-                            {% elif num == page_obj.number|add:"-4" or num == page_obj.number|add:"4" %}
-                                <button class="join-item btn btn-sm btn-disabled">...</button>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if page_obj.has_next %}
-                            <a href="?{% if keep_params %}{{ keep_params }}&{% endif %}sort={{ current_sort }}&dir={{ current_dir }}&page={{ page_obj.next_page_number }}"
-                               class="join-item btn btn-sm">
-                                »
-                            </a>
-                        {% else %}
-                            <button class="join-item btn btn-sm btn-disabled">»</button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+    <!-- Table Container (HTMX target) -->
+    <div id="document-table-container">
+      
+      {% if documents %}
+        <!-- Table with daisyUI styling -->
+        <div class="overflow-x-auto">
+          <table class="table table-zebra table-sm">
+            <thead>
+              <tr>
+                <th>
+                  <a href="?sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}&{{ keep_params }}"
+                     class="link link-hover">
+                    ID {% if current_sort == 'id' %}{% if current_dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                  </a>
+                </th>
+                <th>
+                  <a href="?sort=identifier&dir={% if current_sort == 'identifier' and current_dir == 'asc' %}desc{% else %}asc{% endif %}&{{ keep_params }}"
+                     class="link link-hover">
+                    Document Title {% if current_sort == 'identifier' %}{% if current_dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                  </a>
+                </th>
+                <th>
+                  <a href="?sort=collection&dir={% if current_sort == 'collection' and current_dir == 'asc' %}desc{% else %}asc{% endif %}&{{ keep_params }}"
+                     class="link link-hover">
+                    Collection {% if current_sort == 'collection' %}{% if current_dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                  </a>
+                </th>
+                <th>
+                  <a href="?sort=series&dir={% if current_sort == 'series' and current_dir == 'asc' %}desc{% else %}asc{% endif %}&{{ keep_params }}"
+                     class="link link-hover">
+                    Series {% if current_sort == 'series' %}{% if current_dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                  </a>
+                </th>
+                <th>
+                  <a href="?sort=updated&dir={% if current_sort == 'updated' and current_dir == 'asc' %}desc{% else %}asc{% endif %}&{{ keep_params }}"
+                     class="link link-hover">
+                    Last Updated {% if current_sort == 'updated' %}{% if current_dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                  </a>
+                </th>
+                <th>Updated By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for doc in documents %}
+              <tr class="hover">
+                <td>{{ doc.id }}</td>
+                <td>
+                  <a href="{{ doc.get_absolute_url }}" class="link link-primary">
+                    {{ doc.identifier }}
+                  </a>
+                </td>
+                <td>{{ doc.collection.name|default:"-" }}</td>
+                <td>{{ doc.series.name|default:"-" }}</td>
+                <td>
+                  {% if doc._last_updated %}
+                    {{ doc._last_updated|timesince }} ago
+                  {% else %}
+                    Never
+                  {% endif %}
+                </td>
+                <td>
+                  {% with doc.history.first as last_edit %}
+                    {% if last_edit %}
+                      {{ last_edit.history_user.email|default:"Unknown" }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  {% endwith %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-    </div>
-    
-    <!-- Grid View -->
-    <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 {% if current_view != 'grid' %}hidden{% endif %}">
-        {% if documents %}
-            {% for doc in documents %}
-            <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-                <div class="card-body p-4">
-                    <div class="flex items-start justify-between mb-3">
-                        <a href="{{ doc.get_absolute_url }}" class="link link-primary font-semibold text-base">
-                            DOC-{{ doc.id|stringformat:"03d" }}
-                        </a>
-                        <span class="text-xs text-base-content/60">
-                            {% with last_edit=doc.history.first %}
-                                {% if last_edit %}{{ last_edit.history_date|timesince }} ago{% else %}-{% endif %}
-                            {% endwith %}
-                        </span>
-                    </div>
-                    
-                    <div class="space-y-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Document Title:</span>
-                            <span class="font-medium text-right">{{ doc.identifier|default:"-" }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Collection:</span>
-                            <span class="font-medium text-right">{{ doc.collection.name|default:"-" }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Series:</span>
-                            <span class="font-medium text-right">{{ doc.series.name|default:"-" }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="card-actions justify-end mt-4">
-                        <a href="{{ doc.get_absolute_url }}" class="btn btn-primary btn-sm">
-                            View Document
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-span-full">
-                <div class="card bg-base-100 shadow-md">
-                    <div class="card-body text-center py-12">
-                        <h3 class="text-lg font-semibold text-base-content/60 mb-2">No Documents Found</h3>
-                        <p class="text-sm text-base-content/40">Try adjusting your search or filters</p>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    const btnList = document.getElementById('btn-list');
-    const btnGrid = document.getElementById('btn-grid');
-    const listView = document.getElementById('list-view');
-    const gridView = document.getElementById('grid-view');
-    
-    function switchView(view) {
-        if (view === 'list') {
-            btnList.classList.add('btn-primary');
-            btnGrid.classList.remove('btn-primary');
-            listView.classList.remove('hidden');
-            gridView.classList.add('hidden');
-        } else {
-            btnGrid.classList.add('btn-primary');
-            btnList.classList.remove('btn-primary');
-            listView.classList.add('hidden');
-            gridView.classList.remove('hidden');
-        }
-    }
-    
-    btnList.addEventListener('click', () => switchView('list'));
-    btnGrid.addEventListener('click', () => switchView('grid'));
-    
-    // Search with debounce
-    let searchTimeout;
-    const searchInput = document.querySelector('input[name="search"]');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                document.getElementById('filter-form').submit();
-            }, 500);
-        });
-    }
-</script>
+        <!-- Pagination with daisyUI join buttons -->
+        {% if paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-6">
+          <div class="join">
+            
+            <!-- Previous Button -->
+            {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}&{{ keep_params }}" 
+                 class="join-item btn btn-sm">
+                Previous
+              </a>
+            {% else %}
+              <button class="join-item btn btn-sm btn-disabled" disabled>Previous</button>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            {% for num in page_obj.paginator.page_range %}
+              {% if num == page_obj.number %}
+                <button class="join-item btn btn-sm btn-active">{{ num }}</button>
+              {% elif num == 1 or num == paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <a href="?page={{ num }}&{{ keep_params }}" class="join-item btn btn-sm">{{ num }}</a>
+              {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                <button class="join-item btn btn-sm btn-disabled" disabled>...</button>
+              {% endif %}
+            {% endfor %}
+
+            <!-- Next Button -->
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}&{{ keep_params }}" 
+                 class="join-item btn btn-sm">
+                Next
+              </a>
+            {% else %}
+              <button class="join-item btn btn-sm btn-disabled" disabled>Next</button>
+            {% endif %}
+
+          </div>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-base-content">No Documents Found</h3>
+          <p class="mt-1 text-sm text-base-content/70">Try adjusting your search or filters</p>
+        </div>
+      {% endif %}
+
+    </div>
+
+  {% else %}
+    <!-- Not Authenticated -->
+    <div class="alert alert-warning">
+      <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <span>Please log in to view documents.</span>
+    </div>
+  {% endif %}
+
+</div>
 {% endblock %}
