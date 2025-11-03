@@ -7,6 +7,30 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Libriscan{% endblock %}</title>
+  
+  <!-- 
+  Favicon Attribution
+  
+  Title: Logo Hunter Community
+  Creator: Logo Hunter Community
+  Source: https://www.figma.com/slides/Pu0Bsm1StbjJn4CLDbXksX/Logo-Hunter-for-Apple-Store--Community-?node-id=1-42&t=mcfWKynSYl5cTPea-0
+  License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+  License URL: https://creativecommons.org/licenses/by/4.0/
+  
+  Modifications:
+  - Added Libriscan 
+  - Added blue arrow for extraction signification
+  
+  This is an adapted work based on the original design by Logo Hunter Community from Figma Community.
+  Modifications by Crimson Vision team for LibriScan document management system.
+  
+  Original Copyright: Logo Hunter Community
+  Adapted work: 2025 Crimson Vision Team
+  -->
+  <!-- Favicon - SVG with PNG fallback -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+  <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+  
   {% htmx_script %}
   <!-- daisyUI CSS CDN -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
@@ -33,6 +57,9 @@
   <link rel="stylesheet" href="{% static 'css/word_details.css' %}">
   <link rel="stylesheet" href="{% static 'css/tutorial.css' %}">
   <link rel="stylesheet" href="{% static 'css/search.css' %}">
+  
+  <!-- Page-specific CSS -->
+  {% block extra_css %}{% endblock %}
   
   <!-- Theme Toggle Script -->
   <script>
@@ -97,6 +124,8 @@
   <script src="{% static 'js/tutorial.js' %}"></script>
   
   <!-- Page-specific scripts -->
+  {% block extra_js %}{% endblock %}
+  
   {% block scripts %}{% endblock %}
 </body>
 

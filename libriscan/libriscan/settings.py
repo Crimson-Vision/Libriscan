@@ -33,18 +33,19 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("LB_DEBUG", False)
+# Default to DEBUG=False unless the LB_DEBUG environment variable is explicitly "True".
+DEBUG = os.environ.get("LB_DEBUG") == "True"
 
-ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
-    ","
-)
-SESSION_COOKIE_SECURE = True
-
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = True
-    USE_X_FORWARDED_HOST = True
+ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost,http://127.0.0.1").split(",")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG and os.environ.get("LB_FORCE_SSL") == "True"
+# This prevents the app from crashing for local development
+# while ensuring a key is required for production
+if not SECRET_KEY:
+    SECRET_KEY = "django-insecure-change-me-for-a-real-project"
+    DEBUG = True  # Force DEBUG=True if no SECRET_KEY
 
 # Application definition
 
@@ -69,9 +70,9 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",

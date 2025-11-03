@@ -1,0 +1,122 @@
+{% load static %}
+
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    <a href="?{{ keep_params }}sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        ID
+                        {% if current_sort == 'id' %}
+                            <span class="sort-icon">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ keep_params }}sort=identifier&dir={% if current_sort == 'identifier' and current_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Identifier
+                        {% if current_sort == 'identifier' %}
+                            <span class="sort-icon">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ keep_params }}sort=collection&dir={% if current_sort == 'collection' and current_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Collection
+                        {% if current_sort == 'collection' %}
+                            <span class="sort-icon">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ keep_params }}sort=series&dir={% if current_sort == 'series' and current_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Series
+                        {% if current_sort == 'series' %}
+                            <span class="sort-icon">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="?{{ keep_params }}sort=updated&dir={% if current_sort == 'updated' and current_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Last Updated
+                        {% if current_sort == 'updated' %}
+                            <span class="sort-icon">{% if current_dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
+                <th>Updated By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if documents %}
+                {% for doc in documents %}
+                <tr>
+                    <td>
+                        <a href="{{ doc.get_absolute_url }}" class="doc-link">
+                            DOC-{{ doc.id|stringformat:"03d" }}
+                        </a>
+                    </td>
+                    <td>{{ doc.identifier|default:"-" }}</td>
+                    <td>{{ doc.collection.name|default:"-" }}</td>
+                    <td>{{ doc.series.name|default:"-" }}</td>
+                    <td>
+                        {% with last_edit=doc.history.first %}
+                            {% if last_edit %}{{ last_edit.history_date|timesince }} ago{% else %}-{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with last_edit=doc.history.first %}
+                            {% if last_edit and last_edit.history_user %}{{ last_edit.history_user.username }}{% else %}System{% endif %}
+                        {% endwith %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <h3>No Documents Found</h3>
+                            <p>Try adjusting your search or filters</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <div class="ls-pager">
+        {% if page_obj.has_previous %}
+            <a href="?{{ keep_params }}sort={{ current_sort }}&dir={{ current_dir }}&page={{ page_obj.previous_page_number }}">
+                &laquo; Previous
+            </a>
+        {% else %}
+            <span class="is-disabled">&laquo; Previous</span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <span class="is-current">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a href="?{{ keep_params }}sort={{ current_sort }}&dir={{ current_dir }}&page={{ num }}">
+                    {{ num }}
+                </a>
+            {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                <a href="?{{ keep_params }}sort={{ current_sort }}&dir={{ current_dir }}&page={{ num }}">
+                    {{ num }}
+                </a>
+            {% elif num == page_obj.number|add:"-4" or num == page_obj.number|add:"4" %}
+                <span>...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?{{ keep_params }}sort={{ current_sort }}&dir={{ current_dir }}&page={{ page_obj.next_page_number }}">
+                Next &raquo;
+            </a>
+        {% else %}
+            <span class="is-disabled">Next &raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
