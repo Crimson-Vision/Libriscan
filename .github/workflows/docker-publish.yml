@@ -84,6 +84,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             DOCKER_METADATA_OUTPUT_TAGS
+            DOCKER_METADATA_OUTPUT_VERSION
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
