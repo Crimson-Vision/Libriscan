@@ -73,7 +73,64 @@ Perform the following steps to get this repo up and running on your computer:
 
 ---
 
-## Special Notes
+## CSS Changes (Tailwind / DaisyUI)
+
+Follow the below instructions to have your local environment ready for changes in CSS, if you are changing CSS classes on the teamplates.
+
+Reference site used:
+https://daisyui.com/docs/install/django/?lang=en
+
+In case the above site is down or changed, you can follow the manual installation steps on your computer:
+
+Terminal
+## Run the corresponding command for your OS
+
+### Linux
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64-musl
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64-musl
+
+### MacOS
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+curl -sLo myapp/static/css/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64
+
+### Windows
+curl -sLo myapp/static/css/tailwindcss.exe https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe
+Make the file executable (For Linux and MacOS):
+
+Terminal
+```
+chmod +x myapp/static/css/tailwindcss
+```
+
+Get daisyUI bundle JS file
+Run this code to download latest version of daisyUI as a single js file and put it next to Tailwind's executable file.
+
+Terminal
+```
+curl -sLO myapp/static/css/daisyui.mjs https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.mjs
+curl -sLO myapp/static/css/daisyui-theme.mjs https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.mjs
+```
+
+Add Tailwind CSS and daisyUI to your CSS file.
+Address your HTML and other markup files in the source function.
+
+***biblios/static/css/input.css***
+```
+@import "tailwindcss";
+
+@source not "./tailwindcss";
+@source not "./daisyui{,*}.mjs";
+
+@plugin "./daisyui.mjs";
+
+/* Optional for custom themes – Docs: https://daisyui.com/docs/themes/#how-to-add-a-new-custom-theme */
+@plugin "./daisyui-theme.mjs"{
+  /* custom theme here */
+}
+```
+
 
 ### Admin Portal
 
