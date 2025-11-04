@@ -37,8 +37,9 @@ RUN uv pip install --no-cache-dir -r requirements.txt
 # Stage 2: Production stage
 FROM python:${PYTHON_VERSION}-slim
 
-# Pull the Python version arg into this build stage too
+# Pull the args we need into this build stage too
 ARG PYTHON_VERSION
+ARG DOCKER_METADATA_OUTPUT_TAGS
 
 RUN useradd -m -r appuser && \
     mkdir /app && \
