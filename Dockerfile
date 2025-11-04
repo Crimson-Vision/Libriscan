@@ -8,7 +8,6 @@ FROM python:${PYTHON_VERSION}-slim AS builder
 # Pull the version args into this build stage
 ARG PYTHON_VERSION
 
-
 LABEL org.opencontainers.image.title="Libriscan"
 LABEL org.opencontainers.image.description="Libriscan helps extract and analyze text from historical documents."
 LABEL org.opencontainers.image.source="https://github.com/crimson-vision/libriscan"
@@ -38,8 +37,10 @@ RUN uv pip install --no-cache-dir -r requirements.txt
 # Stage 2: Production stage
 FROM python:${PYTHON_VERSION}-slim
 
-# Pull the Python version arg into this build stage too
+# Pull the args we need into this build stage too
 ARG PYTHON_VERSION
+ARG DOCKER_METADATA_OUTPUT_VERSION
+ARG DOCKER_METADATA_OUTPUT_TAGS
 
 RUN useradd -m -r appuser && \
     mkdir /app && \
@@ -58,6 +59,9 @@ COPY --chown=appuser:appuser libriscan .
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
+ENV LB_TAGS=${DOCKER_METADATA_OUTPUT_TAGS}
+ENV LB_VERSION=${DOCKER_METADATA_OUTPUT_VERSION}
 
 # Switch to non-root user
 USER appuser
