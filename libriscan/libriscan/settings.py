@@ -46,6 +46,20 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     USE_X_FORWARDED_HOST = True
 
+LB_VERSION = os.environ.get("LB_VERSION")
+LB_TAGS = os.environ.get("LB_TAGS", "").split("\n")
+
+# Look for the tag with the SHA, so we can easily reference it
+LB_SHA = None
+
+
+for tag in LB_TAGS:
+    s = tag.split(":")
+    if len(s) > 1 and s[1].startswith("sha-"):
+        # There should only be one, but stop looking once we find it anyway
+        LB_SHA = s[1]
+        break
+
 # Application definition
 
 INSTALLED_APPS = [
