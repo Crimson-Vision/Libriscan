@@ -66,6 +66,57 @@ class Document(BibliosModel):
         return TextBlock.objects.filter(
             page__document=self, print_control=TextBlock.INCLUDE
         ).exists()
+        
+    @property
+    def last_edit_info(self):
+        """
+        Returns the most recent edit info across Document, its Pages, and TextBlocks.
+        Checks audit history (django-simple-history) for all related records.
+        
+        Returns:
+            dict with 'timestamp', 'user', 'type', and optional 'page_number'
+            None if no edit history exists
+        """
+        edits = []
+        
+        # Check Document history
+        if self.history.exists():
+            doc_history = self.history.first()  # Most recent
+            edits.append({
+                'timestamp': doc_history.history_date,
+                'user': doc_history.history_user,
+                'type': 'document',
+                'instance': self
+            })
+        
+        # Check all Pages history
+        for page in self.pages.all():
+            if page.history.exists():
+                page_history = page.history.first()
+                edits.append({
+                    'timestamp': page_history.history_date,
+                    'user': page_history.history_user,
+                    'type': 'page',
+                    'page_number': page.number,
+                    'instance': page
+                })
+            
+            # Check TextBlocks for each page
+            for block in page.words.all():
+                if block.history.exists():
+                    block_history = block.history.first()
+                    edits.append({
+                        'timestamp': block_history.history_date,
+                        'user': block_history.history_user,
+                        'type': 'textblock',
+                        'page_number': page.number,
+                        'instance': page  # Link to page, not block
+                    })
+        
+        # Return most recent edit
+        if edits:
+            return max(edits, key=lambda x: x['timestamp'])
+        return None
 
     def __str__(self):
         return self.identifier
