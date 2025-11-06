@@ -81,13 +81,13 @@ class BibliosTests(TestCase):
         from biblios.views import merge_blocks
         import json
 
-        # Test that words on different lines can't be merged
-        block1 = 20
-        block2 = 21
+        # Test that the first printable word on a line can't be merged
+        # Block 10 is the third word on the line in the fixture, but 8 and 9 are marked Omit
+        block1 = 10
 
         page = Page.objects.get(id=1)
 
-        request = self.factory.post("merge", {"block1": block1, "block2": block2})
+        request = self.factory.post("merge", {"block": block1})
         request.user = self.user
 
         response = merge_blocks(
@@ -100,7 +100,7 @@ class BibliosTests(TestCase):
 
         self.assertEqual(
             json.loads(response.text).get("error"),
-            "Only sequential text on the same line can be merged",
+            "The selected word must have another printable word before it on the same line",
         )
         self.assertEqual(response.status_code, 400)
 
@@ -108,7 +108,7 @@ class BibliosTests(TestCase):
         block3 = 29
         block4 = 30
 
-        request = self.factory.post("merge", {"block1": block3, "block2": block4})
+        request = self.factory.post("merge", {"block": block4})
         request.user = self.user
 
         response = merge_blocks(
