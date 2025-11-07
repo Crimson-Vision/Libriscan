@@ -107,7 +107,7 @@
       <!-- Documents Section -->
       <div class="mb-2 text-base font-semibold text-base-content/80">Documents in this collection:</div>
       <ul class="list bg-base-100 rounded-box shadow divide-base-200">
-        {% for doc in collection.documents.all %}
+        {% for doc in documents %}
           <li class="px-4 py-3 flex items-center justify-between hover:bg-secondary/10 transition rounded-box">
             <a href="{{ doc.get_absolute_url }}" class="flex items-center gap-2 group flex-1">
               <span class="inline-flex items-center justify-center size-8 rounded-full bg-warning/20">
