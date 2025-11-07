@@ -1,14 +1,10 @@
 import logging
 
-
-from huey.contrib.djhuey import HUEY as huey
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
-
-
+from huey.contrib.djhuey import HUEY as huey
 from simple_history.models import HistoricalRecords
 
 from biblios.access_rules import is_org_editor, is_org_viewer
@@ -265,6 +261,7 @@ class TextBlock(BibliosModel):
         decimal_places=3,
         validators=[MinValueValidator(0), MaxValueValidator(CONF_ACCEPTED)],
     )
+    review = models.BooleanField(default=False)
 
     # Controls whether this word should be included from document exports.
     # Include: a normal word to include in the exported file
@@ -347,6 +344,7 @@ class TextBlock(BibliosModel):
     def suggestions_json(self):
         """Returns suggestions as a JSON string for template rendering"""
         import json
+
         if not self.suggestions:
             return "[]"
         try:

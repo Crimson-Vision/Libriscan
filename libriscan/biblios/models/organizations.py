@@ -1,16 +1,12 @@
 import logging
 
 import rules
-
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
-from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
-
-
-from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.models import USStateField
-
+from localflavor.us.us_states import STATE_CHOICES
 from simple_history.models import HistoricalRecords
 
 from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
@@ -27,6 +23,7 @@ class Organization(BibliosModel):
     city = models.CharField(max_length=25)
     state = USStateField(choices=STATE_CHOICES)
     primary = models.BooleanField(default=False)
+    contact = models.EmailField(blank=True, null=True)
     history = HistoricalRecords()
 
     class Meta:
