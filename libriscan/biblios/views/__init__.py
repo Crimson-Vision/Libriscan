@@ -9,6 +9,7 @@ from .organizations import (
     collection_detail,
     SeriesCreateView,
     SeriesDetail,
+    SeriesDeleteView,
 )
 from .documents import (
     DocumentList,

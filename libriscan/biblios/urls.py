@@ -55,8 +55,20 @@ urlpatterns = [
                             ),
                             path(
                                 "<slug:series_slug>-series/",
-                                views.SeriesDetail.as_view(),
-                                name="series",
+                                include(
+                                    [
+                                        path(
+                                            "",
+                                            views.SeriesDetail.as_view(),
+                                            name="series",
+                                        ),
+                                        path(
+                                            "delete/",
+                                            views.SeriesDeleteView.as_view(),
+                                            name="series_delete",
+                                        ),
+                                    ]
+                                ),
                             ),
                             # Document URLs
                             path(
