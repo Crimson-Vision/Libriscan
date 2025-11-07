@@ -74,6 +74,11 @@ urlpatterns = [
                                             name="document_update",
                                         ),
                                         path(
+                                            "delete/",
+                                            views.DocumentDeleteView.as_view(),
+                                            name="document_delete",
+                                        ),
+                                        path(
                                             "metadata/",
                                             views.MetadataDetail.as_view(),
                                             name="metadata",

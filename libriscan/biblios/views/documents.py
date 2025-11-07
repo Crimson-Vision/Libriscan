@@ -12,7 +12,7 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from huey.contrib.djhuey import HUEY as huey
 
@@ -138,7 +138,25 @@ class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
 
 class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Document
-    success_url = reverse_lazy("index")
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "biblios/document_confirm_delete.html"
+
+    def get_object(self, queryset=None):
+        """Get document by URL parameters."""
+        return get_object_or_404(
+            Document,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            identifier=self.kwargs.get("identifier"),
+        )
+
+    def get_success_url(self):
+        """Redirect to collection page after deletion."""
+        return reverse("collection", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+            "collection_slug": self.kwargs.get("collection_slug"),
+        })
 
 
 class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
