@@ -19,6 +19,7 @@ from .documents import (
     MetadataUpdateView,
     PageCreateView,
     PageDetail,
+    delete_page,
     handle_upload,
     extract_text,
     export_pdf,

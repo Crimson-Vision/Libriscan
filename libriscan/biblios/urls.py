@@ -112,6 +112,11 @@ urlpatterns = [
                                             name="page",
                                         ),
                                         path(
+                                            "page<int:number>/delete/",
+                                            views.delete_page,
+                                            name="page_delete",
+                                        ),
+                                        path(
                                             "page<int:number>/extract/",
                                             views.extract_text,
                                             name="page_extract",

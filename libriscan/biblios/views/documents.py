@@ -10,8 +10,8 @@ from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
 
 from huey.contrib.djhuey import HUEY as huey
 
@@ -282,6 +282,26 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
             document__identifier=doc,
             number=number,
         )
+
+
+@permission_required("biblios.delete_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST"])
+def delete_page(request, short_name, collection_slug, identifier, number):
+    """Delete a page and redirect back to document detail."""
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+    page.delete()
+    return redirect(
+        "document",
+        short_name=short_name,
+        collection_slug=collection_slug,
+        identifier=identifier,
+    )
 
 
 @require_http_methods(["POST"])
