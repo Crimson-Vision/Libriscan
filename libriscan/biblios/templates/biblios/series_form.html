@@ -1,76 +1,136 @@
 {% extends "biblios/base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto mt-8">
-    <!-- Breadcrumb Navigation -->
+<!-- Breadcrumb Navigation -->
+<nav class="mb-3 text-sm breadcrumbs">
+    <ul>
+        <li>
+            <a href="{% url 'organization' short_name %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
+                </span>
+                {% if org %}{{ org }}{% else %}{{ short_name }}{% endif %}
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'collection' short_name collection_slug %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                </span>
+                {% if collection %}{{ collection }}{% else %}{{ collection_slug }}{% endif %}
+            </a>
+        </li>
+        {% if object %}
+        <li>
+            <a href="{% url 'series' short_name collection_slug object.slug %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                </span>
+                {{ object }}
+            </a>
+        </li>
+        {% endif %}
+        <li>
+            <span class="flex items-center gap-1 text-base-content/60">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                </span>
+                {% if object %}Edit Series{% else %}New Series{% endif %}
+            </span>
+        </li>
+    </ul>
+</nav>
 
-    <div class="card bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-2xl font-bold mb-4 flex items-center gap-2">
-          <span class="inline-flex items-center justify-center size-10 rounded-full bg-secondary/10">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-secondary">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-            </svg>
-          </span>
-          Create New Series
-        </h2>
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+    <h2 class="card-title text-2xl font-bold mb-4 flex items-center gap-2">
+        <span class="inline-flex items-center justify-center size-10 rounded-full bg-secondary/10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-secondary">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+        </svg>
+        </span>
+        {% if object %}Edit Series{% else %}Create New Series{% endif %}
+    </h2>
+    
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
         
-        <form method="post" class="space-y-4">
-            {% csrf_token %}
-            
-            <div class="form-control">
-                <label for="id_name" class="label">
-                    <span class="label-text font-semibold">Series Name</span>
-                </label>
-                <input 
-                    type="text" 
-                    name="name" 
-                    id="id_name" 
-                    class="input input-bordered w-full" 
-                    value="{{ form.name.value|default_if_none:'' }}"
-                    placeholder="Enter series name"
-                    required
-                >
-                {% if form.name.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
-                    </label>
-                {% endif %}
-            </div>
-            
-            <div class="form-control">
-                <label for="id_slug" class="label">
-                    <span class="label-text font-semibold">Slug</span>
-                </label>
-                <input 
-                    type="text" 
-                    name="slug" 
-                    id="id_slug" 
-                    class="input input-bordered w-full" 
-                    value="{{ form.slug.value|default_if_none:'' }}"
-                    placeholder="series-slug"
-                    pattern="[a-z0-9-]+"
-                    title="Only lowercase letters, numbers, and hyphens"
-                    required
-                >
+        <div class="form-control">
+            <label for="id_name" class="label">
+                <span class="label-text font-semibold">Series Name</span>
+            </label>
+            <input 
+                type="text" 
+                name="name" 
+                id="id_name" 
+                class="input input-bordered w-full" 
+                value="{{ form.name.value|default_if_none:'' }}"
+                placeholder="Enter series name"
+                required
+            >
+            {% if form.name.errors %}
                 <label class="label">
-                    <span class="label-text-alt">URL-friendly identifier (lowercase, numbers, and hyphens only)</span>
+                    <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
                 </label>
-                {% if form.slug.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
-                    </label>
-                {% endif %}
-            </div>
-            
-            <div class="card-actions justify-end mt-6">
-                <a href="{% url 'collection' short_name collection_slug %}" class="btn btn-ghost">Cancel</a>
-                <button type="submit" class="btn btn-primary">
-                    Create Series
-                </button>
-            </div>
-        </form>
-      </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-control">
+            <label for="id_slug" class="label">
+                <span class="label-text font-semibold">Slug</span>
+            </label>
+            <input 
+                type="text" 
+                name="slug" 
+                id="id_slug" 
+                class="input input-bordered w-full" 
+                value="{{ form.slug.value|default_if_none:'' }}"
+                placeholder="series-slug"
+                pattern="[a-z0-9-]+"
+                title="Only lowercase letters, numbers, and hyphens"
+                required
+            >
+            <label class="label">
+                <span class="label-text-alt">URL-friendly identifier (lowercase, numbers, and hyphens only)</span>
+            </label>
+            {% if form.slug.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                </label>
+            {% endif %}
+        </div>
+        
+        <div class="card-actions justify-end mt-6">
+            <a href="{% if object %}{% url 'series' short_name collection_slug object.slug %}{% else %}{% url 'collection' short_name collection_slug %}{% endif %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Update Series{% else %}Create Series{% endif %}
+            </button>
+        </div>
+    </form>
     </div>
 </div>
+
+<script>
+    (function() {
+        const nameInput = document.getElementById('id_name');
+        const slugInput = document.getElementById('id_slug');
+        let slugManuallyEdited = false;
+
+        slugInput.addEventListener('input', () => slugManuallyEdited = true);
+
+        nameInput.addEventListener('input', function() {
+            if (!slugManuallyEdited || !slugInput.value) {
+                slugInput.value = this.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            }
+        });
+    })();
+</script>
 {% endblock content %}

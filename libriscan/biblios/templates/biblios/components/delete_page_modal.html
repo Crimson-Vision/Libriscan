@@ -1,0 +1,50 @@
+<!-- Delete Page Confirmation Modal -->
+<dialog id="deletePageModal" class="modal">
+    <div class="modal-box">
+        <div class="flex items-center gap-3 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-error">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+            <h3 class="font-bold text-lg">Confirm Delete Page</h3>
+        </div>
+        <p class="py-2" id="deletePageMessage">
+            Are you sure you want to delete this page?
+        </p>
+        <div class="alert alert-error mt-4">
+            <span class="text-sm font-semibold">This action cannot be undone.</span>
+        </div>
+        <p class="text-sm text-base-content/70 mt-4">
+            All page content, extracted text, and associated data will be permanently deleted.
+        </p>
+        <div class="modal-action">
+            <form method="dialog">
+                <button class="btn btn-ghost" value="cancel">Cancel</button>
+            </form>
+            <form method="post" id="deletePageForm" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-error">Delete Page</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+<script>
+    function showDeletePageModal(pageNumber, deleteUrl) {
+        const modal = document.getElementById('deletePageModal');
+        const form = document.getElementById('deletePageForm');
+        const message = document.getElementById('deletePageMessage');
+        
+        message.textContent = `Are you sure you want to delete page ${pageNumber}?`;
+        form.action = deleteUrl;
+        
+        modal.showModal();
+        
+        modal.addEventListener('close', function() {
+            if (modal.returnValue === 'cancel' || !modal.returnValue) {
+                return;
+            }
+        }, { once: true });
+    }
+</script>
+
