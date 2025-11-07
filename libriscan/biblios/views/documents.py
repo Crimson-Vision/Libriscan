@@ -18,7 +18,14 @@ from huey.contrib.djhuey import HUEY as huey
 
 from rules.contrib.views import permission_required
 
-from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
+from biblios.models import (
+    Document,
+    Collection,
+    Series,
+    Page,
+    DublinCoreMetadata,
+    TextBlock,
+)
 
 from biblios.forms import DocumentForm, FilePondUploadForm
 from .base import (
@@ -64,6 +71,14 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
             slug=self.kwargs.get("collection_slug"),
         )
 
+        # This view can be called from either a collection or a series.
+        # When it's the series, we'll want to use that in the form
+        series = None
+        if self.kwargs.get("series_slug"):
+            series = Series.objects.get(
+                slug=self.kwargs.get("series_slug"), collection=collection
+            )
+
         # Pre-populate collection field
         form.initial["collection"] = collection.id
 
@@ -74,6 +89,10 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
         form.fields["series"].queryset = form.fields["series"].queryset.filter(
             collection=collection
         )
+
+        # If the form was called from a Series page, set that as the default
+        if series:
+            form.initial["series"] = series.id
 
         return form
 
