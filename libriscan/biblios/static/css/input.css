@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../../templates/**/*.html";
+@source "../../static/js/**/*.js";
 @source not "./tailwindcss.exe";
 @source not "./daisyui{,*}.mjs";
 
