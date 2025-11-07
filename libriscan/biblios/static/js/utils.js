@@ -219,13 +219,30 @@ const LibriscanUtils = {
    */
   showToast(message, type = 'success', duration = 3000) {
     const toast = document.createElement('div');
-    toast.className = `alert alert-${type} fixed bottom-4 right-4 z-50 shadow-lg max-w-sm`;
+    
+    // Map types to DaisyUI alert classes
+    const typeMap = {
+      'success': 'alert-success',
+      'error': 'alert-error',
+      'warning': 'alert-warning',
+      'info': 'alert-info'
+    };
+    
+    toast.className = `alert ${typeMap[type] || typeMap.success} fixed bottom-4 right-4 z-50 shadow-lg max-w-sm transition-all`;
     toast.textContent = message;
     
     document.body.appendChild(toast);
     
+    // Fade in animation
+    setTimeout(() => toast.style.opacity = '1', 10);
+    
     setTimeout(() => {
-      document.body.removeChild(toast);
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        if (toast.parentNode) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
     }, duration);
   },
 

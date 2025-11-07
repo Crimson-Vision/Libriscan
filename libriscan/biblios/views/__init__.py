@@ -30,6 +30,7 @@ from .documents import (
     export_text,
     export_xml,
     check_words,
+    update_document_status,
 )
 from .words import (
     update_word,

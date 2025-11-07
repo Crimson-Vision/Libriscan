@@ -21,7 +21,7 @@ from rules.contrib.views import permission_required
 from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
 
 from biblios.forms import DocumentForm, FilePondUploadForm
-from .base import OrgPermissionRequiredMixin, get_org_by_page
+from .base import OrgPermissionRequiredMixin, get_org_by_page, get_org_by_document
 
 logger = logging.getLogger("django")
 
@@ -477,3 +477,31 @@ def check_words(request, short_name, collection_slug, identifier, number):
         # If the text blocks don't exist yet, return 204 No Content
         # Or whatever HTML should get swapped in while extraction is running
         return HttpResponse(status=204)
+
+
+@permission_required(
+    "biblios.change_document", fn=get_org_by_document, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def update_document_status(request, short_name, collection_slug, identifier):
+    """Update a Document's status field"""
+    document = get_object_or_404(
+        Document,
+        identifier=identifier,
+        collection__slug=collection_slug,
+        collection__owner__short_name=short_name,
+    )
+
+    status = request.POST.get("status", "").strip()
+    if status not in Document.STATUS_CHOICES:
+        return JsonResponse({"error": "Invalid status value"}, status=400)
+
+    document.status = status
+    document.save(update_fields=["status"])
+
+    logger.info("Updated document %s status to %s", identifier, status)
+
+    return JsonResponse({
+        "status": document.status,
+        "status_display": Document.STATUS_CHOICES.get(document.status),
+    })

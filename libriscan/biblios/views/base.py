@@ -41,6 +41,10 @@ def get_org_by_word(request, short_name, collection_slug, identifier, number, wo
     return Organization.objects.get(short_name=short_name)
 
 
+def get_org_by_document(request, short_name, collection_slug, identifier):
+    return Organization.objects.get(short_name=short_name)
+
+
 def index(request):
     context = {"app_name": "Libriscan"}
     if request.user.is_authenticated:
