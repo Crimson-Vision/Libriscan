@@ -69,6 +69,11 @@ urlpatterns = [
                                             name="document",
                                         ),
                                         path(
+                                            "update/",
+                                            views.DocumentUpdateView.as_view(),
+                                            name="document_update",
+                                        ),
+                                        path(
                                             "metadata/",
                                             views.MetadataDetail.as_view(),
                                             name="metadata",

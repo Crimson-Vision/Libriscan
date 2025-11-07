@@ -14,6 +14,7 @@ from .documents import (
     DocumentList,
     DocumentDetail,
     DocumentCreateView,
+    DocumentUpdateView,
     DocumentDeleteView,
     MetadataDetail,
     MetadataUpdateView,
