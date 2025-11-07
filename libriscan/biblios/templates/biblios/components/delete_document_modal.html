@@ -16,13 +16,26 @@
         <p class="text-sm text-base-content/70 mt-4">
             All document content, pages, extracted text, and associated data will be permanently deleted.
         </p>
+        <div class="mt-4">
+            <label class="label py-1">
+                <span class="label-text font-semibold">Type <span class="text-error">Delete</span> to confirm:</span>
+            </label>
+            <input 
+                type="text" 
+                id="deleteDocumentConfirmInput" 
+                class="input input-bordered w-full" 
+                placeholder="Delete"
+                autocomplete="off"
+                oninput="document.getElementById('deleteDocumentConfirmBtn').disabled = this.value !== 'Delete'"
+            />
+        </div>
         <div class="modal-action">
             <form method="dialog">
                 <button class="btn btn-ghost" value="cancel">Cancel</button>
             </form>
             <form method="post" id="deleteDocumentForm" class="inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-error">Delete Document</button>
+                <button type="submit" id="deleteDocumentConfirmBtn" class="btn btn-error" disabled>Delete Document</button>
             </form>
         </div>
     </div>
@@ -34,9 +47,15 @@
         const modal = document.getElementById('deleteDocumentModal');
         const form = document.getElementById('deleteDocumentForm');
         const message = document.getElementById('deleteDocumentMessage');
+        const confirmInput = document.getElementById('deleteDocumentConfirmInput');
+        const confirmBtn = document.getElementById('deleteDocumentConfirmBtn');
         
         message.textContent = `Are you sure you want to delete document "${documentIdentifier}"?`;
         form.action = deleteUrl;
+        
+        // Reset input and disable button
+        confirmInput.value = '';
+        confirmBtn.disabled = true;
         
         modal.showModal();
         

@@ -16,13 +16,26 @@
         <p class="text-sm text-base-content/70 mt-4">
             All series data and associated documents will be permanently deleted.
         </p>
+        <div class="mt-4">
+            <label class="label py-1">
+                <span class="label-text font-semibold">Type <span class="text-error">Delete</span> to confirm:</span>
+            </label>
+            <input 
+                type="text" 
+                id="deleteSeriesConfirmInput" 
+                class="input input-bordered w-full" 
+                placeholder="Delete"
+                autocomplete="off"
+                oninput="document.getElementById('deleteSeriesConfirmBtn').disabled = this.value !== 'Delete'"
+            />
+        </div>
         <div class="modal-action">
             <form method="dialog">
                 <button class="btn btn-ghost" value="cancel">Cancel</button>
             </form>
             <form method="post" id="deleteSeriesForm" class="inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-error">Delete Series</button>
+                <button type="submit" id="deleteSeriesConfirmBtn" class="btn btn-error" disabled>Delete Series</button>
             </form>
         </div>
     </div>
@@ -34,9 +47,15 @@
         const modal = document.getElementById('deleteSeriesModal');
         const form = document.getElementById('deleteSeriesForm');
         const message = document.getElementById('deleteSeriesMessage');
+        const confirmInput = document.getElementById('deleteSeriesConfirmInput');
+        const confirmBtn = document.getElementById('deleteSeriesConfirmBtn');
         
         message.textContent = `Are you sure you want to delete series "${seriesName}"?`;
         form.action = deleteUrl;
+        
+        // Reset input and disable button
+        confirmInput.value = '';
+        confirmBtn.disabled = true;
         
         modal.showModal();
         
