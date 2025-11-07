@@ -21,7 +21,7 @@ from rules.contrib.views import permission_required
 from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
 
 from biblios.forms import DocumentForm, FilePondUploadForm
-from .base import OrgPermissionRequiredMixin, get_org_by_page
+from .base import OrgPermissionRequiredMixin, get_org_by_page, get_org_by_document
 
 logger = logging.getLogger("django")
 
@@ -406,6 +406,9 @@ def extract_text(request, short_name, collection_slug, identifier, number):
     return render(request, "biblios/components/forms/extraction_loading.html", context)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+)
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
     """
     Generates a PDF of a given doc ID.
@@ -421,6 +424,9 @@ def export_pdf(request, short_name, collection_slug, identifier, use_image=True)
     return doc.export_pdf(use_image)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+)
 def export_text(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -433,6 +439,9 @@ def export_text(request, short_name, collection_slug, identifier):
     return doc.export_text()
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+)
 def export_xml(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -445,9 +454,7 @@ def export_xml(request, short_name, collection_slug, identifier):
     return doc.export_xml()
 
 
-@permission_required(
-    "biblios.view_organization", fn=get_org_by_page, raise_exception=True
-)
+@permission_required("biblios.view_page", fn=get_org_by_page, raise_exception=True)
 def check_words(request, short_name, collection_slug, identifier, number):
     """Respond to the textblock polling request."""
     page = get_object_or_404(

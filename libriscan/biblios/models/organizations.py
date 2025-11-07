@@ -9,7 +9,7 @@ from localflavor.us.models import USStateField
 from localflavor.us.us_states import STATE_CHOICES
 from simple_history.models import HistoricalRecords
 
-from biblios.access_rules import is_org_archivist, is_org_editor, is_org_viewer
+from biblios.access_rules import is_org_archivist, is_org_viewer
 from biblios.models.base import BibliosModel
 
 logger = logging.getLogger("django")
@@ -121,10 +121,10 @@ class Series(BibliosModel):
         verbose_name_plural = "Series"
 
         rules_permissions = {
-            "add": is_org_editor,
+            "add": is_org_archivist,
             "view": is_org_viewer,
-            "change": is_org_editor,
-            "delete": is_org_editor,
+            "change": is_org_archivist,
+            "delete": is_org_archivist,
         }
         constraints = [
             models.UniqueConstraint(
