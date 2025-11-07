@@ -90,7 +90,7 @@
                     {% endfor %}
                 </ul>
                 <div class="mt-4 flex justify-end">
-                    <a href="{% url 'document_create' series.collection.owner.short_name series.collection.slug %}" class="btn btn-secondary btn-md">Add New Document</a>
+                    <a href="{% url 'document_series_create' series.collection.owner.short_name series.collection.slug series.slug %}" class="btn btn-secondary btn-md">Add New Document</a>
                 </div>
             </div>
         </div>

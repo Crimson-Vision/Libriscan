@@ -58,6 +58,7 @@ urlpatterns = [
                                 views.SeriesCreateView.as_view(),
                                 name="series_create",
                             ),
+                            # Series URLs
                             path(
                                 "<slug:series_slug>-series/",
                                 include(
@@ -76,6 +77,11 @@ urlpatterns = [
                                             "delete/",
                                             views.SeriesDeleteView.as_view(),
                                             name="series_delete",
+                                        ),
+                                        path(
+                                            "new-document/",
+                                            views.DocumentCreateView.as_view(),
+                                            name="document_series_create",
                                         ),
                                     ]
                                 ),
