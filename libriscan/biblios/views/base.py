@@ -51,7 +51,7 @@ def index(request):
         recent = Document.history.filter(history_user=request.user)
         context["latest_doc"] = recent.latest() if recent.exists() else None
         
-        # FOR TABS: Where You Left Off - Recent TextBlock edits
+        # For Tabs: Where You Left Off - Recent TextBlock edits
         from biblios.models import TextBlock
         from django.core.paginator import Paginator
         
@@ -79,7 +79,7 @@ def index(request):
         
         context["recent_textblocks"] = unique_textblocks
         
-        # FOR TABS: Pending Reviews - Only for staff (10 per page)
+        # For Tabs: Pending Reviews - Only for staff (10 per page)
         if request.user.is_staff:
             pending = (
                 Document.objects
@@ -96,8 +96,8 @@ def index(request):
         else:
             context["pending_reviews"] = None
         
-        # FOR TABS: All Documents - Role-based with pagination (10 per page)
-        # Users see documents from ALL organizations they have access to
+        # For Tabs: All Documents - Role-based with pagination (10 per page)
+        # Users see documents from all organizations they have access to
         all_docs = (
             Document.objects
             .filter(collection__owner__in=user_orgs)
