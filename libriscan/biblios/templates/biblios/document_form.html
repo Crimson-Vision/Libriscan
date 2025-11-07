@@ -1,34 +1,84 @@
-{% extends "biblios/index.html" %}
+{% extends "biblios/base.html" %}
 {% block content %}
-    <form method="post"
-          class="card bg-base-100 shadow max-w-md mx-auto mt-8 p-6 space-y-4">
-        {% csrf_token %}
-        <div class="form-control">
-            <label for="id_series" class="label">Series</label>
-            <select name="series" id="id_series" class="select select-bordered w-full">
-                <option value="">-----</option>
-                {% for s in form.fields.series.queryset %}
-                    <option value="{{ s.pk }}"
-                            {% if form.series.value == s.pk %}selected{% endif %}>{{ s }}</option>
-                {% endfor %}
-            </select>
+    {% if object %}
+        <nav class="mb-3 text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ object.collection.owner.get_absolute_url }}" class="text-primary hover:underline">{{ object.collection.owner }}</a></li>
+                <li><a href="{{ object.collection.get_absolute_url }}" class="text-primary hover:underline">{{ object.collection }}</a></li>
+                <li><span class="text-base-content/60">Edit {{ object }}</span></li>
+            </ul>
+        </nav>
+    {% elif collection %}
+        <nav class="mb-3 text-sm breadcrumbs">
+            <ul>
+                <li><a href="{{ collection.owner.get_absolute_url }}" class="text-primary hover:underline">{{ collection.owner }}</a></li>
+                <li><a href="{{ collection.get_absolute_url }}" class="text-primary hover:underline">{{ collection }}</a></li>
+                <li><span class="text-base-content/60">New Document</span></li>
+            </ul>
+        </nav>
+    {% endif %}
+
+    <div class="card bg-base-100 shadow max-w-2xl mx-auto">
+        <div class="card-body">
+            <h2 class="card-title text-xl font-bold mb-4">{% if object %}Edit Document{% else %}Create Document{% endif %}</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                {% if not object %}
+                    {# Collection is determined by URL, hide it but include as hidden input #}
+                    {% if form.collection %}
+                        <input type="hidden" name="{{ form.collection.html_name }}" value="{{ form.collection.value }}">
+                    {% endif %}
+                {% else %}
+                    {% if form.collection %}{{ form.collection }}{% endif %}
+                {% endif %}
+                <div class="form-control">
+                    <label for="{{ form.identifier.id_for_label }}" class="label">
+                        <span class="label-text font-semibold">Identifier{% if object %} (Title){% endif %}</span>
+                    </label>
+                    <input type="text" name="{{ form.identifier.html_name }}" id="{{ form.identifier.id_for_label }}"
+                           class="input input-bordered w-full" value="{{ form.identifier.value|default_if_none:'' }}"
+                           maxlength="25" {% if object %}required{% endif %}
+                           onkeyup="this.value = this.value.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')">
+                    <label class="label">
+                        <span class="label-text-alt">URL-friendly identifier (letters, numbers, and hyphens only)</span>
+                    </label>
+                    {% for error in form.identifier.errors %}
+                        <div class="alert alert-error mt-2"><span>{{ error }}</span></div>
+                    {% endfor %}
+                </div>
+                <div class="form-control">
+                    <label for="{{ form.series.id_for_label }}" class="label">
+                        <span class="label-text font-semibold">Series</span>
+                    </label>
+                    <select name="{{ form.series.html_name }}" id="{{ form.series.id_for_label }}" class="select select-bordered w-full">
+                        <option value="">-----</option>
+                        {% for choice in form.series.field.queryset %}
+                            <option value="{{ choice.pk }}" {% if form.series.value == choice.pk %}selected{% endif %}>{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.series.errors %}
+                        <div class="alert alert-error mt-2"><span>{{ error }}</span></div>
+                    {% endfor %}
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-2">
+                        <input type="checkbox" name="{{ form.use_long_s_detection.html_name }}" id="{{ form.use_long_s_detection.id_for_label }}"
+                               class="checkbox" {% if form.use_long_s_detection.value %}checked{% endif %}>
+                        <span class="label-text">Use long s ⟨ſ⟩ detection</span>
+                    </label>
+                    {% for error in form.use_long_s_detection.errors %}
+                        <div class="alert alert-error mt-2"><span>{{ error }}</span></div>
+                    {% endfor %}
+                </div>
+                <div class="flex gap-2 justify-end">
+                    {% if object %}
+                        <a href="{% url 'document' object.collection.owner.short_name object.collection.slug object.identifier %}" class="btn btn-ghost">Cancel</a>
+                    {% else %}
+                        <a href="{{ collection.get_absolute_url }}" class="btn btn-ghost">Cancel</a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">{% if object %}Save Changes{% else %}Submit{% endif %}</button>
+                </div>
+            </form>
         </div>
-        <div class="form-control">
-            <label for="id_identifier" class="label">Identifier</label>
-            <input type="text"
-                   name="identifier"
-                   id="id_identifier"
-                   class="input input-bordered w-full"
-                   value="{{ form.identifier.value|default_if_none:'' }}">
-        </div>
-        <div class="form-control flex-row items-center gap-2">
-            <input type="checkbox"
-                   name="use_long_s_detection"
-                   id="id_use_long_s_detection"
-                   class="checkbox"
-                   {% if form.use_long_s_detection.value %}checked{% endif %}>
-            <label for="id_use_long_s_detection" class="label cursor-pointer">Use long s ⟨ſ⟩ detection</label>
-        </div>
-        <button type="submit" class="btn btn-primary w-full">Submit</button>
-    </form>
+    </div>
 {% endblock content %}

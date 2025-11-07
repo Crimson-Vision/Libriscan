@@ -2,16 +2,17 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from django import forms
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 
 from huey.contrib.djhuey import HUEY as huey
 
@@ -52,11 +53,19 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
 
-        # Update the Series field so it only shows values owned by the current Collection
-        collection = Collection.objects.filter(
+        # Get the current collection from URL
+        collection = Collection.objects.get(
             owner__short_name=self.kwargs.get("short_name"),
             slug=self.kwargs.get("collection_slug"),
-        ).first()
+        )
+        
+        # Pre-populate collection field
+        form.initial["collection"] = collection.id
+        
+        # Filter collection queryset to only show current collection
+        form.fields["collection"].queryset = Collection.objects.filter(id=collection.id)
+
+        # Update the Series field so it only shows values owned by the current Collection
         form.fields["series"].queryset = form.fields["series"].queryset.filter(
             collection=collection
         )
@@ -83,14 +92,71 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        collection = Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+        context["collection"] = collection
+        return context
+
 
 class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     model = Document
+    form_class = DocumentForm
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "biblios/document_form.html"
+
+    def _get_collection(self):
+        """Helper to get the current collection."""
+        return Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        collection = self._get_collection()
+        form.fields["series"].queryset = form.fields["series"].queryset.filter(collection=collection)
+        form.fields["collection"].widget = forms.HiddenInput()
+        return form
+
+    def form_valid(self, form):
+        """Ensure collection is set correctly before saving."""
+        form.instance.collection = self._get_collection()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("document", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+            "collection_slug": self.kwargs.get("collection_slug"),
+            "identifier": self.object.identifier,
+        })
 
 
 class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Document
-    success_url = reverse_lazy("index")
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "biblios/document_confirm_delete.html"
+
+    def get_object(self, queryset=None):
+        """Get document by URL parameters."""
+        return get_object_or_404(
+            Document,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            identifier=self.kwargs.get("identifier"),
+        )
+
+    def get_success_url(self):
+        """Redirect to collection page after deletion."""
+        return reverse("collection", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+            "collection_slug": self.kwargs.get("collection_slug"),
+        })
 
 
 class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
@@ -282,6 +348,26 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
             document__identifier=doc,
             number=number,
         )
+
+
+@permission_required("biblios.delete_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST"])
+def delete_page(request, short_name, collection_slug, identifier, number):
+    """Delete a page and redirect back to document detail."""
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+    page.delete()
+    return redirect(
+        "document",
+        short_name=short_name,
+        collection_slug=collection_slug,
+        identifier=identifier,
+    )
 
 
 @require_http_methods(["POST"])
