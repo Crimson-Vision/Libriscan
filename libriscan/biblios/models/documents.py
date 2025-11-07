@@ -165,6 +165,9 @@ class DublinCoreMetadata(BibliosModel):
 
 
 class Page(BibliosModel):
+    # How many words should the page snippets be?
+    SNIPPET_LENGTH = 20
+
     document = models.ForeignKey(
         Document, on_delete=models.CASCADE, related_name="pages"
     )
@@ -215,6 +218,26 @@ class Page(BibliosModel):
     @cached_property
     def extraction_key(self):
         return f"extracting-{self.id}"
+
+    @property
+    def snippet(self):
+        words = list(self.words.filter(print_control=TextBlock.INCLUDE))
+        snippet = ""
+        # We might not have any words yet
+        if not words:
+            snippet = "(No extracted text)"
+        # Use the full text if it's short enough
+        elif len(words) <= self.SNIPPET_LENGTH:
+            print(len(words))
+            snippet = " ".join([w.text for w in words])
+        # Otherwise, construct our snipper
+        else:
+            snip = int(self.SNIPPET_LENGTH / 2)
+            first = " ".join([w.text for w in words[:snip]])
+            last = " ".join([w.text for w in words[-snip:]])
+
+            snippet = f"{first} ... {last}"
+        return snippet
 
     # Hand off this work to the Huey background task
     def generate_extraction(self):
