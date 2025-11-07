@@ -221,6 +221,7 @@ class Page(BibliosModel):
 
     @property
     def snippet(self):
+        # Pulling the text into a list at the start means this property will only introduce one additional DB query
         words = list(self.words.filter(print_control=TextBlock.INCLUDE))
         snippet = ""
         # We might not have any words yet
