@@ -6,6 +6,7 @@ from .organizations import (
     OrganizationUpdate,
     CollectionCreate,
     CollectionUpdate,
+    CollectionDeleteView,
     collection_detail,
     SeriesCreateView,
     SeriesDetail,

@@ -90,6 +90,28 @@ class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
     slug_url_kwarg = "collection_slug"
 
 
+class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
+    model = Collection
+    slug_url_kwarg = "collection_slug"
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed(["POST"])
+
+    def get_object(self, queryset=None):
+        """Get collection by URL parameters."""
+        return get_object_or_404(
+            Collection,
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+
+    def get_success_url(self):
+        """Redirect to organization page after deletion."""
+        return reverse("organization", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+        })
+
+
 @permission_required(
     "biblios.view_organization", fn=get_org_by_collection, raise_exception=True
 )

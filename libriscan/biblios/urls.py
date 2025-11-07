@@ -44,6 +44,11 @@ urlpatterns = [
                                 name="collection_update",
                             ),
                             path(
+                                "delete/",
+                                views.CollectionDeleteView.as_view(),
+                                name="collection_delete",
+                            ),
+                            path(
                                 "new-document/",
                                 views.DocumentCreateView.as_view(),
                                 name="document_create",
