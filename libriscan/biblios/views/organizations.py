@@ -93,7 +93,20 @@ class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
 class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
     model = Collection
     fields = ["name", "slug"]
+    template_name = "biblios/collection_form.html"
     slug_url_kwarg = "collection_slug"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["org"] = self.object.owner
+        return context
+
+    def get_success_url(self):
+        return reverse("collection", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+            "collection_slug": self.object.slug,
+        })
 
 
 class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):

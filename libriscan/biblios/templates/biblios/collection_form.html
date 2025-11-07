@@ -14,6 +14,18 @@
                 {% if org %}{{ org }}{% else %}{{ short_name }}{% endif %}
             </a>
         </li>
+        {% if object %}
+        <li>
+            <a href="{% url 'collection' short_name object.slug %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                </span>
+                {{ object }}
+            </a>
+        </li>
+        {% endif %}
         <li>
             <span class="flex items-center gap-1 text-base-content/60">
                 <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
@@ -21,7 +33,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                 </span>
-                New Collection
+                {% if object %}Edit Collection{% else %}New Collection{% endif %}
             </span>
         </li>
     </ul>
@@ -35,7 +47,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
             </span>
-            Create New Collection
+            {% if object %}Edit Collection{% else %}Create New Collection{% endif %}
         </h2>
         
         <form method="post" class="space-y-4">
@@ -87,9 +99,9 @@
             </div>
             
             <div class="card-actions justify-end mt-6">
-                <a href="{% url 'organization' short_name %}" class="btn btn-ghost">Cancel</a>
+                <a href="{% if object %}{% url 'collection' short_name object.slug %}{% else %}{% url 'organization' short_name %}{% endif %}" class="btn btn-ghost">Cancel</a>
                 <button type="submit" class="btn btn-primary">
-                    Create Collection
+                    {% if object %}Update Collection{% else %}Create Collection{% endif %}
                 </button>
             </div>
         </form>
