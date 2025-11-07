@@ -230,7 +230,7 @@ class Page(BibliosModel):
         elif len(words) <= self.SNIPPET_LENGTH:
             print(len(words))
             snippet = " ".join([w.text for w in words])
-        # Otherwise, construct our snipper
+        # Otherwise, construct our snippet
         else:
             snip = int(self.SNIPPET_LENGTH / 2)
             first = " ".join([w.text for w in words[:snip]])
