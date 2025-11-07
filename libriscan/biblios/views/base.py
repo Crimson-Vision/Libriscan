@@ -43,17 +43,78 @@ def get_org_by_word(request, short_name, collection_slug, identifier, number, wo
 
 def index(request):
     context = {"app_name": "Libriscan"}
+    
     if request.user.is_authenticated:
-        # The most recent doc the user edited
+        user_orgs = request.user.userrole_set.values_list("organization", flat=True)
+        
+        # The most recent doc the user edited (existing code)
         recent = Document.history.filter(history_user=request.user)
-
         context["latest_doc"] = recent.latest() if recent.exists() else None
-        # All docs in all orgs the user is a member of
-        context["documents"] = Document.objects.filter(
-            collection__owner__in=request.user.userrole_set.values_list(
-                "organization", flat=True
-            )
+        
+        # FOR TABS: Where You Left Off - Recent TextBlock edits
+        from biblios.models import TextBlock
+        from django.core.paginator import Paginator
+        
+        recent_history = (
+            TextBlock.history
+            .filter(history_user=request.user)
+            .select_related('page__document', 'page__document__collection')
+            .order_by('-history_date')[:20]
         )
+        
+        seen_ids = set()
+        unique_textblocks = []
+        for hist_record in recent_history:
+            if hist_record.id not in seen_ids:
+                seen_ids.add(hist_record.id)
+                unique_textblocks.append({
+                    'id': hist_record.id,
+                    'text': hist_record.text,
+                    'page': hist_record.page,
+                    'modified': hist_record.history_date,
+                    'modified_by': hist_record.history_user,
+                })
+                if len(unique_textblocks) >= 5:
+                    break
+        
+        context["recent_textblocks"] = unique_textblocks
+        
+        # FOR TABS: Pending Reviews - Only for staff (10 per page)
+        if request.user.is_staff:
+            pending = (
+                Document.objects
+                .filter(
+                    collection__owner__in=user_orgs,
+                    status='pending'
+                )
+                .select_related('collection', 'collection__owner', 'series')
+                .order_by('identifier')  # Fix unordered warning
+            )
+            pending_paginator = Paginator(pending, 10)
+            pending_page = request.GET.get('pending_page', 1)
+            context["pending_reviews"] = pending_paginator.get_page(pending_page)
+        else:
+            context["pending_reviews"] = None
+        
+        # FOR TABS: All Documents - Role-based with pagination (10 per page)
+        # Users see documents from ALL organizations they have access to
+        all_docs = (
+            Document.objects
+            .filter(collection__owner__in=user_orgs)
+            .select_related('collection', 'collection__owner', 'series')
+            .order_by('identifier')  # Order by identifier for consistent pagination
+        )
+        
+        # Paginate All Documents - 10 per page
+        all_docs_paginator = Paginator(all_docs, 10)
+        all_docs_page = request.GET.get('page', 1)
+        context["all_documents"] = all_docs_paginator.get_page(all_docs_page)
+        
+        # Keep existing documents context
+        context["documents"] = Document.objects.filter(
+            collection__owner__in=user_orgs
+        )
+    
     return render(request, "biblios/index.html", context)
 
 
