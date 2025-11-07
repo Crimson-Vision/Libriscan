@@ -173,6 +173,36 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
 
+class SeriesUpdateView(OrgPermissionRequiredMixin, UpdateView):
+    model = Series
+    fields = ["name", "slug"]
+    template_name = "biblios/series_form.html"
+    slug_url_kwarg = "series_slug"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Series,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            slug=self.kwargs.get("series_slug"),
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["collection_slug"] = self.kwargs.get("collection_slug")
+        context["org"] = self.object.collection.owner
+        context["collection"] = self.object.collection
+        return context
+
+    def get_success_url(self):
+        return reverse("series", kwargs={
+            "short_name": self.kwargs.get("short_name"),
+            "collection_slug": self.kwargs.get("collection_slug"),
+            "series_slug": self.object.slug,
+        })
+
+
 class SeriesDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Series
     slug_url_kwarg = "series_slug"

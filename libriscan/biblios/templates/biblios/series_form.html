@@ -24,6 +24,18 @@
                 {% if collection %}{{ collection }}{% else %}{{ collection_slug }}{% endif %}
             </a>
         </li>
+        {% if object %}
+        <li>
+            <a href="{% url 'series' short_name collection_slug object.slug %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                </span>
+                {{ object }}
+            </a>
+        </li>
+        {% endif %}
         <li>
             <span class="flex items-center gap-1 text-base-content/60">
                 <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
@@ -31,7 +43,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
                     </svg>
                 </span>
-                New Series
+                {% if object %}Edit Series{% else %}New Series{% endif %}
             </span>
         </li>
     </ul>
@@ -45,7 +57,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
         </svg>
         </span>
-        Create New Series
+        {% if object %}Edit Series{% else %}Create New Series{% endif %}
     </h2>
     
     <form method="post" class="space-y-4">
@@ -97,9 +109,9 @@
         </div>
         
         <div class="card-actions justify-end mt-6">
-            <a href="{% url 'collection' short_name collection_slug %}" class="btn btn-ghost">Cancel</a>
+            <a href="{% if object %}{% url 'series' short_name collection_slug object.slug %}{% else %}{% url 'collection' short_name collection_slug %}{% endif %}" class="btn btn-ghost">Cancel</a>
             <button type="submit" class="btn btn-primary">
-                Create Series
+                {% if object %}Update Series{% else %}Create Series{% endif %}
             </button>
         </div>
     </form>

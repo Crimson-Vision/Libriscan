@@ -68,6 +68,11 @@ urlpatterns = [
                                             name="series",
                                         ),
                                         path(
+                                            "update/",
+                                            views.SeriesUpdateView.as_view(),
+                                            name="series_update",
+                                        ),
+                                        path(
                                             "delete/",
                                             views.SeriesDeleteView.as_view(),
                                             name="series_delete",

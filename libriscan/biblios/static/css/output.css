@@ -3487,6 +3487,13 @@
       height: var(--size);
     }
   }
+  .btn-square {
+    @layer daisyui.modifier {
+      padding-inline: calc(0.25rem * 0);
+      width: var(--size);
+      height: var(--size);
+    }
+  }
   .size-3 {
     width: calc(var(--spacing) * 3);
     height: calc(var(--spacing) * 3);
