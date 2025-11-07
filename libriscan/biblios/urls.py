@@ -179,6 +179,11 @@ urlpatterns = [
                                             name="revert_word",
                                         ),
                                         path(
+                                            "page<int:number>/word/<int:word_id>/toggle-review/",
+                                            views.toggle_review_flag,
+                                            name="toggle_review_flag",
+                                        ),
+                                        path(
                                             "page<int:number>/word/<int:word_id>/history/",
                                             views.textblock_history,
                                             name="textblock_history",

@@ -37,4 +37,5 @@ from .words import (
     textblock_history,
     revert_word,
     merge_blocks,
+    toggle_review_flag,
 )
