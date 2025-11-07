@@ -59,8 +59,14 @@ class OrganizationUpdate(OrgPermissionRequiredMixin, UpdateView):
 class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
     model = Collection
     fields = ["name", "slug"]
-    slug_field = "short_name"
-    slug_url_kwarg = "short_name"
+    template_name = "biblios/collection_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        # Add organization object for breadcrumbs
+        context["org"] = Organization.objects.get(short_name=self.kwargs.get("short_name"))
+        return context
 
     def post(self, request, **kwargs):
         from biblios.forms import CollectionForm
@@ -136,6 +142,12 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["short_name"] = self.kwargs.get("short_name")
         context["collection_slug"] = self.kwargs.get("collection_slug")
+        # Add organization and collection objects for breadcrumbs
+        context["org"] = Organization.objects.get(short_name=self.kwargs.get("short_name"))
+        context["collection"] = Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
         return context
 
     def post(self, request, **kwargs):

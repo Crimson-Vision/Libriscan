@@ -48,6 +48,9 @@
           <li class="px-6 py-4 text-center text-sm opacity-60">No collections</li>
         {% endfor %}
       </ul>
+      <div class="mt-4 flex justify-end">
+        <a href="{% url 'collection_create' org.short_name %}" class="btn btn-primary btn-md">Add New Collection</a>
+      </div>
     </div>
   </div>
 
