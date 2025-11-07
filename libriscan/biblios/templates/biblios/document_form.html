@@ -37,7 +37,11 @@
                     </label>
                     <input type="text" name="{{ form.identifier.html_name }}" id="{{ form.identifier.id_for_label }}"
                            class="input input-bordered w-full" value="{{ form.identifier.value|default_if_none:'' }}"
-                           maxlength="25" {% if object %}required{% endif %}>
+                           maxlength="25" {% if object %}required{% endif %}
+                           onkeyup="this.value = this.value.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')">
+                    <label class="label">
+                        <span class="label-text-alt">URL-friendly identifier (letters, numbers, and hyphens only)</span>
+                    </label>
                     {% for error in form.identifier.errors %}
                         <div class="alert alert-error mt-2"><span>{{ error }}</span></div>
                     {% endfor %}
