@@ -21,7 +21,12 @@ from rules.contrib.views import permission_required
 from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
 
 from biblios.forms import DocumentForm, FilePondUploadForm
-from .base import OrgPermissionRequiredMixin, get_org_by_page, get_org_by_document
+from .base import (
+    OrgPermissionRequiredMixin,
+    get_org_by_page,
+    get_org_by_document,
+    get_org_for_export,
+)
 
 logger = logging.getLogger("django")
 
@@ -58,10 +63,10 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
             owner__short_name=self.kwargs.get("short_name"),
             slug=self.kwargs.get("collection_slug"),
         )
-        
+
         # Pre-populate collection field
         form.initial["collection"] = collection.id
-        
+
         # Filter collection queryset to only show current collection
         form.fields["collection"].queryset = Collection.objects.filter(id=collection.id)
 
@@ -119,7 +124,9 @@ class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         collection = self._get_collection()
-        form.fields["series"].queryset = form.fields["series"].queryset.filter(collection=collection)
+        form.fields["series"].queryset = form.fields["series"].queryset.filter(
+            collection=collection
+        )
         form.fields["collection"].widget = forms.HiddenInput()
         return form
 
@@ -129,11 +136,14 @@ class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("document", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-            "identifier": self.object.identifier,
-        })
+        return reverse(
+            "document",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+                "identifier": self.object.identifier,
+            },
+        )
 
 
 class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
@@ -153,10 +163,13 @@ class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Redirect to collection page after deletion."""
-        return reverse("collection", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-        })
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+            },
+        )
 
 
 class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
@@ -370,6 +383,7 @@ def delete_page(request, short_name, collection_slug, identifier, number):
     )
 
 
+@permission_required("biblios.update_page", fn=get_org_by_page, raise_exception=True)
 @require_http_methods(["POST"])
 def extract_text(request, short_name, collection_slug, identifier, number):
     page = Page.objects.select_related("document__collection__owner").get(
@@ -407,7 +421,7 @@ def extract_text(request, short_name, collection_slug, identifier, number):
 
 
 @permission_required(
-    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
 )
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
     """
@@ -425,7 +439,7 @@ def export_pdf(request, short_name, collection_slug, identifier, use_image=True)
 
 
 @permission_required(
-    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
 )
 def export_text(request, short_name, collection_slug, identifier):
     """
@@ -440,7 +454,7 @@ def export_text(request, short_name, collection_slug, identifier):
 
 
 @permission_required(
-    "biblios.view_document", fn=get_org_by_document, raise_exception=True
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
 )
 def export_xml(request, short_name, collection_slug, identifier):
     """
