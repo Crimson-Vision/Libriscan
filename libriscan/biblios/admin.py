@@ -1,15 +1,22 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.forms.widgets import PasswordInput
 from django.forms import ModelForm
-
+from django.forms.widgets import PasswordInput
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import User, UserRole, Organization, CloudService
-from .models import Collection, Series, Document, Page, TextBlock, DublinCoreMetadata
-
 from .forms import CustomUserChangeForm, CustomUserCreationForm
-
+from .models import (
+    CloudService,
+    Collection,
+    Document,
+    DublinCoreMetadata,
+    Organization,
+    Page,
+    Series,
+    TextBlock,
+    User,
+    UserRole,
+)
 
 admin.site.site_header = "Libriscan Administration"
 admin.site.site_title = "Libriscan Admin"
@@ -63,11 +70,13 @@ class CollectionAdmin(SimpleHistoryAdmin):
     list_display = ["name", "owner"]
     prepopulated_fields = {"slug": ["name"]}
 
+
 @admin.register(Series)
 class SeriesAdmin(admin.ModelAdmin):
     list_display = ["name", "collection"]
     prepopulated_fields = {"slug": ["name"]}
-    list_select_related = ['collection']
+    list_select_related = ["collection"]
+
 
 @admin.register(Document)
 class DocumentAdmin(SimpleHistoryAdmin):
@@ -150,14 +159,7 @@ class TextAdmin(SimpleHistoryAdmin):
     fieldsets = (
         (
             None,
-            {
-                "fields": (
-                    "text",
-                    "text_type",
-                    "print_control",
-                    "confidence",
-                )
-            },
+            {"fields": ("text", "text_type", "print_control", "confidence", "review")},
         ),
         (
             "Position",

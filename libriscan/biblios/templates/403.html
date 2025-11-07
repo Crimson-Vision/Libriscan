@@ -1,5 +1,63 @@
 {% extends "biblios/base.html" %}
 
 {% block content %}
-<p>You do not have access to this page.</p>
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="max-w-2xl w-full text-center">
+        <div class="mb-8">
+            <h1 class="text-9xl font-bold text-info opacity-20">403</h1>
+            <div class="-mt-16">
+                <h2 class="text-4xl font-bold text-base-content mb-4">Access Forbidden</h2>
+                <p class="text-xl text-base-content/70">You don't have permission to access this resource.</p>
+            </div>
+        </div>
+
+        <div class="card bg-base-200 shadow-xl mb-8">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>This page is restricted. You need proper authorization to view it.</span>
+                </div>
+
+                <div class="mt-6 text-base-content/80 text-left space-y-2">
+                    <p class="font-semibold">What you can do:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>Log in with an authorized account</li>
+                        <li>Contact an administrator for access</li>
+                        <li>Return to the homepage</li>
+                        <li>Check if you have the correct permissions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 justify-center">
+            <button onclick="history.back()" class="btn btn-outline btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Go Back
+            </button>
+            <a href="/" class="btn btn-primary btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25">
+                    </path>
+                </svg>
+                Go to Homepage
+            </a>
+        </div>
+
+        <div class="mt-12 text-sm text-base-content/60">
+            <p>Error Code: 403 | Access Forbidden</p>
+            <p class="mt-2">If you believe you should have access, please contact support.</p>
+        </div>
+    </div>
+</div>
 {% endblock content %}
