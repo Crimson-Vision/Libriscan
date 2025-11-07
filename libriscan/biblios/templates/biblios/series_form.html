@@ -73,4 +73,20 @@
       </div>
     </div>
 </div>
+
+<script>
+    (function() {
+        const nameInput = document.getElementById('id_name');
+        const slugInput = document.getElementById('id_slug');
+        let slugManuallyEdited = false;
+
+        slugInput.addEventListener('input', () => slugManuallyEdited = true);
+
+        nameInput.addEventListener('input', function() {
+            if (!slugManuallyEdited || !slugInput.value) {
+                slugInput.value = this.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            }
+        });
+    })();
+</script>
 {% endblock content %}
