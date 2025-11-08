@@ -1,8 +1,6 @@
-{% load static %}
-<!-- Review Flag Button Partial -->
 <button id="reviewFlagBtn" 
         class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200" 
-        data-tip="Raise Flag for Review (F)"
+        data-tip="Flag for Review (F){% if flagged_count > 0 %} - {{ flagged_count }} flagged{% endif %}"
         hx-post="{% url 'toggle_review_flag' short_name collection_slug identifier number word.id %}"
         hx-target="#reviewFlagBtn"
         hx-swap="outerHTML">
@@ -17,6 +15,7 @@
       </svg>
     {% endif %}
     <kbd class="kbd kbd-sm">F</kbd>
+    {% if flagged_count > 0 %}<span class="badge badge-warning badge-sm min-w-[1.25rem]">{{ flagged_count }}</span>{% endif %}
   </span>
 </button>
 
