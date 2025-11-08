@@ -26,7 +26,6 @@ class WordDetails {
     this.nextWordBtn = document.getElementById('nextWordBtn');
     this.wordPosition = document.getElementById('wordPosition');
     this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
-    this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
   }
 
   _initData() {
@@ -91,9 +90,6 @@ class WordDetails {
     
     if (this.revertToOriginalAction) {
       this.revertToOriginalAction.onclick = () => this.revert.revertToOriginalWord();
-    }
-    if (this.saveToDictionaryAction) {
-      this.saveToDictionaryAction.onclick = () => this.saveToDictionary();
     }
 
     const auditHistoryTab = document.getElementById('wordAuditHistoryTab');
@@ -216,10 +212,6 @@ class WordDetails {
 
   updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
     WordBlockManager.updateContent(wordBlock, text, confidence, confidenceLevel);
-  }
-
-  saveToDictionary() {
-    // TODO: Implement functionality
   }
 
   async revertToOriginalWord() {
