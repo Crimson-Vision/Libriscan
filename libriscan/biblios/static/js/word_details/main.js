@@ -46,7 +46,6 @@ class WordDetails {
 
     this.metadata = new WordMetadata({
       wordVisibilityControlDropdownBtn: document.getElementById('wordVisibilityControlDropdownBtn'),
-      wordVisibilityControlDisplay: document.getElementById('wordVisibilityControlDisplay'),
       wordVisibilityControlBadge: document.getElementById('wordVisibilityControlBadge'),
       wordVisibilityControlOptions: document.querySelectorAll('.word-visibility-control-option'),
       acceptBtn: this.acceptBtn

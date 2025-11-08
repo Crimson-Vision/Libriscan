@@ -5,7 +5,6 @@
 class WordMetadata {
   constructor(elements) {
     this.wordVisibilityControlDropdownBtn = elements.wordVisibilityControlDropdownBtn;
-    this.wordVisibilityControlDisplay = elements.wordVisibilityControlDisplay;
     this.wordVisibilityControlBadge = elements.wordVisibilityControlBadge;
     this.wordVisibilityControlOptions = elements.wordVisibilityControlOptions;
     this.acceptBtn = elements.acceptBtn;
@@ -45,7 +44,7 @@ class WordMetadata {
       return;
     }
     
-    this.wordVisibilityControlDisplay.textContent = 'Updating...';
+    this.wordVisibilityControlBadge.textContent = 'Updating...';
     this.wordVisibilityControlDropdownBtn.disabled = true;
     
     try {
@@ -92,11 +91,9 @@ class WordMetadata {
       'O': { text: 'Omit', badge: 'badge-error' }
     }[wordVisibilityControlValue] || { text: 'Include', badge: 'badge-success' };
     
-    if (this.wordVisibilityControlDisplay) this.wordVisibilityControlDisplay.textContent = config.text;
-    
     if (this.wordVisibilityControlBadge) {
-      this.wordVisibilityControlBadge.textContent = wordVisibilityControlValue;
-      this.wordVisibilityControlBadge.className = `badge badge-xs ${config.badge}`;
+      this.wordVisibilityControlBadge.textContent = config.text;
+      this.wordVisibilityControlBadge.className = `badge badge-sm ${config.badge}`;
     }
   }
 
