@@ -1,6 +1,6 @@
 /**
  * Confidence Indicator Toggle Styles
- * Controls visibility of confidence indicators and print control indicators
+ * Controls visibility of confidence indicators and word visibility control indicators
  */
 
 :root {
@@ -125,15 +125,15 @@
   opacity: 1 !important;
 }
 
-/* Hide Indicators - Print Control */
-.hide-confidence-omit .word-block.print-control-omit,
-.hide-confidence-merge .word-block.print-control-merge {
+/* Hide Indicators - Word Visibility Control */
+.hide-confidence-omit .word-block.word-visibility-control-omit,
+.hide-confidence-merge .word-block.word-visibility-control-merge {
   opacity: 1 !important;
   color: inherit !important;
 }
 
-.hide-confidence-omit .word-block.print-control-omit::after,
-.hide-confidence-merge .word-block.print-control-merge::after {
+.hide-confidence-omit .word-block.word-visibility-control-omit::after,
+.hide-confidence-merge .word-block.word-visibility-control-merge::after {
   display: none !important;
 }
 

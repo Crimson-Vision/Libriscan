@@ -26,7 +26,7 @@
                   <button 
                     class="btn {% if word.review %}btn-error{% elif word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash{% else %}btn-ghost{% endif %} btn-sm word-block no-animation normal-case text-sm relative
                            {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
-                           {% if word.print_control == 'O' %}print-control-omit{% elif word.print_control == 'M' %}print-control-merge{% endif %}"
+                           {% if word.print_control == 'O' %}word-visibility-control-omit{% elif word.print_control == 'M' %}word-visibility-control-merge{% endif %}"
                     data-word-id="{{ word.id }}"
                     data-word-text="{{ word.text }}"
                     data-word-confidence="{{ word.confidence }}"
