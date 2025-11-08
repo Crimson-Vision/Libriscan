@@ -424,27 +424,26 @@ def reorder_page(request, short_name, collection_slug, identifier, number):
     if len(pages) <= 1:
         return JsonResponse({'success': False, 'error': 'Cannot reorder single page'}, status=400)
     
-    current_index = next((i for i, p in enumerate(pages) if p.id == page.id), None)
-    if current_index is None:
-        return JsonResponse({'success': False, 'error': 'Page not found'}, status=404)
-    
+    current_index = next(i for i, p in enumerate(pages) if p.id == page.id)
     offset = -1 if direction == 'up' else 1
+
+    # Cannot move the first or last page
     if (direction == 'up' and current_index == 0) or (direction == 'down' and current_index == len(pages) - 1):
         return JsonResponse({'success': False, 'error': f'Cannot move {direction}'}, status=400)
     
     try:
         with transaction.atomic():
             target_page = pages[current_index + offset]
+            # Swap the page numbers using a temporary number to avoid unique constraint violation
             temp, current_num, target_num = 99999, page.number, target_page.number
-            page.number = temp
+            page.number, target_page.number = temp, current_num
             page.save(update_fields=['number'])
-            target_page.number = current_num
             target_page.save(update_fields=['number'])
             page.number = target_num
             page.save(update_fields=['number'])
         return JsonResponse({'success': True})
-    except Exception as e:
-        logger.error(f'Error reordering page: {e}')
+    except Exception as error:
+        logger.error('Error reordering page: %s', error)
         return JsonResponse({'success': False, 'error': 'Reorder failed'}, status=500)
 
 
