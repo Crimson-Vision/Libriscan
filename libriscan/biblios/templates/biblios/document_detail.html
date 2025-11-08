@@ -95,12 +95,12 @@
                               <button 
                                 type="button"
                                 class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.first %}btn-disabled opacity-50{% endif %}"
-                                data-page-number="{{ page.number }}"
-                                data-direction="up"
-                                data-reorder-url="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=up"
                                 data-tip="Move up"
                                 {% if forloop.first %}disabled{% endif %}
-                                onclick="event.stopPropagation(); event.preventDefault(); reorderPage(this)">
+                                hx-post="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=up"
+                                hx-swap="none"
+                                hx-trigger="click"
+                                onclick="event.stopPropagation()">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
@@ -108,12 +108,12 @@
                               <button 
                                 type="button"
                                 class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.last %}btn-disabled opacity-50{% endif %}"
-                                data-page-number="{{ page.number }}"
-                                data-direction="down"
-                                data-reorder-url="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=down"
                                 data-tip="Move down"
                                 {% if forloop.last %}disabled{% endif %}
-                                onclick="event.stopPropagation(); event.preventDefault(); reorderPage(this)">
+                                hx-post="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=down"
+                                hx-swap="none"
+                                hx-trigger="click"
+                                onclick="event.stopPropagation()">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                 </svg>
@@ -321,4 +321,25 @@
         window.initStatusDropdown(currentStatus);
     });
 </script>
+{% if document.pages.count > 1 %}
+<script>
+    document.body.addEventListener('htmx:afterRequest', function(event) {
+        const target = event.target;
+        const xhr = event.detail.xhr;
+        if (!xhr || !target.hasAttribute('hx-post') || !target.getAttribute('hx-post').includes('/reorder/')) return;
+        
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (xhr.status === 200 && response.success) {
+                window.location.reload();
+            } else {
+                LibriscanUtils.showToast(response.error || 'Failed to reorder page', 'error');
+            }
+        } catch (error) {
+            LibriscanUtils.showToast('Failed to reorder page', 'error');
+        }
+    });
+</script>
+{% endif %}
 {% endblock content %}
+
