@@ -5018,6 +5018,43 @@
       }
     }
   }
+  .group-hover\/link\:bg-accent\/20 {
+    &:is(:where(.group\/link):hover *) {
+      @media (hover: hover) {
+        background-color: var(--color-accent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-accent) 20%, transparent);
+        }
+      }
+    }
+  }
+  .group-hover\/link\:bg-secondary\/20 {
+    &:is(:where(.group\/link):hover *) {
+      @media (hover: hover) {
+        background-color: var(--color-secondary);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-secondary) 20%, transparent);
+        }
+      }
+    }
+  }
+  .group-hover\/link\:bg-warning\/30 {
+    &:is(:where(.group\/link):hover *) {
+      @media (hover: hover) {
+        background-color: var(--color-warning);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-warning) 30%, transparent);
+        }
+      }
+    }
+  }
+  .group-hover\/link\:text-primary {
+    &:is(:where(.group\/link):hover *) {
+      @media (hover: hover) {
+        color: var(--color-primary);
+      }
+    }
+  }
   .last\:border-b-0 {
     &:last-child {
       border-bottom-style: var(--tw-border-style);
