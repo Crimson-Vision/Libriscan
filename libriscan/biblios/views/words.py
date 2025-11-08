@@ -238,8 +238,8 @@ def revert_word(request, short_name, collection_slug, identifier, number, word_i
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
         try:
             # earliest() will be the creation record
