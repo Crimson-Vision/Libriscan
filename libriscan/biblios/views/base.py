@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from rules.contrib.views import AutoPermissionRequiredMixin
 
-from biblios.models import Organization, Document, TextBlock, UserRole
+from biblios.models import Organization, Document, UserRole
 
 logger = logging.getLogger("django")
 
