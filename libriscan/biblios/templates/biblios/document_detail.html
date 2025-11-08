@@ -89,6 +89,38 @@
                       <a href="{{ page.get_absolute_url }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group block cursor-pointer outline outline-1 outline-base-300 hover:outline-primary/50">
                         <div class="card-body p-4">
                           <div class="flex items-start gap-4">
+                            <!-- Arrow Buttons (Reorder) -->
+                            {% if document.pages.count > 1 %}
+                            <div class="flex-shrink-0 flex flex-col gap-2">
+                              <button 
+                                type="button"
+                                class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.first %}btn-disabled opacity-50{% endif %}"
+                                data-page-number="{{ page.number }}"
+                                data-direction="up"
+                                data-reorder-url="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=up"
+                                data-tip="Move up"
+                                {% if forloop.first %}disabled{% endif %}
+                                onclick="event.stopPropagation(); event.preventDefault(); reorderPage(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                              </button>
+                              <button 
+                                type="button"
+                                class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.last %}btn-disabled opacity-50{% endif %}"
+                                data-page-number="{{ page.number }}"
+                                data-direction="down"
+                                data-reorder-url="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=down"
+                                data-tip="Move down"
+                                {% if forloop.last %}disabled{% endif %}
+                                onclick="event.stopPropagation(); event.preventDefault(); reorderPage(this)">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                              </button>
+                            </div>
+                            {% endif %}
+                            
                             <!-- Page Number Badge -->
                             <div class="flex-shrink-0">
                               <div class="flex items-center justify-center size-10 rounded-lg bg-info/10 group-hover:bg-info/20 transition-colors">
@@ -138,7 +170,7 @@
                                       <span class="text-[10px] font-medium text-base-content/40 uppercase tracking-wide">Last Modified:</span>
                                       <span>{{ page.history.last.history_date|date:"M d, Y" }}</span>
                                     {% endif %}
-                                  </span>
+                          </span>
                                   {% endif %}
                                 {% endif %}
                               </div>
@@ -203,7 +235,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                                            PDF with Images
+                            PDF with Images
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             Full document with embedded page images
@@ -230,7 +262,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                                            Text-only PDF
+                            Text-only PDF
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             PDF format with extracted text only
@@ -257,7 +289,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                                            Plain Text
+                            Plain Text
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             Simple text file with extracted content
