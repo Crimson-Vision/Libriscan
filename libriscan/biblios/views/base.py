@@ -53,19 +53,43 @@ def get_org_for_export(
 
 def index(request):
     context = {"app_name": "Libriscan"}
+    
     if request.user.is_authenticated:
         # The most recent doc the user edited
         recent = Document.history.filter(history_user=request.user)
-
         context["latest_doc"] = recent.latest() if recent.exists() else None
-        # All docs in all orgs the user is a member of
-        context["documents"] = Document.objects.filter(
-            collection__owner__in=request.user.userrole_set.values_list(
-                "organization", flat=True
-            )
-        )
+        
+        # Get all organizations user has access to
+        user_orgs = request.user.userrole_set.values_list("organization", flat=True)
+        
+        # All documents in user's organizations
+        all_docs = Document.objects.filter(
+            collection__owner__in=user_orgs
+        ).select_related('collection__owner', 'series').order_by('-id')
+        
+        # Paginate All Documents (10 per page)
+        from django.core.paginator import Paginator
+        page_num = request.GET.get('page', 1)
+        paginator = Paginator(all_docs, 10)
+        context["all_documents"] = paginator.get_page(page_num)
+        
+        # Pending Reviews (admin/archivist only)
+        if request.user.is_staff or getattr(request.user, 'role', None) == 'archivist':
+            pending = all_docs.filter(status='pending_review')
+            pending_page = request.GET.get('pending_page', 1)
+            pending_paginator = Paginator(pending, 10)
+            context["pending_reviews"] = pending_paginator.get_page(pending_page)
+        
+        # Recent TextBlocks (Where You Left Off) - Use historical records
+        from biblios.models import TextBlock
+        recent_history = TextBlock.history.filter(
+            history_user=request.user
+        ).select_related('page__document').order_by('-history_date')[:5]
+        
+        # Get the actual TextBlock objects from history
+        context["recent_textblocks"] = [h.instance for h in recent_history if h.instance]
+    
     return render(request, "biblios/index.html", context)
-
 
 def scan(request):
     context = {

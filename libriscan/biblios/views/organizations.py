@@ -144,7 +144,7 @@ class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
 )
 def collection_detail(request, short_name, collection_slug):
     collection = Collection.objects.get(slug=collection_slug)
-    docs = collection.documents.filter(series__isnull=True)
+    docs = collection.documents.all()  # CHANGED: Show ALL documents, not just those without series
     context = {"collection": collection, "documents": docs}
     return render(request, "biblios/collection_detail.html", context)
 
