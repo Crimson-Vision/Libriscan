@@ -59,6 +59,7 @@ class WordDetails {
     this.navigation = new WordNavigation(this);
     this.suggestions = new WordSuggestions(this);
     this.revert = new WordRevert(this);
+    this.reviewFlag = new WordReviewFlag(this);
   }
 
   _setupCallbacks() {
@@ -125,6 +126,11 @@ class WordDetails {
     this._updateConfidenceDisplay(wordInfo);
     this.metadata.updatePrintControlDisplay(wordInfo.print_control || 'I');
     this.suggestions.updateSuggestions(wordInfo);
+    
+    // Update review flag button
+    if (this.reviewFlag) {
+      this.reviewFlag.updateFlagButton(wordInfo);
+    }
     
     this.revert.checkAndEnableRevertButton(wordInfo.id);
   }

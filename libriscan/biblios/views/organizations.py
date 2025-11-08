@@ -65,7 +65,9 @@ class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["short_name"] = self.kwargs.get("short_name")
         # Add organization object for breadcrumbs
-        context["org"] = Organization.objects.get(short_name=self.kwargs.get("short_name"))
+        context["org"] = Organization.objects.get(
+            short_name=self.kwargs.get("short_name")
+        )
         return context
 
     def post(self, request, **kwargs):
@@ -103,10 +105,13 @@ class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("collection", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.object.slug,
-        })
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.object.slug,
+            },
+        )
 
 
 class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
@@ -126,9 +131,12 @@ class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Redirect to organization page after deletion."""
-        return reverse("organization", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-        })
+        return reverse(
+            "organization",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+            },
+        )
 
 
 @permission_required(
@@ -136,7 +144,8 @@ class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
 )
 def collection_detail(request, short_name, collection_slug):
     collection = Collection.objects.get(slug=collection_slug)
-    context = {"collection": collection}
+    docs = collection.documents.filter(series__isnull=True)
+    context = {"collection": collection, "documents": docs}
     return render(request, "biblios/collection_detail.html", context)
 
 
@@ -156,7 +165,9 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
         context["short_name"] = self.kwargs.get("short_name")
         context["collection_slug"] = self.kwargs.get("collection_slug")
         # Add organization and collection objects for breadcrumbs
-        context["org"] = Organization.objects.get(short_name=self.kwargs.get("short_name"))
+        context["org"] = Organization.objects.get(
+            short_name=self.kwargs.get("short_name")
+        )
         context["collection"] = Collection.objects.get(
             owner__short_name=self.kwargs.get("short_name"),
             slug=self.kwargs.get("collection_slug"),
@@ -209,11 +220,14 @@ class SeriesUpdateView(OrgPermissionRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("series", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-            "series_slug": self.object.slug,
-        })
+        return reverse(
+            "series",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+                "series_slug": self.object.slug,
+            },
+        )
 
 
 class SeriesDeleteView(OrgPermissionRequiredMixin, DeleteView):
@@ -234,7 +248,10 @@ class SeriesDeleteView(OrgPermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Redirect to collection page after deletion."""
-        return reverse("collection", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-        })
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+            },
+        )
