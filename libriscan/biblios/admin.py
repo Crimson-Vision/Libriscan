@@ -80,13 +80,14 @@ class SeriesAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(SimpleHistoryAdmin):
-    list_display = ["identifier", "series", "series__collection"]
+    list_display = ["identifier", "collection", "series", "status"]
+    list_filter = ["collection", "series", "status"]
     inlines = [PagesInline, MetadataInline]
 
 
 @admin.register(Page)
 class PageAdmin(SimpleHistoryAdmin):
-    list_display = ["number", "document", "document__series__collection__owner"]
+    list_display = ["number", "document", "document__collection__owner"]
 
 
 @admin.register(UserRole)
