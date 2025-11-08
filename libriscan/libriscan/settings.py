@@ -40,6 +40,7 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").
     ","
 )
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
