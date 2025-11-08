@@ -200,7 +200,7 @@ class AuditHistoryRenderer {
           <span class="badge badge-outline badge-xs sm:badge-sm whitespace-nowrap">${confidence}%</span>
           <span class="text-base-content/60 font-medium whitespace-nowrap">Type:</span>
           <span class="badge badge-outline badge-xs sm:badge-sm break-words truncate sm:truncate" title="${record.text_type_display || 'N/A'}">${record.text_type_display || 'N/A'}</span>
-          <span class="text-base-content/60 font-medium whitespace-nowrap">Print Control:</span>
+          <span class="text-base-content/60 font-medium whitespace-nowrap">Word Visibility Control:</span>
           <span class="badge badge-outline badge-xs sm:badge-sm break-words truncate sm:truncate" title="${record.print_control_display || 'N/A'}">${record.print_control_display || 'N/A'}</span>
         </div>
       </div>

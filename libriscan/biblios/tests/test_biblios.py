@@ -157,7 +157,7 @@ class BibliosTests(TestCase):
         self.assertEqual(word.confidence, Decimal(str(word.CONF_ACCEPTED)))
 
     def test_update_print_control(self):
-        """Test updating a TextBlock's print control from the front end."""
+        """Test updating a TextBlock's word visibility control from the front end."""
         from biblios.views import update_print_control
 
         word = TextBlock.objects.get(id=1)

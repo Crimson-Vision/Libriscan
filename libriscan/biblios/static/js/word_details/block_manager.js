@@ -34,19 +34,19 @@ class WordBlockManager {
     wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
     wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
     
-    // Update print control classes
-    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
+    // Update word visibility control classes
+    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
     if (data.print_control === 'O') {
-      wordBlock.classList.add('print-control-omit');
+      wordBlock.classList.add('word-visibility-control-omit');
     } else if (data.print_control === 'M') {
-      wordBlock.classList.add('print-control-merge');
+      wordBlock.classList.add('word-visibility-control-merge');
     }
   }
 
-  static updatePrintControlClasses(wordBlock, printControl) {
-    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
-    if (printControl === 'O') wordBlock.classList.add('print-control-omit');
-    else if (printControl === 'M') wordBlock.classList.add('print-control-merge');
+  static updateWordVisibilityControlClasses(wordBlock, wordVisibilityControl) {
+    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
+    if (wordVisibilityControl === 'O') wordBlock.classList.add('word-visibility-control-omit');
+    else if (wordVisibilityControl === 'M') wordBlock.classList.add('word-visibility-control-merge');
   }
 
   static updateContent(wordBlock, text, confidence, confidenceLevel) {

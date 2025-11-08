@@ -62,29 +62,29 @@
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <!-- Print Control Section -->
+            <!-- Word Visibility Control Section -->
             <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-base-content/70">Print Control</label>
+              <label class="text-sm font-medium text-base-content/70">Word Visibility Control</label>
               <div class="dropdown w-full">
-                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-9 min-h-9" id="printControlDropdownBtn">
+                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-9 min-h-9" id="wordVisibilityControlDropdownBtn">
                   <div class="flex items-center gap-2">
-                    <span id="printControlBadge" class="badge badge-sm"></span>
-                    <span id="printControlDisplay">Include</span>
+                    <span id="wordVisibilityControlBadge" class="badge badge-sm"></span>
+                    <span id="wordVisibilityControlDisplay">Include</span>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
-                  <li><a data-value="I" class="print-control-option">
+                  <li><a data-value="I" class="word-visibility-control-option">
                     <span class="badge badge-success badge-sm">I</span>
                     <span>Include</span>
                   </a></li>
-                  <li><a data-value="M" class="print-control-option">
+                  <li><a data-value="M" class="word-visibility-control-option">
                     <span class="badge badge-warning badge-sm">M</span>
                     <span>Merge with Prior</span>
                   </a></li>
-                  <li><a data-value="O" class="print-control-option">
+                  <li><a data-value="O" class="word-visibility-control-option">
                     <span class="badge badge-error badge-sm">O</span>
                     <span>Omit</span>
                   </a></li>

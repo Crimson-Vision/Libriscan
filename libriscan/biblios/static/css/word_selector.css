@@ -1,6 +1,6 @@
 /**
  * Word Selector Styles
- * Styles for word blocks, confidence indicators, and print control
+ * Styles for word blocks, confidence indicators, and word visibility control
  */
 
 :root {
@@ -36,25 +36,25 @@
   color: var(--color-accepted);
 }
 
-/* Print control - Omit (red) and Merge (gray) strikethrough */
-.word-block.print-control-omit,
-.word-block.print-control-merge {
+/* Word visibility control - Omit (red) and Merge (gray) strikethrough */
+.word-block.word-visibility-control-omit,
+.word-block.word-visibility-control-merge {
   position: relative;
   opacity: 0.6;
 }
 
-.word-block.print-control-omit {
+.word-block.word-visibility-control-omit {
   color: var(--color-omit);
   --strikethrough-color: var(--color-omit);
 }
 
-.word-block.print-control-merge {
+.word-block.word-visibility-control-merge {
   color: var(--color-merge);
   --strikethrough-color: var(--color-merge);
 }
 
-.word-block.print-control-omit::after,
-.word-block.print-control-merge::after {
+.word-block.word-visibility-control-omit::after,
+.word-block.word-visibility-control-merge::after {
   content: '';
   position: absolute;
   left: 0;
@@ -91,12 +91,12 @@
 }
 
 /* Ensure strikethrough persists when active */
-.btn-active.print-control-omit,
-.btn-active.print-control-merge {
+.btn-active.word-visibility-control-omit,
+.btn-active.word-visibility-control-merge {
   position: relative;
 }
 
-.btn-active.print-control-omit::after {
+.btn-active.word-visibility-control-omit::after {
   content: '';
   position: absolute;
   left: 0.75rem;
@@ -108,7 +108,7 @@
   z-index: 1;
 }
 
-.btn-active.print-control-merge::after {
+.btn-active.word-visibility-control-merge::after {
   content: '';
   position: absolute;
   left: 0.75rem;
