@@ -4,8 +4,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
-from huey.contrib.djhuey import HUEY as huey
+
 from simple_history.models import HistoricalRecords
+from simple_history.utils import update_change_reason
 
 from biblios.access_rules import is_org_editor, is_org_viewer
 from biblios.models.base import BibliosModel
@@ -190,6 +191,14 @@ class Page(BibliosModel):
     def __str__(self):
         return f"{self.document} page {self.number}"
 
+    def save(self, *args, **kwargs):
+        # Propagate the save history up to the page
+        doc = self.document
+        doc.save()
+        update_change_reason(doc, "Edited page")
+
+        super().save(**kwargs)
+
     def get_absolute_url(self):
         keys = {
             "short_name": self.document.collection.owner.short_name,
@@ -348,6 +357,12 @@ class TextBlock(BibliosModel):
             update_fields := kwargs.get("update_fields")
         ) is not None and "text" in update_fields:
             kwargs["update_fields"] = {"suggestions"}.union(update_fields)
+
+        # Propagate the save history up to the page
+        page = self.page
+        page.save()
+        update_change_reason(page, "Edited word")
+
         super().save(**kwargs)
 
     @property
