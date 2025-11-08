@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from rules.contrib.views import AutoPermissionRequiredMixin
 
-from biblios.models import Organization, Document
+from biblios.models import Organization, Document, TextBlock, UserRole
 
 logger = logging.getLogger("django")
 
@@ -52,18 +52,30 @@ def get_org_for_export(
 
 
 def index(request):
+    from django.db.models import Subquery
+
     context = {"app_name": "Libriscan"}
     if request.user.is_authenticated:
-        # The most recent doc the user edited
-        recent = Document.history.filter(history_user=request.user)
+        # The most recent doc edited by the user
+        history = Document.history.filter(history_user=request.user)
 
-        context["latest_doc"] = recent.latest() if recent.exists() else None
+        context["latest_doc"] = history.latest().instance if history.exists() else None
+
+        all_roles = request.user.userrole_set.all()
+
         # All docs in all orgs the user is a member of
         context["documents"] = Document.objects.filter(
-            collection__owner__in=request.user.userrole_set.values_list(
-                "organization", flat=True
-            )
+            collection__owner__in=Subquery(all_roles.values("organization"))
         )
+
+        # All docs in 'needs review' status for an org where the user is an Archivist
+        arc_roles = all_roles.filter(role=UserRole.ARCHIVIST)
+
+        context["needs_review"] = Document.objects.filter(
+            collection__owner__in=Subquery(arc_roles.values("organization")),
+            status=Document.REVIEW,
+        )
+
     return render(request, "biblios/index.html", context)
 
 
