@@ -102,6 +102,11 @@ urlpatterns = [
                                             name="document_update",
                                         ),
                                         path(
+                                            "status/",
+                                            views.update_document_status,
+                                            name="document_status_update",
+                                        ),
+                                        path(
                                             "delete/",
                                             views.DocumentDeleteView.as_view(),
                                             name="document_delete",
