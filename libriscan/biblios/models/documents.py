@@ -240,14 +240,6 @@ class Page(BibliosModel):
             snippet = f"{first} ... {last}"
         return snippet
 
-    @property
-    def last_textblock_modification(self):
-        """Get the most recent TextBlock modification date for any word on this page."""
-        from django.db.models import Max
-        return TextBlock.history.model.objects.filter(page=self).aggregate(
-            latest_date=Max('history_date')
-        ).get('latest_date')
-
     # Hand off this work to the Huey background task
     def generate_extraction(self):
         extractor = self.document.collection.owner.cloudservice.extractor

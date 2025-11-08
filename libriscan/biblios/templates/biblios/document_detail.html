@@ -160,18 +160,6 @@
                                     <span class="text-[10px] font-medium text-base-content/40 uppercase tracking-wide">Created:</span>
                                     <span>{{ page.history.first.history_date|date:"M d, Y" }}</span>
                                   </span>
-                                  {% if page.last_textblock_modification or page.history.last and page.history.last.history_date != page.history.first.history_date %}
-                                  <span class="mx-1 text-base-content/30">|</span>
-                                  <span class="flex items-center gap-1 whitespace-nowrap">
-                                    {% if page.last_textblock_modification %}
-                                      <span class="text-[10px] font-medium text-base-content/40 uppercase tracking-wide">Last Modified:</span>
-                                      <span>{{ page.last_textblock_modification|date:"M d, Y" }}</span>
-                                    {% elif page.history.last and page.history.last.history_date != page.history.first.history_date %}
-                                      <span class="text-[10px] font-medium text-base-content/40 uppercase tracking-wide">Last Modified:</span>
-                                      <span>{{ page.history.last.history_date|date:"M d, Y" }}</span>
-                                    {% endif %}
-                          </span>
-                                  {% endif %}
                                 {% endif %}
                               </div>
                             </div>
