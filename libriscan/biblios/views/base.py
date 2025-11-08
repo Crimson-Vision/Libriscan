@@ -93,12 +93,10 @@ def index(request):
             context["pending_reviews"] = pending_paginator.get_page(pending_page)
         
         # Recent TextBlocks (Where You Left Off) - Use historical records
-        recent_history = TextBlock.history.filter(
+        # Get recent TextBlock history records (not instances, to preserve history_user)
+        context["recent_textblocks"] = TextBlock.history.filter(
             history_user=request.user
         ).select_related('page__document').order_by('-history_date')[:5]
-        
-        # Get the actual TextBlock objects from history (filter out None instances)
-        context["recent_textblocks"] = [h.instance for h in recent_history if h.instance is not None]
     
     return render(request, "biblios/index.html", context)
 

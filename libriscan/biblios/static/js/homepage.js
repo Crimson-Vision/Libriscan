@@ -184,7 +184,16 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await LibriscanUtils.fetchJSON(`/api/search/?q=${encodeURIComponent(query)}`);
       
       if (data.results && data.results.length > 0) {
-        displaySearchResults(data.results);
+        // Inline display results (removed displaySearchResults function)
+        searchResults.innerHTML = data.results.map(doc => `
+          <a href="${doc.url}" class="block p-3 hover:bg-base-200 transition-colors border-b border-base-300 last:border-b-0">
+            <div class="font-medium text-base">${doc.identifier}</div>
+            <div class="text-sm text-base-content/70">
+              ${doc.organization} > ${doc.collection}${doc.series ? ' > ' + doc.series : ' > <span class="text-base-content/50">Orphaned</span>'}
+            </div>
+          </a>
+        `).join('');
+        searchResults.classList.remove('hidden');
       } else {
         searchResults.innerHTML = '<div class="p-4 text-center text-base-content/60">No documents found</div>';
         searchResults.classList.remove('hidden');
@@ -194,18 +203,6 @@ document.addEventListener('DOMContentLoaded', function() {
       searchResults.innerHTML = `<div class="p-4 text-center text-error">Search error: ${error.message}</div>`;
       searchResults.classList.remove('hidden');
     }
-  }
-  
-  function displaySearchResults(results) {
-    searchResults.innerHTML = results.map(doc => `
-      <a href="${doc.url}" class="block p-3 hover:bg-base-200 transition-colors border-b border-base-300 last:border-b-0">
-        <div class="font-medium text-base">${doc.identifier}</div>
-        <div class="text-sm text-base-content/70">
-          ${doc.organization} > ${doc.collection}${doc.series ? ' > ' + doc.series : ' > <span class="text-base-content/50">Orphaned</span>'}
-        </div>
-      </a>
-    `).join('');
-    searchResults.classList.remove('hidden');
   }
 });
 
@@ -242,8 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (gridContainer.children.length === 0) {
       generateGridCards();
       
-      // Re-apply search filter after cards are generated
-      setTimeout(() => {
+      // Re-apply search filter after cards are generated using requestAnimationFrame
+      requestAnimationFrame(() => {
         const searchInput = document.getElementById('homepage-search');
         if (searchInput && searchInput.value.trim()) {
           const query = searchInput.value.trim().toLowerCase();
@@ -253,12 +250,19 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.display = text.includes(query) ? '' : 'none';
           });
         }
-      }, 50);
+      });
     }
   });
   
+  /**
+   * Generate grid cards from table rows (client-side view toggle).
+   * Note: For large datasets, use server-side rendering for better performance.
+   * 
+   * @returns {void}
+   */
   function generateGridCards() {
     const rows = tableContainer.querySelectorAll('tbody tr');
+    const fragment = document.createDocumentFragment();
     
     rows.forEach(row => {
       const cells = row.querySelectorAll('td');
@@ -292,7 +296,10 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
       `;
-      gridContainer.appendChild(card);
+      fragment.appendChild(card);
     });
+    
+    // Batch DOM update for better performance
+    gridContainer.appendChild(fragment);
   }
 });
