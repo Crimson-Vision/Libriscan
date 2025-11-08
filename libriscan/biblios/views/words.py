@@ -238,8 +238,8 @@ def revert_word(request, short_name, collection_slug, identifier, number, word_i
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
         try:
             # earliest() will be the creation record
@@ -280,7 +280,7 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
     Combine two text blocks into new third text block.
 
     Requires a text block ID in the request body, which will be combined with the prior word on that line.
-    The submitted text block can be in any print control status, but it must have at least one INCLUDE word before it on the same line.
+    The submitted text block can be in any word visibility control status, but it must have at least one INCLUDE word before it on the same line.
     """
     response = {}
     status = 400
