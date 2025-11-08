@@ -18,10 +18,22 @@ from huey.contrib.djhuey import HUEY as huey
 
 from rules.contrib.views import permission_required
 
-from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
+from biblios.models import (
+    Document,
+    Collection,
+    Series,
+    Page,
+    DublinCoreMetadata,
+    TextBlock,
+)
 
 from biblios.forms import DocumentForm, FilePondUploadForm
-from .base import OrgPermissionRequiredMixin, get_org_by_page, get_org_by_document
+from .base import (
+    OrgPermissionRequiredMixin,
+    get_org_by_page,
+    get_org_by_document,
+    get_org_for_export,
+)
 
 logger = logging.getLogger("django")
 
@@ -58,10 +70,18 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
             owner__short_name=self.kwargs.get("short_name"),
             slug=self.kwargs.get("collection_slug"),
         )
-        
+
+        # This view can be called from either a collection or a series.
+        # When it's the series, we'll want to use that in the form
+        series = None
+        if self.kwargs.get("series_slug"):
+            series = Series.objects.get(
+                slug=self.kwargs.get("series_slug"), collection=collection
+            )
+
         # Pre-populate collection field
         form.initial["collection"] = collection.id
-        
+
         # Filter collection queryset to only show current collection
         form.fields["collection"].queryset = Collection.objects.filter(id=collection.id)
 
@@ -69,6 +89,10 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
         form.fields["series"].queryset = form.fields["series"].queryset.filter(
             collection=collection
         )
+
+        # If the form was called from a Series page, set that as the default
+        if series:
+            form.initial["series"] = series.id
 
         return form
 
@@ -119,7 +143,9 @@ class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
         collection = self._get_collection()
-        form.fields["series"].queryset = form.fields["series"].queryset.filter(collection=collection)
+        form.fields["series"].queryset = form.fields["series"].queryset.filter(
+            collection=collection
+        )
         form.fields["collection"].widget = forms.HiddenInput()
         return form
 
@@ -129,11 +155,14 @@ class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("document", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-            "identifier": self.object.identifier,
-        })
+        return reverse(
+            "document",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+                "identifier": self.object.identifier,
+            },
+        )
 
 
 class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
@@ -153,10 +182,13 @@ class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         """Redirect to collection page after deletion."""
-        return reverse("collection", kwargs={
-            "short_name": self.kwargs.get("short_name"),
-            "collection_slug": self.kwargs.get("collection_slug"),
-        })
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+            },
+        )
 
 
 class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
@@ -370,6 +402,7 @@ def delete_page(request, short_name, collection_slug, identifier, number):
     )
 
 
+@permission_required("biblios.update_page", fn=get_org_by_page, raise_exception=True)
 @require_http_methods(["POST"])
 def extract_text(request, short_name, collection_slug, identifier, number):
     page = Page.objects.select_related("document__collection__owner").get(
@@ -406,6 +439,9 @@ def extract_text(request, short_name, collection_slug, identifier, number):
     return render(request, "biblios/components/forms/extraction_loading.html", context)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
     """
     Generates a PDF of a given doc ID.
@@ -421,6 +457,9 @@ def export_pdf(request, short_name, collection_slug, identifier, use_image=True)
     return doc.export_pdf(use_image)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_text(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -433,6 +472,9 @@ def export_text(request, short_name, collection_slug, identifier):
     return doc.export_text()
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_xml(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -445,9 +487,7 @@ def export_xml(request, short_name, collection_slug, identifier):
     return doc.export_xml()
 
 
-@permission_required(
-    "biblios.view_organization", fn=get_org_by_page, raise_exception=True
-)
+@permission_required("biblios.view_page", fn=get_org_by_page, raise_exception=True)
 def check_words(request, short_name, collection_slug, identifier, number):
     """Respond to the textblock polling request."""
     page = get_object_or_404(

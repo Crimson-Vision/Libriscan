@@ -4,7 +4,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 
 from rules.contrib.views import permission_required
@@ -113,7 +113,41 @@ def update_print_control(
 
     except Exception as e:
         logger.error(f"Error updating print_control for word {word_id}: {e}")
-        return JsonResponse({"error": "Failed to update print control"}, status=500)
+        return JsonResponse({"error": "Failed to update print_control"}, status=500)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def toggle_review_flag(
+    request, short_name, collection_slug, identifier, number, word_id
+):
+    """Toggle a TextBlock's review flag"""
+    try:
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
+        )
+        word.review = not word.review
+        word.save(update_fields=["review"])
+        
+        # Return HTML partial for HTMX swap
+        context = {
+            "word": word,
+            "short_name": short_name,
+            "collection_slug": collection_slug,
+            "identifier": identifier,
+            "number": number,
+        }
+        return render(request, "biblios/components/forms/review_flag_button.html", context)
+    except Exception as e:
+        logger.error(f"Error toggling review flag for word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to toggle review flag"}, status=500)
 
 
 @permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)

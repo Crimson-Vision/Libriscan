@@ -5,7 +5,7 @@
 
 class ConfidenceToggle {
   static STORAGE_KEY = 'confidenceTogglePrefs';
-  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge'];
+  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge', 'review'];
 
   constructor(containerId = 'word-container') {
     // Initialize toggles as empty object first to prevent undefined errors
