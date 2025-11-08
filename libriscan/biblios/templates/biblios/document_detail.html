@@ -82,30 +82,79 @@
                 </div>
                 
                 <!-- Pages Section -->
-                <div class="mb-2 text-base font-semibold text-base-content/80">Pages in this document:</div>
-                  <ul class="bg-base-100 rounded-box shadow divide-base-200">
+                <div class="mb-4">
+                  <h3 class="text-base font-semibold text-base-content/80 mb-3">Pages in this document:</h3>
+                  <div class="space-y-2">
                     {% for page in document.pages.all %}
-                      <li class="px-4 py-3 flex items-center justify-between hover:bg-secondary/10 transition rounded-box">
-                        <a href="{{ page.get_absolute_url }}" class="flex items-center gap-3 group flex-1">
-                          <span class="inline-flex items-center justify-center size-6 rounded bg-info/10">
-                            <span class="text-xs font-medium text-info">{{ page.number }}</span>
-                          </span>
-                          <span class="text-sm font-medium group-hover:underline">Page {{ page.number }}</span>
-                        </a>
+                      <a href="{{ page.get_absolute_url }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group block cursor-pointer outline outline-1 outline-base-300 hover:outline-primary/50">
+                        <div class="card-body p-4">
+                          <div class="flex items-start gap-4">
+                            <!-- Page Number Badge -->
+                            <div class="flex-shrink-0">
+                              <div class="flex items-center justify-center size-10 rounded-lg bg-info/10 group-hover:bg-info/20 transition-colors">
+                                <span class="text-sm font-semibold text-info">{{ page.number }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Page Content -->
+                            <div class="flex-1 min-w-0">
+                              <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span class="text-base font-semibold text-base-content group-hover:text-primary transition-colors">
+                                  Page {{ page.number }}
+                                </span>
+                                <!-- Status Badges -->
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                  {% if not page.has_extraction %}
+                                    <span class="badge badge-sm badge-warning">New</span>
+                                  {% elif page.has_extraction %}
+                                    <span class="badge badge-sm badge-success">Transcribed</span>
+                                  {% endif %}
+                                </div>
+                              </div>
+                              
+                              <!-- Snippet Preview -->
+                              {% if page.snippet %}
+                                <blockquote class="text-sm text-base-content/70 line-clamp-2 mb-2 border-l-4 border-primary/30 pl-3 italic">
+                                  "{{ page.snippet }}"
+                                </blockquote>
+                              {% else %}
+                                <p class="text-sm text-base-content/50 italic mb-2">No preview available</p>
+                              {% endif %}
+                              
+                              <!-- Metadata -->
+                              <div class="flex items-center gap-2 text-xs text-base-content/50 flex-wrap">
+                                {% if page.history.first %}
+                                  <span class="flex items-center gap-1 whitespace-nowrap">
+                                    <span class="text-[10px] font-medium text-base-content/40 uppercase tracking-wide">Created:</span>
+                                    <span>{{ page.history.first.history_date|date:"M d, Y" }}</span>
+                                  </span>
+                                {% endif %}
+                              </div>
+                            </div>
+                            
+                            <!-- Delete Button -->
+                            <div class="flex-shrink-0">
                         <button 
                           type="button" 
-                          class="btn btn-ghost btn-sm btn-error ml-2 tooltip tooltip-left"
+                                class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                           data-tip="Delete page"
-                          onclick="showDeletePageModal({{ page.number }}, '{% url 'page_delete' keys.owner keys.collection_slug document.identifier page.number %}')">
+                                onclick="event.stopPropagation(); event.preventDefault(); showDeletePageModal({{ page.number }}, '{% url 'page_delete' keys.owner keys.collection_slug document.identifier page.number %}')">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                           </svg>
                         </button>
-                      </li>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
                     {% empty %}
-                      <li class="px-4 py-3 text-center text-sm opacity-60">No pages in this document yet.</li>
+                      <div class="card bg-base-100 border border-base-300">
+                        <div class="card-body p-6 text-center">
+                          <p class="text-sm text-base-content/60">No pages in this document yet.</p>
+                        </div>
+                      </div>
                     {% endfor %}
-                  </ul>
+                  </div>
                   <div class="mt-4 flex justify-end">
                       <a href="{% url 'page_create' keys.owner keys.collection_slug document.identifier %}" class="btn btn-secondary btn-md">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
