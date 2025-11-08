@@ -232,6 +232,11 @@
     if (event.target.querySelector && event.target.querySelector('.word-block')) {
       console.log('HTMX content swap detected, reinitializing word handlers...');
       
+      // Clean up existing instances before creating new ones
+      if (typeof WordDetails !== 'undefined' && window.wordDetailsInstance) {
+        window.wordDetailsInstance.destroy();
+      }
+      
       if (typeof WordSelector !== 'undefined') {
         new WordSelector();
       }
@@ -253,6 +258,11 @@
     // Clean up OpenSeadragon viewer to prevent memory leaks
     if (window.viewerInstance) {
       destroyViewer();
+    }
+    
+    // Clean up WordDetails instance to prevent duplicate event listeners
+    if (window.wordDetailsInstance) {
+      window.wordDetailsInstance.destroy();
     }
   });
 </script>

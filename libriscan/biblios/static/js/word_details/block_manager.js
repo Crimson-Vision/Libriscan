@@ -72,8 +72,12 @@ class WordBlockManager {
   }
 
   static syncActiveWordButton(wordId) {
-    document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}.btn-active`)
-      ?.classList.remove('btn-active');
+    const previousActive = document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}.btn-active`);
+    if (previousActive) {
+      previousActive.classList.remove('btn-active');
+      // Remove focus to prevent black border from being left behind
+      previousActive.blur();
+    }
 
     const currentButton = this.getWordBlock(wordId);
     if (!currentButton) return;

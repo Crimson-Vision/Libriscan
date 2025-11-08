@@ -4,12 +4,30 @@
  */
 class WordDetails {
   constructor() {
+    // Clean up any existing instance to prevent duplicate event listeners
+    if (window.wordDetailsInstance) {
+      window.wordDetailsInstance.destroy();
+    }
+    
     this._initElements();
     this._initData();
     this._initModules();
     this._setupCallbacks();
     this.initializeEventListeners();
     this.navigation.selectFirstWord();
+    
+    // Store instance globally for cleanup
+    window.wordDetailsInstance = this;
+  }
+  
+  destroy() {
+    if (this.keyboard) {
+      this.keyboard.destroy();
+    }
+    // Remove event listeners
+    document.removeEventListener('wordSelected', this._wordSelectedHandler);
+    document.removeEventListener('wordVisibilityControlUpdated', this._wordVisibilityControlHandler);
+    window.wordDetailsInstance = null;
   }
 
   _initElements() {
@@ -78,8 +96,12 @@ class WordDetails {
   }
 
   initializeEventListeners() {
-    document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
-    document.addEventListener('wordVisibilityControlUpdated', (event) => this._handleWordVisibilityControlUpdate(event.detail));
+    // Store handlers as instance methods for proper cleanup
+    this._wordSelectedHandler = (event) => this.updateWordDetails(event.detail);
+    this._wordVisibilityControlHandler = (event) => this._handleWordVisibilityControlUpdate(event.detail);
+    
+    document.addEventListener('wordSelected', this._wordSelectedHandler);
+    document.addEventListener('wordVisibilityControlUpdated', this._wordVisibilityControlHandler);
     
     if (this.prevWordBtn) {
       this.prevWordBtn.onclick = () => this.navigation.goToPrevWord();

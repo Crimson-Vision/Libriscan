@@ -1,14 +1,15 @@
 import logging
 
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.db.models import Q
+from django.db.models import Q, Subquery
 
 from rules.contrib.views import AutoPermissionRequiredMixin
 
-from biblios.models import Organization, Document
+from biblios.models import Organization, Document, TextBlock, UserRole
 
 logger = logging.getLogger("django")
 
@@ -55,41 +56,52 @@ def index(request):
     context = {"app_name": "Libriscan"}
     
     if request.user.is_authenticated:
-        # The most recent doc the user edited
-        recent = Document.history.filter(history_user=request.user)
-        context["latest_doc"] = recent.latest() if recent.exists() else None
+        # The most recent doc edited by the user
+        history = Document.history.filter(history_user=request.user)
+        context["latest_doc"] = history.latest().instance if history.exists() else None
         
         # Get all organizations user has access to
-        user_orgs = request.user.userrole_set.values_list("organization", flat=True)
+        all_roles = request.user.userrole_set.all()
+        user_orgs = all_roles.values_list("organization", flat=True)
         
         # All documents in user's organizations
         all_docs = Document.objects.filter(
             collection__owner__in=user_orgs
-        ).select_related('collection__owner', 'series').order_by('-id')
+        ).order_by('-id')
         
         # Paginate All Documents (10 per page)
-        from django.core.paginator import Paginator
-        page_num = request.GET.get('page', 1)
         paginator = Paginator(all_docs, 10)
+        page_num = request.GET.get('page', 1)
         context["all_documents"] = paginator.get_page(page_num)
         
-        # Pending Reviews (admin/archivist only)
-        if request.user.is_staff or getattr(request.user, 'role', None) == 'archivist':
-            pending = all_docs.filter(status='pending_review')
+        # All docs in all orgs the user is a member of (for backward compatibility)
+        context["documents"] = Document.objects.filter(
+            collection__owner__in=Subquery(all_roles.values("organization"))
+        )
+        
+        # Pending Reviews (archivist only)
+        arc_roles = all_roles.filter(role=UserRole.ARCHIVIST)
+        context["needs_review"] = Document.objects.filter(
+            collection__owner__in=Subquery(arc_roles.values("organization")),
+            status=Document.REVIEW,
+        )
+        
+        if arc_roles.exists():
+            pending = context["needs_review"]
             pending_page = request.GET.get('pending_page', 1)
             pending_paginator = Paginator(pending, 10)
             context["pending_reviews"] = pending_paginator.get_page(pending_page)
         
         # Recent TextBlocks (Where You Left Off) - Use historical records
-        from biblios.models import TextBlock
         recent_history = TextBlock.history.filter(
             history_user=request.user
         ).select_related('page__document').order_by('-history_date')[:5]
         
-        # Get the actual TextBlock objects from history
-        context["recent_textblocks"] = [h.instance for h in recent_history if h.instance]
+        # Get the actual TextBlock objects from history (filter out None instances)
+        context["recent_textblocks"] = [h.instance for h in recent_history if h.instance is not None]
     
     return render(request, "biblios/index.html", context)
+
 
 def scan(request):
     context = {
