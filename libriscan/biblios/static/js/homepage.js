@@ -181,20 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   async function performSearch(query) {
     try {
-      // Get CSRF token if needed for your setup
-      const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`, {
-        method: 'GET',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        credentials: 'same-origin'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await LibriscanUtils.fetchJSON(`/api/search/?q=${encodeURIComponent(query)}`);
       
       if (data.results && data.results.length > 0) {
         displaySearchResults(data.results);
