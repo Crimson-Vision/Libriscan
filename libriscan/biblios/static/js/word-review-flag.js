@@ -41,11 +41,14 @@ class WordReviewFlag {
     this.container.innerHTML = `
       <button id="reviewFlagBtn" 
               class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200 text-orange-500" 
-              data-tip="Raise for Review"
+              data-tip="Raise Flag for Review (F)"
               hx-post="${toggleUrl}"
               hx-target="#reviewFlagBtn"
               hx-swap="outerHTML">
-        ${isReviewed ? this.filledIcon : this.outlineIcon}
+        <span class="flex items-center gap-1">
+          ${isReviewed ? this.filledIcon : this.outlineIcon}
+          <kbd class="kbd kbd-sm">F</kbd>
+        </span>
       </button>
     `;
     
@@ -81,8 +84,16 @@ class WordReviewFlag {
     
     const wordBlock = WordBlockManager?.getWordBlock?.(this.wordDetails.currentWordId);
     if (wordBlock) {
-      wordBlock.setAttribute('data-word-review', isReviewed);
+      // Set as string to match template format ('true' or 'false')
+      wordBlock.setAttribute('data-word-review', isReviewed ? 'true' : 'false');
       this.updateWordBlockVisual(this.wordDetails.currentWordId, isReviewed);
+    }
+  }
+
+  toggleFlag() {
+    const button = document.getElementById('reviewFlagBtn');
+    if (button && this.wordDetails.currentWordId) {
+      button.click();
     }
   }
 }

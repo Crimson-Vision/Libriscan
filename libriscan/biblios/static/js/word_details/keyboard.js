@@ -41,6 +41,9 @@ class WordKeyboard {
     } else if (key === 'a' || key === 'A') {
       event.preventDefault();
       this.wordDetails.metadata.accept();
+    } else if (key === 'f' || key === 'F') {
+      event.preventDefault();
+      this.wordDetails.reviewFlag?.toggleFlag();
     }
   }
 

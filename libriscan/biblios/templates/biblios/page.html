@@ -228,22 +228,15 @@
   document.addEventListener('htmx:afterSettle', function(event) {
     // Reinitialize components after HTMX content swaps
     
-    // Check for word blocks and reinitialize handlers
-    if (event.target.querySelector && event.target.querySelector('.word-block')) {
-      console.log('HTMX content swap detected, reinitializing word handlers...');
-      
-      // Clean up existing instances before creating new ones
-      if (typeof WordDetails !== 'undefined' && window.wordDetailsInstance) {
-        window.wordDetailsInstance.destroy();
-      }
-      
-      if (typeof WordSelector !== 'undefined') {
-        new WordSelector();
-      }
-      
-      if (typeof WordDetails !== 'undefined') {
-        new WordDetails();
-      }
+    // Reinitialize word handlers if swap contains word blocks
+    const hasWordBlocks = event.target.querySelector?.('.word-block');
+    if (hasWordBlocks) {
+      if (window.wordDetailsInstance) window.wordDetailsInstance.destroy();
+      if (typeof WordSelector !== 'undefined') new WordSelector();
+      if (typeof WordDetails !== 'undefined') new WordDetails();
+    } else if (typeof WordDetails !== 'undefined' && !window.wordDetailsInstance && document.querySelector('.word-block')) {
+      // Recreate WordDetails if missing (e.g., after flag button swap)
+      new WordDetails();
     }
     
     // Reinitialize OpenSeadragon viewer after navigation
@@ -255,13 +248,17 @@
   });
 
   document.addEventListener('htmx:beforeSwap', function(event) {
-    // Clean up OpenSeadragon viewer to prevent memory leaks
-    if (window.viewerInstance) {
-      destroyViewer();
-    }
+    if (window.viewerInstance) destroyViewer();
     
-    // Clean up WordDetails instance to prevent duplicate event listeners
-    if (window.wordDetailsInstance) {
+    const target = event.detail.target;
+    const isFlagSwap = target?.id === 'reviewFlagBtn' || target?.id?.includes('reviewFlag');
+    const hasWordBlocks = !isFlagSwap && target && (
+      target.querySelector?.('.word-block') || 
+      target.classList?.contains('word-block') || 
+      ['word-container', 'textDisplay'].includes(target.id)
+    );
+    
+    if (hasWordBlocks && window.wordDetailsInstance) {
       window.wordDetailsInstance.destroy();
     }
   });
