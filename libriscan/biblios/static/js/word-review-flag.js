@@ -37,15 +37,20 @@ class WordReviewFlag {
     const url = this.getUrlParts();
     const toggleUrl = `/${url.shortName}/${url.collectionSlug}/${url.identifier}/page${url.pageNumber}/word/${wordInfo.id}/toggle-review/`;
     const isReviewed = Boolean(wordInfo.review);
+    const flaggedCount = document.querySelectorAll('.word-block[data-word-review="true"]').length;
     
     this.container.innerHTML = `
       <button id="reviewFlagBtn" 
               class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200 text-orange-500" 
-              data-tip="Raise for Review"
+              data-tip="Flag for Review (F)${flaggedCount > 0 ? ` - ${flaggedCount} flagged` : ''}"
               hx-post="${toggleUrl}"
               hx-target="#reviewFlagBtn"
               hx-swap="outerHTML">
-        ${isReviewed ? this.filledIcon : this.outlineIcon}
+        <span class="flex items-center gap-1">
+          ${isReviewed ? this.filledIcon : this.outlineIcon}
+          <kbd class="kbd kbd-sm">F</kbd>
+          ${flaggedCount > 0 ? `<span class="badge badge-warning badge-sm min-w-[1.25rem]">${flaggedCount}</span>` : ''}
+        </span>
       </button>
     `;
     
@@ -81,8 +86,16 @@ class WordReviewFlag {
     
     const wordBlock = WordBlockManager?.getWordBlock?.(this.wordDetails.currentWordId);
     if (wordBlock) {
-      wordBlock.setAttribute('data-word-review', isReviewed);
+      // Set as string to match template format ('true' or 'false')
+      wordBlock.setAttribute('data-word-review', isReviewed ? 'true' : 'false');
       this.updateWordBlockVisual(this.wordDetails.currentWordId, isReviewed);
+    }
+  }
+
+  toggleFlag() {
+    const button = document.getElementById('reviewFlagBtn');
+    if (button && this.wordDetails.currentWordId) {
+      button.click();
     }
   }
 }

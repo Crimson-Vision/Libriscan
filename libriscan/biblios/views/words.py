@@ -136,6 +136,9 @@ def toggle_review_flag(
         word.review = not word.review
         word.save(update_fields=["review"])
         
+        # Count flagged words on the page
+        flagged_count = word.page.words.filter(review=True).count()
+        
         # Return HTML partial for HTMX swap
         context = {
             "word": word,
@@ -143,6 +146,7 @@ def toggle_review_flag(
             "collection_slug": collection_slug,
             "identifier": identifier,
             "number": number,
+            "flagged_count": flagged_count,
         }
         return render(request, "biblios/components/forms/review_flag_button.html", context)
     except Exception as e:
