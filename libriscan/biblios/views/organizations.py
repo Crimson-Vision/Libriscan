@@ -1,8 +1,10 @@
 import logging
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
+from django.http import HttpResponseNotAllowed
 
 from django.views.generic import DetailView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from rules.contrib.views import permission_required
 
@@ -57,8 +59,16 @@ class OrganizationUpdate(OrgPermissionRequiredMixin, UpdateView):
 class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
     model = Collection
     fields = ["name", "slug"]
-    slug_field = "short_name"
-    slug_url_kwarg = "short_name"
+    template_name = "biblios/collection_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        # Add organization object for breadcrumbs
+        context["org"] = Organization.objects.get(
+            short_name=self.kwargs.get("short_name")
+        )
+        return context
 
     def post(self, request, **kwargs):
         from biblios.forms import CollectionForm
@@ -85,7 +95,48 @@ class CollectionCreate(OrgPermissionRequiredMixin, CreateView):
 class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
     model = Collection
     fields = ["name", "slug"]
+    template_name = "biblios/collection_form.html"
     slug_url_kwarg = "collection_slug"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["org"] = self.object.owner
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.object.slug,
+            },
+        )
+
+
+class CollectionDeleteView(OrgPermissionRequiredMixin, DeleteView):
+    model = Collection
+    slug_url_kwarg = "collection_slug"
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed(["POST"])
+
+    def get_object(self, queryset=None):
+        """Get collection by URL parameters."""
+        return get_object_or_404(
+            Collection,
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+
+    def get_success_url(self):
+        """Redirect to organization page after deletion."""
+        return reverse(
+            "organization",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+            },
+        )
 
 
 @permission_required(
@@ -93,7 +144,8 @@ class CollectionUpdate(OrgPermissionRequiredMixin, UpdateView):
 )
 def collection_detail(request, short_name, collection_slug):
     collection = Collection.objects.get(slug=collection_slug)
-    context = {"collection": collection}
+    docs = collection.documents.filter(series__isnull=True)
+    context = {"collection": collection, "documents": docs}
     return render(request, "biblios/collection_detail.html", context)
 
 
@@ -112,6 +164,14 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["short_name"] = self.kwargs.get("short_name")
         context["collection_slug"] = self.kwargs.get("collection_slug")
+        # Add organization and collection objects for breadcrumbs
+        context["org"] = Organization.objects.get(
+            short_name=self.kwargs.get("short_name")
+        )
+        context["collection"] = Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
         return context
 
     def post(self, request, **kwargs):
@@ -135,3 +195,63 @@ class SeriesCreateView(OrgPermissionRequiredMixin, CreateView):
         form = SeriesForm(post)
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+
+
+class SeriesUpdateView(OrgPermissionRequiredMixin, UpdateView):
+    model = Series
+    fields = ["name", "slug"]
+    template_name = "biblios/series_form.html"
+    slug_url_kwarg = "series_slug"
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Series,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            slug=self.kwargs.get("series_slug"),
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["short_name"] = self.kwargs.get("short_name")
+        context["collection_slug"] = self.kwargs.get("collection_slug")
+        context["org"] = self.object.collection.owner
+        context["collection"] = self.object.collection
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            "series",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+                "series_slug": self.object.slug,
+            },
+        )
+
+
+class SeriesDeleteView(OrgPermissionRequiredMixin, DeleteView):
+    model = Series
+    slug_url_kwarg = "series_slug"
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed(["POST"])
+
+    def get_object(self, queryset=None):
+        """Get series by URL parameters."""
+        return get_object_or_404(
+            Series,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            slug=self.kwargs.get("series_slug"),
+        )
+
+    def get_success_url(self):
+        """Redirect to collection page after deletion."""
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+            },
+        )

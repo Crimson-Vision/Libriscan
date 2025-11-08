@@ -1,11 +1,126 @@
 {% extends "biblios/base.html" %}
 
 {% block content %}
+<!-- Breadcrumb Navigation -->
+<nav class="mb-3 text-sm breadcrumbs">
+    <ul>
+        <li>
+            <a href="{% url 'organization' short_name %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
+                </span>
+                {% if org %}{{ org }}{% else %}{{ short_name }}{% endif %}
+            </a>
+        </li>
+        {% if object %}
+        <li>
+            <a href="{% url 'collection' short_name object.slug %}" class="flex items-center gap-1 hover:underline text-primary">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                </span>
+                {{ object }}
+            </a>
+        </li>
+        {% endif %}
+        <li>
+            <span class="flex items-center gap-1 text-base-content/60">
+                <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                </span>
+                {% if object %}Edit Collection{% else %}New Collection{% endif %}
+            </span>
+        </li>
+    </ul>
+</nav>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <input type="submit" value="Submit">
-</form>
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+        <h2 class="card-title text-2xl font-bold mb-4 flex items-center gap-2">
+            <span class="inline-flex items-center justify-center size-10 rounded-full bg-accent/10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+            </span>
+            {% if object %}Edit Collection{% else %}Create New Collection{% endif %}
+        </h2>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            
+            <div class="form-control">
+                <label for="id_name" class="label">
+                    <span class="label-text font-semibold">Collection Name</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    id="id_name" 
+                    class="input input-bordered w-full" 
+                    value="{{ form.name.value|default_if_none:'' }}"
+                    placeholder="Enter collection name"
+                    required
+                >
+                {% if form.name.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                    </label>
+                {% endif %}
+            </div>
+            
+            <div class="form-control">
+                <label for="id_slug" class="label">
+                    <span class="label-text font-semibold">Slug</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="slug" 
+                    id="id_slug" 
+                    class="input input-bordered w-full" 
+                    value="{{ form.slug.value|default_if_none:'' }}"
+                    placeholder="collection-slug"
+                    pattern="[a-z0-9-]+"
+                    title="Only lowercase letters, numbers, and hyphens"
+                    required
+                >
+                <label class="label">
+                    <span class="label-text-alt">URL-friendly identifier (lowercase, numbers, and hyphens only)</span>
+                </label>
+                {% if form.slug.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                    </label>
+                {% endif %}
+            </div>
+            
+            <div class="card-actions justify-end mt-6">
+                <a href="{% if object %}{% url 'collection' short_name object.slug %}{% else %}{% url 'organization' short_name %}{% endif %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if object %}Update Collection{% else %}Create Collection{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
+<script>
+    (function() {
+        const nameInput = document.getElementById('id_name');
+        const slugInput = document.getElementById('id_slug');
+        let slugManuallyEdited = false;
+
+        slugInput.addEventListener('input', () => slugManuallyEdited = true);
+
+        nameInput.addEventListener('input', function() {
+            if (!slugManuallyEdited || !slugInput.value) {
+                slugInput.value = this.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            }
+        });
+    })();
+</script>
 {% endblock content %}

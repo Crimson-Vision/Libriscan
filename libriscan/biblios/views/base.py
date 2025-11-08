@@ -33,11 +33,21 @@ def get_org_by_collection(request, short_name, collection_slug):
     return Organization.objects.get(short_name=short_name)
 
 
+def get_org_by_document(request, short_name, collection_slug, identifier):
+    return Organization.objects.get(short_name=short_name)
+
+
 def get_org_by_page(request, short_name, collection_slug, identifier, number):
     return Organization.objects.get(short_name=short_name)
 
 
 def get_org_by_word(request, short_name, collection_slug, identifier, number, word_id):
+    return Organization.objects.get(short_name=short_name)
+
+
+def get_org_for_export(
+    request, short_name, collection_slug, identifier, use_image=False
+):
     return Organization.objects.get(short_name=short_name)
 
 
@@ -73,23 +83,22 @@ def search_documents(request):
     Searches by document identifier, collection name, and series name.
     """
     query = request.GET.get("q", "").strip()
-    
+
     if not query or not request.user.is_authenticated:
         return JsonResponse({"results": []})
-    
+
     user_orgs = request.user.userrole_set.values_list("organization", flat=True)
     results = (
-        Document.objects
-        .filter(collection__owner__in=user_orgs)
+        Document.objects.filter(collection__owner__in=user_orgs)
         .filter(
-            Q(identifier__icontains=query) |
-            Q(collection__name__icontains=query) |
-            Q(series__name__icontains=query)
+            Q(identifier__icontains=query)
+            | Q(collection__name__icontains=query)
+            | Q(series__name__icontains=query)
         )
         .select_related("collection", "collection__owner", "series", "metadata")
         .distinct()[:20]
     )
-    
+
     def get_title(doc):
         try:
             title = doc.metadata.title
@@ -98,17 +107,19 @@ def search_documents(request):
         except Document.metadata.RelatedObjectDoesNotExist:
             pass
         return doc.identifier
-    
-    return JsonResponse({
-        "results": [
-            {
-                "identifier": doc.identifier,
-                "title": get_title(doc),
-                "url": doc.get_absolute_url(),
-                "collection": doc.collection.name,
-                "series": doc.series.name if doc.series else None,
-                "organization": doc.collection.owner.short_name,
-            }
-            for doc in results
-        ]
-    })
+
+    return JsonResponse(
+        {
+            "results": [
+                {
+                    "identifier": doc.identifier,
+                    "title": get_title(doc),
+                    "url": doc.get_absolute_url(),
+                    "collection": doc.collection.name,
+                    "series": doc.series.name if doc.series else None,
+                    "organization": doc.collection.owner.short_name,
+                }
+                for doc in results
+            ]
+        }
+    )

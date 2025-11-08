@@ -1,0 +1,17 @@
+{% extends "biblios/base.html" %}
+{% block content %}
+    <div class="card bg-base-100 shadow max-w-2xl mx-auto mt-8">
+        <div class="card-body">
+            <h2 class="card-title text-xl font-bold mb-4">Delete Document</h2>
+            <p class="mb-4">Are you sure you want to delete "{{ object }}"?</p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="flex gap-2 justify-end">
+                    <a href="{{ object.get_absolute_url }}" class="btn btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-error">Delete Document</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
+

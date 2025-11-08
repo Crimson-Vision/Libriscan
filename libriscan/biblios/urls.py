@@ -44,6 +44,11 @@ urlpatterns = [
                                 name="collection_update",
                             ),
                             path(
+                                "delete/",
+                                views.CollectionDeleteView.as_view(),
+                                name="collection_delete",
+                            ),
+                            path(
                                 "new-document/",
                                 views.DocumentCreateView.as_view(),
                                 name="document_create",
@@ -53,10 +58,33 @@ urlpatterns = [
                                 views.SeriesCreateView.as_view(),
                                 name="series_create",
                             ),
+                            # Series URLs
                             path(
                                 "<slug:series_slug>-series/",
-                                views.SeriesDetail.as_view(),
-                                name="series",
+                                include(
+                                    [
+                                        path(
+                                            "",
+                                            views.SeriesDetail.as_view(),
+                                            name="series",
+                                        ),
+                                        path(
+                                            "update/",
+                                            views.SeriesUpdateView.as_view(),
+                                            name="series_update",
+                                        ),
+                                        path(
+                                            "delete/",
+                                            views.SeriesDeleteView.as_view(),
+                                            name="series_delete",
+                                        ),
+                                        path(
+                                            "new-document/",
+                                            views.DocumentCreateView.as_view(),
+                                            name="document_series_create",
+                                        ),
+                                    ]
+                                ),
                             ),
                             # Document URLs
                             path(
@@ -67,6 +95,21 @@ urlpatterns = [
                                             "",
                                             views.DocumentDetail.as_view(),
                                             name="document",
+                                        ),
+                                        path(
+                                            "update/",
+                                            views.DocumentUpdateView.as_view(),
+                                            name="document_update",
+                                        ),
+                                        path(
+                                            "status/",
+                                            views.update_document_status,
+                                            name="document_status_update",
+                                        ),
+                                        path(
+                                            "delete/",
+                                            views.DocumentDeleteView.as_view(),
+                                            name="document_delete",
                                         ),
                                         path(
                                             "metadata/",
@@ -112,6 +155,11 @@ urlpatterns = [
                                             name="page",
                                         ),
                                         path(
+                                            "page<int:number>/delete/",
+                                            views.delete_page,
+                                            name="page_delete",
+                                        ),
+                                        path(
                                             "page<int:number>/extract/",
                                             views.extract_text,
                                             name="page_extract",
@@ -140,6 +188,11 @@ urlpatterns = [
                                             "page<int:number>/word/<int:word_id>/revert/",
                                             views.revert_word,
                                             name="revert_word",
+                                        ),
+                                        path(
+                                            "page<int:number>/word/<int:word_id>/toggle-review/",
+                                            views.toggle_review_flag,
+                                            name="toggle_review_flag",
                                         ),
                                         path(
                                             "page<int:number>/word/<int:word_id>/history/",

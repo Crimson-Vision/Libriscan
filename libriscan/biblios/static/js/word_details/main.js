@@ -26,7 +26,6 @@ class WordDetails {
     this.nextWordBtn = document.getElementById('nextWordBtn');
     this.wordPosition = document.getElementById('wordPosition');
     this.revertToOriginalAction = document.getElementById('revertToOriginalAction');
-    this.saveToDictionaryAction = document.getElementById('saveToDictionaryAction');
   }
 
   _initData() {
@@ -45,10 +44,9 @@ class WordDetails {
     });
 
     this.metadata = new WordMetadata({
-      printControlDropdownBtn: document.getElementById('printControlDropdownBtn'),
-      printControlDisplay: document.getElementById('printControlDisplay'),
-      printControlBadge: document.getElementById('printControlBadge'),
-      printControlOptions: document.querySelectorAll('.print-control-option'),
+      wordVisibilityControlDropdownBtn: document.getElementById('wordVisibilityControlDropdownBtn'),
+      wordVisibilityControlBadge: document.getElementById('wordVisibilityControlBadge'),
+      wordVisibilityControlOptions: document.querySelectorAll('.word-visibility-control-option'),
       acceptBtn: this.acceptBtn
     });
 
@@ -59,6 +57,7 @@ class WordDetails {
     this.navigation = new WordNavigation(this);
     this.suggestions = new WordSuggestions(this);
     this.revert = new WordRevert(this);
+    this.reviewFlag = new WordReviewFlag(this);
   }
 
   _setupCallbacks() {
@@ -80,7 +79,7 @@ class WordDetails {
 
   initializeEventListeners() {
     document.addEventListener('wordSelected', (event) => this.updateWordDetails(event.detail));
-    document.addEventListener('printControlUpdated', (event) => this._handlePrintControlUpdate(event.detail));
+    document.addEventListener('wordVisibilityControlUpdated', (event) => this._handleWordVisibilityControlUpdate(event.detail));
     
     if (this.prevWordBtn) {
       this.prevWordBtn.onclick = () => this.navigation.goToPrevWord();
@@ -91,9 +90,6 @@ class WordDetails {
     
     if (this.revertToOriginalAction) {
       this.revertToOriginalAction.onclick = () => this.revert.revertToOriginalWord();
-    }
-    if (this.saveToDictionaryAction) {
-      this.saveToDictionaryAction.onclick = () => this.saveToDictionary();
     }
 
     const auditHistoryTab = document.getElementById('wordAuditHistoryTab');
@@ -123,8 +119,13 @@ class WordDetails {
     WordBlockManager.syncActiveWordButton(this.currentWordId);
     this.navigation.updateNavigationState();
     this._updateConfidenceDisplay(wordInfo);
-    this.metadata.updatePrintControlDisplay(wordInfo.print_control || 'I');
+    this.metadata.updateWordVisibilityControlDisplay(wordInfo.print_control || 'I');
     this.suggestions.updateSuggestions(wordInfo);
+    
+    // Update review flag button
+    if (this.reviewFlag) {
+      this.reviewFlag.updateFlagButton(wordInfo);
+    }
     
     this.revert.checkAndEnableRevertButton(wordInfo.id);
   }
@@ -178,10 +179,10 @@ class WordDetails {
     this.updateHandler.updateWordBlock(data);
   }
 
-  async _handlePrintControlUpdate(detail) {
+  async _handleWordVisibilityControlUpdate(detail) {
     await this.updateHandler.handleMetadataChange(detail, 'print_control', (wordBlock, value) => {
       wordBlock.dataset.wordPrintControl = value;
-      WordBlockManager.updatePrintControlClasses(wordBlock, value);
+      WordBlockManager.updateWordVisibilityControlClasses(wordBlock, value);
     });
   }
 
@@ -211,10 +212,6 @@ class WordDetails {
 
   updateWordBlockContent(wordBlock, text, confidence, confidenceLevel) {
     WordBlockManager.updateContent(wordBlock, text, confidence, confidenceLevel);
-  }
-
-  saveToDictionary() {
-    // TODO: Implement functionality
   }
 
   async revertToOriginalWord() {

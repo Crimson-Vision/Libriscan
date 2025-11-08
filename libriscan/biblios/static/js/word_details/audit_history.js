@@ -32,7 +32,7 @@ class AuditHistory {
       },
       { 
         key: 'print_control', 
-        label: 'Print Control', 
+        label: 'Word Visibility Control', 
         getValue: (record) => record.print_control_display 
       }
     ]

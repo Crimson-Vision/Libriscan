@@ -3,7 +3,7 @@
 
 <div id="clickedWordsContainer" class="mt-8 hidden"
      {# Geo coordinates (geo_x_0, geo_y_0, geo_x_1, geo_y_1) removed from data-words-json #}
-     data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.suggestions|escapejs }}{% if not forloop.last %};&{% endif %}{% endfor %}"
+     data-words-json="{% for word in words %}{{ word.id }},{{ word.text }},{{ word.confidence }},{{ word.confidence_level }},{{ word.line }},{{ word.number }},{{ word.text_type }},{{ word.print_control }},{{ word.extraction_id }},{{ word.suggestions|escapejs }},{{ word.review|yesno:'true,false' }}{% if not forloop.last %};&{% endif %}{% endfor %}"
      data-last-edited-word-id="{{ last_edited_word_id|default:'' }}">
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body p-0">
@@ -62,31 +62,27 @@
             </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <!-- Print Control Section -->
+            <!-- Word Visibility Control Section -->
             <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-base-content/70">Print Control</label>
+              <label class="text-sm font-medium text-base-content/70">Word Visibility Control</label>
               <div class="dropdown w-full">
-                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-9 min-h-9" id="printControlDropdownBtn">
+                <div tabindex="0" role="button" class="btn btn-sm btn-outline w-full justify-between normal-case h-9 min-h-9" id="wordVisibilityControlDropdownBtn">
                   <div class="flex items-center gap-2">
-                    <span id="printControlBadge" class="badge badge-sm"></span>
-                    <span id="printControlDisplay">Include</span>
+                    <span id="wordVisibilityControlBadge" class="badge badge-sm">Include</span>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[100] w-full p-2 shadow-xl border border-base-300">
-                  <li><a data-value="I" class="print-control-option">
-                    <span class="badge badge-success badge-sm">I</span>
-                    <span>Include</span>
+                  <li><a data-value="I" class="word-visibility-control-option">
+                    <span class="badge badge-success badge-sm">Include</span>
                   </a></li>
-                  <li><a data-value="M" class="print-control-option">
-                    <span class="badge badge-warning badge-sm">M</span>
-                    <span>Merge with Prior</span>
+                  <li><a data-value="M" class="word-visibility-control-option">
+                    <span class="badge badge-warning badge-sm">Merge with Prior</span>
                   </a></li>
-                  <li><a data-value="O" class="print-control-option">
-                    <span class="badge badge-error badge-sm">O</span>
-                    <span>Omit</span>
+                  <li><a data-value="O" class="word-visibility-control-option">
+                    <span class="badge badge-error badge-sm">Omit</span>
                   </a></li>
                 </ul>
               </div>
@@ -133,22 +129,31 @@
         </div>
       </div>
 
-      <!-- Actions Dropdown -->
-        <div id="wordActionsDropdownContainer" class="absolute top-2 right-4 z-10 dropdown dropdown">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm opacity-70 hover:opacity-100 transition-opacity duration-200" id="wordActionsDropdown">
-            <!-- Kebab icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
-            </svg>
+      <!-- Actions Dropdown Container with Review Flag -->
+        <div class="absolute top-2 right-4 z-10 flex items-center gap-2">
+          <!-- Review Flag Button -->
+          <div id="reviewFlagContainer">
+            <button id="reviewFlagBtn" class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200" data-tip="Raise for Review" disabled>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="rgb(249, 115, 22)" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+              </svg>
+            </button>
           </div>
-          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
-            <li>
-              <a id="revertToOriginalAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Revert to Original</a>
-            </li>
-            <li>
-              <a id="saveToDictionaryAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Save to Dictionary</a>
-            </li>
-          </ul>
+
+          <!-- Actions Dropdown -->
+          <div id="wordActionsDropdownContainer" class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm opacity-70 hover:opacity-100 transition-opacity duration-200" id="wordActionsDropdown">
+              <!-- Kebab icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow border border-base-200">
+              <li>
+                <a id="revertToOriginalAction" class="opacity-50 pointer-events-none" aria-disabled="true" tabindex="-1">Revert to Original</a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

@@ -6,25 +6,31 @@ from .organizations import (
     OrganizationUpdate,
     CollectionCreate,
     CollectionUpdate,
+    CollectionDeleteView,
     collection_detail,
     SeriesCreateView,
+    SeriesUpdateView,
     SeriesDetail,
+    SeriesDeleteView,
 )
 from .documents import (
     DocumentList,
     DocumentDetail,
     DocumentCreateView,
+    DocumentUpdateView,
     DocumentDeleteView,
     MetadataDetail,
     MetadataUpdateView,
     PageCreateView,
     PageDetail,
+    delete_page,
     handle_upload,
     extract_text,
     export_pdf,
     export_text,
     export_xml,
     check_words,
+    update_document_status,
 )
 from .words import (
     update_word,
@@ -32,4 +38,5 @@ from .words import (
     textblock_history,
     revert_word,
     merge_blocks,
+    toggle_review_flag,
 )
