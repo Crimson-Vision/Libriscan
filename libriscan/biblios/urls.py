@@ -160,6 +160,11 @@ urlpatterns = [
                                             name="page_delete",
                                         ),
                                         path(
+                                            "page<int:number>/reorder/",
+                                            views.reorder_page,
+                                            name="page_reorder",
+                                        ),
+                                        path(
                                             "page<int:number>/extract/",
                                             views.extract_text,
                                             name="page_extract",

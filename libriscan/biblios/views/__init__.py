@@ -24,6 +24,7 @@ from .documents import (
     PageCreateView,
     PageDetail,
     delete_page,
+    reorder_page,
     handle_upload,
     extract_text,
     export_pdf,
