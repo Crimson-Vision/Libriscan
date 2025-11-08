@@ -39,7 +39,11 @@ class WordSelector {
 
   handleWordClick(event) {
     try {
-      if (this.selectedBlock) this.selectedBlock.classList.remove('btn-active');
+      if (this.selectedBlock) {
+        this.selectedBlock.classList.remove('btn-active');
+        // Remove focus to prevent black border from being left behind
+        this.selectedBlock.blur();
+      }
       
       const wordBlock = event.currentTarget;
       wordBlock.classList.add('btn-active');
