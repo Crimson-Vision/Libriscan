@@ -402,6 +402,52 @@ def delete_page(request, short_name, collection_slug, identifier, number):
     )
 
 
+@permission_required("biblios.change_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST"])
+def reorder_page(request, short_name, collection_slug, identifier, number):
+    """Reorder a page by swapping its number with the page above or below."""
+    from django.db import transaction
+    
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+    
+    direction = request.GET.get('direction', '').lower()
+    if direction not in ['up', 'down']:
+        return JsonResponse({'success': False, 'error': 'Invalid direction'}, status=400)
+    
+    pages = list(page.document.pages.order_by('number'))
+    if len(pages) <= 1:
+        return JsonResponse({'success': False, 'error': 'Cannot reorder single page'}, status=400)
+    
+    current_index = next((i for i, p in enumerate(pages) if p.id == page.id), None)
+    if current_index is None:
+        return JsonResponse({'success': False, 'error': 'Page not found'}, status=404)
+    
+    offset = -1 if direction == 'up' else 1
+    if (direction == 'up' and current_index == 0) or (direction == 'down' and current_index == len(pages) - 1):
+        return JsonResponse({'success': False, 'error': f'Cannot move {direction}'}, status=400)
+    
+    try:
+        with transaction.atomic():
+            target_page = pages[current_index + offset]
+            temp, current_num, target_num = 99999, page.number, target_page.number
+            page.number = temp
+            page.save(update_fields=['number'])
+            target_page.number = current_num
+            target_page.save(update_fields=['number'])
+            page.number = target_num
+            page.save(update_fields=['number'])
+        return JsonResponse({'success': True})
+    except Exception as e:
+        logger.error(f'Error reordering page: {e}')
+        return JsonResponse({'success': False, 'error': 'Reorder failed'}, status=500)
+
+
 @permission_required("biblios.update_page", fn=get_org_by_page, raise_exception=True)
 @require_http_methods(["POST"])
 def extract_text(request, short_name, collection_slug, identifier, number):
