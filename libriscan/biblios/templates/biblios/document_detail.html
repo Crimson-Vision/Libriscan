@@ -203,7 +203,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                            PDF with Images
+                                            PDF with Images
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             Full document with embedded page images
@@ -230,7 +230,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                            Text-only PDF
+                                            Text-only PDF
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             PDF format with extracted text only
@@ -257,7 +257,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
-                            Plain Text
+                                            Plain Text
                                         </h4>
                                         <p class="text-xs text-base-content/60 line-clamp-2">
                                             Simple text file with extracted content
@@ -283,10 +283,10 @@
 <!-- Status Dropdown Script -->
 <script src="{% static 'js/document_status.js' %}"></script>
 <script>
-        // Initialize status dropdown when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentStatus = '{{ document.status }}';
-            window.initStatusDropdown(currentStatus);
-        });
+    // Initialize status dropdown when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentStatus = '{{ document.status }}';
+        window.initStatusDropdown(currentStatus);
+    });
 </script>
 {% endblock content %}
