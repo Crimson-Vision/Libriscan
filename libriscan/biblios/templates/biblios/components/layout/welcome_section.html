@@ -102,39 +102,7 @@
     <div id="all-documents-tab" class="tab-panel">
       <div id="all-documents">
         {% if all_documents %}
-          <div class="overflow-x-auto">
-            <table class="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th class="text-base w-[15%]">Document ID</th>
-                  <th class="text-base w-[15%]">Organization</th>
-                  <th class="text-base w-[20%]">Collection</th>
-                  <th class="text-base w-[15%]">Series</th>
-                  <th class="text-base w-[15%]">Status</th>
-                  <th class="text-base w-[20%]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for doc in all_documents %}
-                <tr class="hover">
-                  <td class="font-medium">{{ doc.identifier }}</td>
-                  <td>{{ doc.collection.owner.short_name }}</td>
-                  <td>{{ doc.collection.name }}</td>
-                  <td>{{ doc.series.name|default:"<span class='text-base-content/50'>Orphaned</span>"|safe }}</td>
-                  <td><span class="badge badge-neutral">{{ doc.get_status_display }}</span></td>
-                  <td>
-                    <a href="{{ doc.get_absolute_url }}" class="btn btn-sm btn-primary">
-                      Open
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                      </svg>
-                    </a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+          {% include 'biblios/components/tables/document_table.html' with documents=all_documents badge_class='badge-neutral' action_text='Open' action_class='btn-primary' action_icon='arrow_right_icon' %}
           
           <!-- Pagination Controls -->
           {% if all_documents.has_other_pages %}
@@ -178,40 +146,7 @@
     <div id="pending-reviews-tab" class="tab-panel hidden">
       <div id="pending-reviews">
         {% if pending_reviews %}
-          <div class="overflow-x-auto">
-            <table class="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th class="text-base w-[15%]">Document ID</th>
-                  <th class="text-base w-[15%]">Organization</th>
-                  <th class="text-base w-[20%]">Collection</th>
-                  <th class="text-base w-[15%]">Series</th>
-                  <th class="text-base w-[15%]">Status</th>
-                  <th class="text-base w-[20%]">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for doc in pending_reviews %}
-                <tr class="hover">
-                  <td class="font-medium">{{ doc.identifier }}</td>
-                  <td>{{ doc.collection.owner.short_name }}</td>
-                  <td>{{ doc.collection.name }}</td>
-                  <td>{{ doc.series.name|default:"<span class='text-base-content/50'>Orphaned</span>"|safe }}</td>
-                  <td><span class="badge badge-warning">{{ doc.get_status_display }}</span></td>
-                  <td>
-                    <a href="{{ doc.get_absolute_url }}" class="btn btn-sm btn-warning">
-                      Review
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                      </svg>
-                    </a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+          {% include 'biblios/components/tables/document_table.html' with documents=pending_reviews badge_class='badge-warning' action_text='Review' action_class='btn-warning' action_icon='eye_icon' %}
           
           <!-- Pagination Controls -->
           {% if pending_reviews.has_other_pages %}
