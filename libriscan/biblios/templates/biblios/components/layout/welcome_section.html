@@ -296,7 +296,7 @@
                 
                 <!-- Action Button -->
                 <div class="card-actions justify-end mt-4">
-                  <a href="{% url 'page-detail' textblock.instance.page.id %}" class="btn btn-sm btn-primary">
+                  <a href="{{ textblock.instance.page.get_absolute_url }}" class="btn btn-sm btn-primary">
                     Continue Editing
                   </a>
                 </div>
