@@ -1,9 +1,0 @@
-/* Tab transitions */
-.tabs .tab {
-  transition: all 0.3s ease;
-}
-
-.tabs .tab:hover:not(.tab-active) {
-  background-color: hsl(var(--b3));
-  transform: translateY(-1px);
-}
