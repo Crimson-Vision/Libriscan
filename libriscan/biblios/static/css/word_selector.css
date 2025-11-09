@@ -90,6 +90,16 @@
   outline-offset: 2px;
 }
 
+/* Ensure dashed border persists when active for accepted words */
+.word-block.btn-active.btn-dash {
+  --btn-shadow: "";
+  border-style: dashed !important;
+  --btn-bg: #0000;
+  --btn-fg: var(--btn-color);
+  --btn-border: var(--btn-color);
+  --btn-noise: none;
+}
+
 /* Ensure strikethrough persists when active */
 .btn-active.word-visibility-control-omit,
 .btn-active.word-visibility-control-merge {

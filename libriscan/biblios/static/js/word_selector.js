@@ -14,10 +14,18 @@ class WordSelector {
   applyReviewFlags() {
     document.querySelectorAll('.word-block').forEach(wordBlock => {
       const isReviewed = wordBlock.dataset.wordReview === 'true';
+      const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+      
       wordBlock.classList.toggle('btn-error', isReviewed);
       
       if (isReviewed) {
-        wordBlock.classList.remove('btn-ghost', 'btn-dash');
+        wordBlock.classList.remove('btn-ghost');
+        // Keep btn-dash for accepted words even when reviewed
+        if (isAccepted) {
+          wordBlock.classList.add('btn-dash');
+        } else {
+          wordBlock.classList.remove('btn-dash');
+        }
         if (!wordBlock.querySelector('.review-flag-icon')) {
           const flagIcon = document.createElement('span');
           flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
@@ -27,8 +35,7 @@ class WordSelector {
       } else {
         wordBlock.classList.remove('btn-error');
         wordBlock.querySelector('.review-flag-icon')?.remove();
-        const confidence = parseFloat(wordBlock.dataset.wordConfidence) || 0;
-        if (confidence >= 99.999) {
+        if (isAccepted) {
           wordBlock.classList.add('btn-dash');
         } else {
           wordBlock.classList.add('btn-ghost');
