@@ -57,7 +57,7 @@ class ConfidenceToggle {
     if (!this.container) return;
     
     this.container.querySelectorAll('.word-block').forEach(block => {
-      const isAccepted = block.dataset.wordConfidenceLevel === 'accepted';
+      const isAccepted = block.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
       if (!isAccepted) return;
       
       block.classList.toggle('btn-dash', isVisible);

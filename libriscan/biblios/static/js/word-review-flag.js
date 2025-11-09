@@ -62,7 +62,7 @@ class WordReviewFlag {
     const wordBlock = WordBlockManager?.getWordBlock?.(wordId);
     if (!wordBlock) return;
     
-    const isAccepted = wordBlock.dataset.wordConfidenceLevel === 'accepted';
+    const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
     
     wordBlock.classList.toggle('btn-error', isReviewed);
     

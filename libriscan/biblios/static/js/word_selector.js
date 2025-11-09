@@ -14,7 +14,7 @@ class WordSelector {
   applyReviewFlags() {
     document.querySelectorAll('.word-block').forEach(wordBlock => {
       const isReviewed = wordBlock.dataset.wordReview === 'true';
-      const isAccepted = wordBlock.dataset.wordConfidenceLevel === 'accepted';
+      const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
       
       wordBlock.classList.toggle('btn-error', isReviewed);
       
