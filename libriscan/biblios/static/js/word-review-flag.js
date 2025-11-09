@@ -62,9 +62,22 @@ class WordReviewFlag {
     const wordBlock = WordBlockManager?.getWordBlock?.(wordId);
     if (!wordBlock) return;
     
+    const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+    
     wordBlock.classList.toggle('btn-error', isReviewed);
-    wordBlock.classList.toggle('btn-ghost', !isReviewed);
-    wordBlock.classList.toggle('btn-dash', !isReviewed && parseFloat(wordBlock.dataset.wordConfidence) >= 99.999);
+    
+    if (isReviewed) {
+      wordBlock.classList.remove('btn-ghost');
+      // Keep btn-dash for accepted words even when reviewed
+      if (isAccepted) {
+        wordBlock.classList.add('btn-dash');
+      } else {
+        wordBlock.classList.remove('btn-dash');
+      }
+    } else {
+      wordBlock.classList.toggle('btn-ghost', !isAccepted);
+      wordBlock.classList.toggle('btn-dash', isAccepted);
+    }
     
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {

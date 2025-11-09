@@ -21,8 +21,7 @@ class WordBlockManager {
     wordBlock.classList.add(`confidence-${data.confidence_level}`);
     
     // Update btn-ghost/btn-dash classes for accepted words
-    const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
-                      parseFloat(data.confidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+    const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
     let acceptedToggleVisible = true;
     try {
       acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
@@ -52,8 +51,7 @@ class WordBlockManager {
   static updateContent(wordBlock, text, confidence, confidenceLevel) {
     wordBlock.innerHTML = '';
     const textSpan = document.createElement('span');
-    const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
-                      confidence >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+    const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
     
     if (isAccepted) textSpan.className = 'accepted-word';
     textSpan.textContent = text;
