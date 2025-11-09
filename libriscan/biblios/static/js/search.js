@@ -1,5 +1,5 @@
 /**
- * Document Search - Debounced search with dropdown results
+ * Document Search - Debounced search with dropdown results + instant filter
  */
 (function() {
   'use strict';
@@ -15,6 +15,11 @@
     input.addEventListener('input', (event) => {
       clearTimeout(timeout);
       const query = event.target.value.trim();
+      
+      // Instant filter table/grid
+      filterDocuments(query);
+      
+      // Debounced dropdown search
       timeout = setTimeout(() => query ? search(query, container) : container.innerHTML = '', 300);
     });
 
@@ -27,6 +32,34 @@
     document.addEventListener('click', (event) => {
       if (!event.target.closest('.dropdown')) container.innerHTML = '';
     });
+  }
+
+  // Filter both table rows and grid cards
+  function filterDocuments(query) {
+    const lowerQuery = query.toLowerCase();
+    
+    // Filter table rows
+    const tableContainer = document.querySelector('#tab1 .overflow-x-auto');
+    if (tableContainer && !tableContainer.classList.contains('hidden')) {
+      const tableRows = tableContainer.querySelectorAll('tbody tr');
+      tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
+    }
+    
+    // Filter grid cards
+    const gridContainer = document.getElementById('documents-grid');
+    if (gridContainer && !gridContainer.classList.contains('hidden')) {
+      // Wait for grid to be populated
+      requestAnimationFrame(() => {
+        const gridCards = gridContainer.querySelectorAll('.card');
+        gridCards.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          card.style.display = text.includes(lowerQuery) ? '' : 'none';
+        });
+      });
+    }
   }
 
   // Highlight the search query in the text
@@ -72,4 +105,3 @@
     init();
   }
 })();
-
