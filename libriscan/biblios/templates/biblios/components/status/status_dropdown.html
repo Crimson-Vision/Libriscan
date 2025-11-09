@@ -1,13 +1,15 @@
 <!-- Status Dropdown Component -->
 <div class="dropdown dropdown-end" id="statusDropdown">
-    <div tabindex="0" role="button" class="btn btn-sm gap-2 transition-all duration-200 hover:scale-105" id="statusButton">
-        <span id="statusBadge" class="badge badge-sm gap-1.5 px-3 py-1.5 font-semibold">
+    <div tabindex="0" role="button" class="inline-flex items-center gap-0 rounded-lg overflow-hidden transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" id="statusButton">
+        <span id="statusBadge" class="badge badge-sm gap-1.5 px-3 py-1.5 font-semibold rounded-r-none border-r-0">
             <span id="statusIcon"></span>
             <span id="statusText">{{ document.get_status_display }}</span>
         </span>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3 opacity-70">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-        </svg>
+        <span class="flex items-center justify-center px-2 py-1.5 bg-base-200/60 hover:bg-base-200/80 transition-colors rounded-r-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3 text-base-content/60">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+        </span>
     </div>
     <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300 mt-2">
         <li>
