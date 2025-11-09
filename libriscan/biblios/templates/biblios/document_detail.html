@@ -155,17 +155,19 @@
                               
                               <!-- Metadata -->
                               <div class="flex items-center gap-3 text-xs flex-wrap">
-                                {% if page.history.last %}
-                                  <span class="flex items-center gap-1.5 whitespace-nowrap">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-info/70">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <span class="text-[10px] font-semibold text-info/80 uppercase tracking-wide">Created:</span>
-                                    <span class="text-base-content/70 font-medium">{{ page.history.last.history_date|date:"M d, Y" }} {{ page.history.last.history_date|time:"g:i A" }} {{ page.history.last.history_date|date:"T" }}</span>
-                                  </span>
+                                {% if page.history.exists %}
+                                  {% with created=page.history.earliest %}
+                                    <span class="flex items-center gap-1.5 whitespace-nowrap">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-info/70">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                      </svg>
+                                      <span class="text-[10px] font-semibold text-info/80 uppercase tracking-wide">Created:</span>
+                                      <span class="text-base-content/70 font-medium">{{ created.history_date|date:"M d, Y" }} {{ created.history_date|time:"g:i A" }} {{ created.history_date|date:"T" }}</span>
+                                    </span>
+                                  {% endwith %}
                                 {% endif %}
                                 {% if page.history.count > 1 %}
-                                  {% with created=page.history.last latest=page.history.first %}
+                                  {% with created=page.history.earliest latest=page.history.latest %}
                                     {% if latest.history_date != created.history_date %}
                                       <span class="flex items-center gap-1.5 whitespace-nowrap">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-accent/70">
