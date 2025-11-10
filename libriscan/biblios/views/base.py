@@ -31,25 +31,25 @@ class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
 # the permission 'biblios.view_organization' on it.
 # If so, they can access this page. If not, they get a 403.
 def get_org_by_collection(request, short_name, collection_slug):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_document(request, short_name, collection_slug, identifier):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_page(request, short_name, collection_slug, identifier, number):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_word(request, short_name, collection_slug, identifier, number, word_id):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_for_export(
     request, short_name, collection_slug, identifier, use_image=False
 ):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def index(request):
