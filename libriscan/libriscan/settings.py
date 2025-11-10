@@ -33,7 +33,7 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("LB_DEBUG", False)
+DEBUG = os.environ.get("LB_DEBUG") == "True"
 
 ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
