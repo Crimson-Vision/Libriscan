@@ -37,11 +37,18 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Restore active tab from URL hash on page load (after pagination)
   function restoreActiveTab() {
-    const hash = window.location.hash.slice(1); // Remove # from hash
+    const hash = window.location.hash.slice(1);
     if (hash && document.getElementById(hash)) {
       const tabToActivate = document.querySelector(`[data-tab="${hash}"]`);
       if (tabToActivate) {
-        tabToActivate.click();
+        // Prevents scroll jump
+        tabs.forEach(t => {
+          t.classList.remove('tab-active', 'btn-primary', 'font-semibold', 'shadow-md', '-translate-y-0.5');
+        });
+        tabToActivate.classList.add('tab-active', 'btn-primary', 'font-semibold', 'shadow-md', '-translate-y-0.5');
+        
+        panels.forEach(panel => panel.classList.add('hidden'));
+        document.getElementById(hash).classList.remove('hidden');
       }
     }
   }
