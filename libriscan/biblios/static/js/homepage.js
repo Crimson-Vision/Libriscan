@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const targetId = this.getAttribute('data-tab');
       document.getElementById(targetId).classList.remove('hidden');
       
-      // Save active tab in URL hash
-      window.location.hash = targetId;
+      // Save active tab in URL without scrolling
+      history.replaceState(null, null, `#${targetId}`);
     });
   });
   
