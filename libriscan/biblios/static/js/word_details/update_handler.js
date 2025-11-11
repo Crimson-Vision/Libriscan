@@ -4,6 +4,8 @@
 class WordUpdateHandler {
   constructor(wordDetails) {
     this.wordDetails = wordDetails;
+    this.isAutoAdvancing = false;
+    this.autoAdvanceTimeout = null;
   }
 
   async updateWordText(newText, options = {}) {
@@ -74,16 +76,32 @@ class WordUpdateHandler {
   }
 
   autoAdvanceIfPossible() {
+    // Prevent multiple auto-advances from firing
+    if (this.isAutoAdvancing) {
+      return;
+    }
+    
+    // Clear any pending auto-advance
+    if (this.autoAdvanceTimeout) {
+      clearTimeout(this.autoAdvanceTimeout);
+      this.autoAdvanceTimeout = null;
+    }
+    
     const currentButton = WordBlockManager.getWordBlock(this.wordDetails.currentWordId);
     const hasNextWord = currentButton?.nextElementSibling?.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS);
     
     if (hasNextWord) {
-      setTimeout(() => this.wordDetails.goToNextWord(), WordDetailsConfig.AUTO_ADVANCE_DELAY);
+      this.isAutoAdvancing = true;
+      this.autoAdvanceTimeout = setTimeout(() => {
+        this.isAutoAdvancing = false;
+        this.autoAdvanceTimeout = null;
+        this.wordDetails.goToNextWord();
+      }, WordDetailsConfig.AUTO_ADVANCE_DELAY);
     }
   }
 
   async handleMetadataChange(detail, metadataKey, updateBlockFn) {
-    const { wordId, printControl: value, data } = detail;
+    const { wordId, wordVisibilityControl: value, data } = detail;
     const wordBlock = WordBlockManager.getWordBlock(wordId);
     if (!wordBlock) return;
 

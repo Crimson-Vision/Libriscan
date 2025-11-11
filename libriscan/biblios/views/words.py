@@ -4,7 +4,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 
 
 from rules.contrib.views import permission_required
@@ -113,7 +113,45 @@ def update_print_control(
 
     except Exception as e:
         logger.error(f"Error updating print_control for word {word_id}: {e}")
-        return JsonResponse({"error": "Failed to update print control"}, status=500)
+        return JsonResponse({"error": "Failed to update print_control"}, status=500)
+
+
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def toggle_review_flag(
+    request, short_name, collection_slug, identifier, number, word_id
+):
+    """Toggle a TextBlock's review flag"""
+    try:
+        word = get_object_or_404(
+            TextBlock,
+            id=word_id,
+            page__number=number,
+            page__document__identifier=identifier,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
+        )
+        word.review = not word.review
+        word.save(update_fields=["review"])
+        
+        # Count flagged words on the page
+        flagged_count = word.page.words.filter(review=True).count()
+        
+        # Return HTML partial for HTMX swap
+        context = {
+            "word": word,
+            "short_name": short_name,
+            "collection_slug": collection_slug,
+            "identifier": identifier,
+            "number": number,
+            "flagged_count": flagged_count,
+        }
+        return render(request, "biblios/components/forms/review_flag_button.html", context)
+    except Exception as e:
+        logger.error(f"Error toggling review flag for word {word_id}: {e}")
+        return JsonResponse({"error": "Failed to toggle review flag"}, status=500)
 
 
 @permission_required("biblios.view_textblock", fn=get_org_by_word, raise_exception=True)
@@ -189,7 +227,9 @@ def textblock_history(
         return JsonResponse({"error": "Failed to retrieve history"}, status=500)
 
 
-@permission_required("biblios.change_textblock", fn=get_org_by_word, raise_exception=True)
+@permission_required(
+    "biblios.change_textblock", fn=get_org_by_word, raise_exception=True
+)
 @require_http_methods(["POST"])
 def revert_word(request, short_name, collection_slug, identifier, number, word_id):
     """Revert a word to its original value."""
@@ -202,8 +242,8 @@ def revert_word(request, short_name, collection_slug, identifier, number, word_i
             id=word_id,
             page__number=number,
             page__document__identifier=identifier,
-            page__document__series__collection__slug=collection_slug,
-            page__document__series__collection__owner__short_name=short_name,
+            page__document__collection__slug=collection_slug,
+            page__document__collection__owner__short_name=short_name,
         )
         try:
             # earliest() will be the creation record
@@ -243,45 +283,53 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
     """
     Combine two text blocks into new third text block.
 
-    Requires two text block IDs in the request body: block1 and block2.
+    Requires a text block ID in the request body, which will be combined with the prior word on that line.
+    The submitted text block can be in any word visibility control status, but it must have at least one INCLUDE word before it on the same line.
     """
     response = {}
     status = 400
     try:
-        block1 = get_object_or_404(TextBlock, id=request.POST.get("block1", ""))
-        block2 = get_object_or_404(TextBlock, id=request.POST.get("block2", ""))
+        right_block = get_object_or_404(TextBlock, id=request.POST.get("block"))
 
-        if block1.page != block2.page:
-            response = {"error": "Blocks must be on the same page to be merged"}
+        # Find the printable words on this line before the selected one, and take the last as our merge target
+        # TextBlock orders by line+number so we can trust last() to return the correct one
+        left_block = TextBlock.objects.filter(
+            page=right_block.page,
+            line=right_block.line,
+            number__lt=right_block.number,
+            print_control=TextBlock.INCLUDE,
+        ).last()
 
-        elif block1.line != block2.line or abs(block1.number - block2.number) != 1:
-            response = {"error": "Only sequential text on the same line can be merged"}
+        if not left_block:
+            response = {
+                "error": "The selected word must have another printable word before it on the same line"
+            }
 
         else:
             new_block = TextBlock()
 
             # Concatenate the blocks' text with no space
-            new_block.text = f"{block1.text}{block2.text}"
+            new_block.text = f"{left_block.text}{right_block.text}"
 
             # Use block 1's info except where we need block 2's
-            new_block.text_type = block1.text_type
-            new_block.page = block1.page
-            new_block.line = block1.line
-            new_block.number = block1.number
+            new_block.text_type = left_block.text_type
+            new_block.page = left_block.page
+            new_block.line = left_block.line
+            new_block.number = left_block.number
             new_block.confidence = TextBlock.CONF_ACCEPTED
             # Don't assume block_1 is the first.
             # Take the smallest (x,y)0 and the largest (x,y)1 to get the full boundary corners
-            new_block.geo_x_0 = min(block1.geo_x_0, block2.geo_x_0)
-            new_block.geo_y_0 = min(block1.geo_y_0, block2.geo_y_0)
-            new_block.geo_x_1 = max(block1.geo_x_1, block2.geo_x_1)
-            new_block.geo_y_1 = max(block1.geo_x_1, block2.geo_x_1)
+            new_block.geo_x_0 = min(left_block.geo_x_0, right_block.geo_x_0)
+            new_block.geo_y_0 = min(left_block.geo_y_0, right_block.geo_y_0)
+            new_block.geo_x_1 = max(left_block.geo_x_1, right_block.geo_x_1)
+            new_block.geo_y_1 = max(left_block.geo_x_1, right_block.geo_x_1)
 
             with transaction.atomic():
-                block1.print_control = TextBlock.MERGE
-                block1.save()
+                left_block.print_control = TextBlock.MERGE
+                left_block.save()
 
-                block2.print_control = TextBlock.MERGE
-                block2.save()
+                right_block.print_control = TextBlock.MERGE
+                right_block.save()
 
                 new_block.save()
 
@@ -295,8 +343,8 @@ def merge_blocks(request, short_name, collection_slug, identifier, number):
                         if isinstance(new_block.suggestions, list)
                         else new_block.suggestions,
                     },
-                    "merged_1": block1.id,
-                    "merged_2": block2.id,
+                    "merged_left": left_block.id,
+                    "merged_right": right_block.id,
                 }
                 status = 201
 

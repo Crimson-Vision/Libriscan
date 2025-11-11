@@ -5,7 +5,7 @@
 
 class ConfidenceToggle {
   static STORAGE_KEY = 'confidenceTogglePrefs';
-  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge'];
+  static LEVELS = ['high', 'medium', 'low', 'accepted', 'omit', 'merge', 'review'];
 
   constructor(containerId = 'word-container') {
     // Initialize toggles as empty object first to prevent undefined errors
@@ -57,8 +57,7 @@ class ConfidenceToggle {
     if (!this.container) return;
     
     this.container.querySelectorAll('.word-block').forEach(block => {
-      const isAccepted = block.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
-                        parseFloat(block.dataset.wordConfidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+      const isAccepted = block.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
       if (!isAccepted) return;
       
       block.classList.toggle('btn-dash', isVisible);

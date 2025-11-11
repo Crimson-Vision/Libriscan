@@ -21,8 +21,7 @@ class WordBlockManager {
     wordBlock.classList.add(`confidence-${data.confidence_level}`);
     
     // Update btn-ghost/btn-dash classes for accepted words
-    const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
-                      parseFloat(data.confidence) >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+    const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
     let acceptedToggleVisible = true;
     try {
       acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
@@ -34,26 +33,25 @@ class WordBlockManager {
     wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
     wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
     
-    // Update print control classes
-    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
+    // Update word visibility control classes
+    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
     if (data.print_control === 'O') {
-      wordBlock.classList.add('print-control-omit');
+      wordBlock.classList.add('word-visibility-control-omit');
     } else if (data.print_control === 'M') {
-      wordBlock.classList.add('print-control-merge');
+      wordBlock.classList.add('word-visibility-control-merge');
     }
   }
 
-  static updatePrintControlClasses(wordBlock, printControl) {
-    wordBlock.classList.remove('print-control-omit', 'print-control-merge');
-    if (printControl === 'O') wordBlock.classList.add('print-control-omit');
-    else if (printControl === 'M') wordBlock.classList.add('print-control-merge');
+  static updateWordVisibilityControlClasses(wordBlock, wordVisibilityControl) {
+    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
+    if (wordVisibilityControl === 'O') wordBlock.classList.add('word-visibility-control-omit');
+    else if (wordVisibilityControl === 'M') wordBlock.classList.add('word-visibility-control-merge');
   }
 
   static updateContent(wordBlock, text, confidence, confidenceLevel) {
     wordBlock.innerHTML = '';
     const textSpan = document.createElement('span');
-    const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED || 
-                      confidence >= WordDetailsConfig.ACCEPTED_THRESHOLD;
+    const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
     
     if (isAccepted) textSpan.className = 'accepted-word';
     textSpan.textContent = text;
@@ -72,8 +70,12 @@ class WordBlockManager {
   }
 
   static syncActiveWordButton(wordId) {
-    document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}.btn-active`)
-      ?.classList.remove('btn-active');
+    const previousActive = document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}.btn-active`);
+    if (previousActive) {
+      previousActive.classList.remove('btn-active');
+      // Remove focus to prevent black border from being left behind
+      previousActive.blur();
+    }
 
     const currentButton = this.getWordBlock(wordId);
     if (!currentButton) return;

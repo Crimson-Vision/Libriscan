@@ -32,10 +32,21 @@ class WordEditor {
     }
     if (this.wordInput) {
       this.wordInput.onkeypress = (event) => { 
-        if (event.key === 'Enter') this.save(); 
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          event.stopPropagation();
+          this.save(); 
+        }
       };
       this.wordInput.onkeydown = (event) => {
-        if (event.key === 'Escape') this.revert();
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          this.revert();
+        } else if (event.key === 'Enter') {
+          // Prevent Enter from bubbling up to keyboard handler
+          event.stopPropagation();
+        }
       };
     }
     

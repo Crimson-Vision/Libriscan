@@ -33,18 +33,33 @@ load_dotenv(dotenv_path=LOCAL_DIR / ".env")
 SECRET_KEY = os.environ.get("LB_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("LB_DEBUG", False)
+DEBUG = os.environ.get("LB_DEBUG") == "True"
 
 ALLOWED_HOSTS = os.environ.get("LB_ALLOWED_HOSTS", "127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("LB_TRUSTED_ORIGINS", "http://localhost").split(
     ","
 )
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     USE_X_FORWARDED_HOST = True
+
+LB_VERSION = os.environ.get("LB_VERSION")
+LB_TAGS = os.environ.get("LB_TAGS", "").split("\n")
+
+# Look for the tag with the SHA, so we can easily reference it
+LB_SHA = None
+
+
+for tag in LB_TAGS:
+    s = tag.split(":")
+    if len(s) > 1 and s[1].startswith("sha-"):
+        # There should only be one, but stop looking once we find it anyway
+        LB_SHA = s[1]
+        break
 
 # Application definition
 

@@ -1,26 +1,25 @@
 /**
  * WordMetadata - Handles word metadata updates
- * Manages print control and accepted status functionality
+ * Manages word visibility control and accepted status functionality
  */
 class WordMetadata {
   constructor(elements) {
-    this.printControlDropdownBtn = elements.printControlDropdownBtn;
-    this.printControlDisplay = elements.printControlDisplay;
-    this.printControlBadge = elements.printControlBadge;
-    this.printControlOptions = elements.printControlOptions;
+    this.wordVisibilityControlDropdownBtn = elements.wordVisibilityControlDropdownBtn;
+    this.wordVisibilityControlBadge = elements.wordVisibilityControlBadge;
+    this.wordVisibilityControlOptions = elements.wordVisibilityControlOptions;
     this.acceptBtn = elements.acceptBtn;
     this.currentWordId = null;
     this.currentWordInfo = null;
-    this.currentPrintControl = 'I';
+    this.currentWordVisibilityControl = 'I';
     this.onAccept = null;
   }
 
   initializeEventListeners() {
-    this.printControlOptions.forEach(option => {
+    this.wordVisibilityControlOptions.forEach(option => {
       option.addEventListener('click', (event) => {
         event.preventDefault();
-        this.updatePrintControl(option.getAttribute('data-value'));
-        this._closeDropdown(this.printControlDropdownBtn);
+        this.updateWordVisibilityControl(option.getAttribute('data-value'));
+        this._closeDropdown(this.wordVisibilityControlDropdownBtn);
       });
     });
     
@@ -38,73 +37,71 @@ class WordMetadata {
     this.currentWordId = wordInfo.id;
   }
 
-  async updatePrintControl(printControlValue) {
+  async updateWordVisibilityControl(wordVisibilityControlValue) {
     if (!this.currentWordId) {
       console.error('No word selected');
       LibriscanUtils.showToast('No word selected', 'error');
       return;
     }
     
-    this.printControlDisplay.textContent = 'Updating...';
-    this.printControlDropdownBtn.disabled = true;
+    this.wordVisibilityControlBadge.textContent = 'Updating...';
+    this.wordVisibilityControlDropdownBtn.disabled = true;
     
     try {
-      const data = await this._sendPrintControlUpdate(printControlValue);
-      this.currentPrintControl = data.print_control;
-      this._updatePrintControlDisplay(data.print_control);
-      this._showPrintControlSuccess();
-      LibriscanUtils.showToast('Print control updated', 'success');
+      const data = await this._sendWordVisibilityControlUpdate(wordVisibilityControlValue);
+      this.currentWordVisibilityControl = data.print_control;
+      this._updateWordVisibilityControlDisplay(data.print_control);
+      this._showWordVisibilityControlSuccess();
+      LibriscanUtils.showToast('Word visibility control updated', 'success');
       
       // Dispatch event to update word block styling
-      document.dispatchEvent(new CustomEvent('printControlUpdated', { 
-        detail: { wordId: this.currentWordId, printControl: data.print_control, data: data } 
+      document.dispatchEvent(new CustomEvent('wordVisibilityControlUpdated', { 
+        detail: { wordId: this.currentWordId, wordVisibilityControl: data.print_control, data: data } 
       }));
       
       return data;
     } catch (error) {
-      console.error('Error updating print control:', error);
-      LibriscanUtils.showToast(error.message || 'Failed to update print control', 'error');
-      this._updatePrintControlDisplay(this.currentPrintControl);
+      console.error('Error updating word visibility control:', error);
+      LibriscanUtils.showToast(error.message || 'Failed to update word visibility control', 'error');
+      this._updateWordVisibilityControlDisplay(this.currentWordVisibilityControl);
       throw error;
     } finally {
-      this.printControlDropdownBtn.disabled = false;
+      this.wordVisibilityControlDropdownBtn.disabled = false;
     }
   }
 
-  updatePrintControlDisplay(printControlValue) {
-    this.currentPrintControl = printControlValue;
-    this._updatePrintControlDisplay(printControlValue);
+  updateWordVisibilityControlDisplay(wordVisibilityControlValue) {
+    this.currentWordVisibilityControl = wordVisibilityControlValue;
+    this._updateWordVisibilityControlDisplay(wordVisibilityControlValue);
   }
 
-  async _sendPrintControlUpdate(printControlValue) {
+  async _sendWordVisibilityControlUpdate(wordVisibilityControlValue) {
     const { shortName, collectionSlug, identifier, pageNumber } = LibriscanUtils.parseLibriscanURL();
     const url = `/${shortName}/${collectionSlug}/${identifier}/page${pageNumber}/word/${this.currentWordId}/print-control/`;
     
     return await LibriscanUtils.postFormData(url, { 
-      print_control: printControlValue 
+      print_control: wordVisibilityControlValue 
     });
   }
 
-  _updatePrintControlDisplay(printControlValue) {
+  _updateWordVisibilityControlDisplay(wordVisibilityControlValue) {
     const config = {
       'I': { text: 'Include', badge: 'badge-success' },
       'M': { text: 'Merge with Prior', badge: 'badge-warning' },
       'O': { text: 'Omit', badge: 'badge-error' }
-    }[printControlValue] || { text: 'Include', badge: 'badge-success' };
+    }[wordVisibilityControlValue] || { text: 'Include', badge: 'badge-success' };
     
-    if (this.printControlDisplay) this.printControlDisplay.textContent = config.text;
-    
-    if (this.printControlBadge) {
-      this.printControlBadge.textContent = printControlValue;
-      this.printControlBadge.className = `badge badge-xs ${config.badge}`;
+    if (this.wordVisibilityControlBadge) {
+      this.wordVisibilityControlBadge.textContent = config.text;
+      this.wordVisibilityControlBadge.className = `badge badge-sm ${config.badge}`;
     }
   }
 
-  _showPrintControlSuccess() {
-    if (!this.printControlBadge) return;
+  _showWordVisibilityControlSuccess() {
+    if (!this.wordVisibilityControlBadge) return;
     
-    this.printControlBadge.classList.add('badge-outline');
-    setTimeout(() => this.printControlBadge.classList.remove('badge-outline'), 300);
+    this.wordVisibilityControlBadge.classList.add('badge-outline');
+    setTimeout(() => this.wordVisibilityControlBadge.classList.remove('badge-outline'), 300);
   }
 
   _closeDropdown(dropdownBtn) {

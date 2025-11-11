@@ -2,25 +2,38 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from django import forms
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 
 from huey.contrib.djhuey import HUEY as huey
 
 from rules.contrib.views import permission_required
 
-from biblios.models import Document, Collection, Page, DublinCoreMetadata, TextBlock
+from biblios.models import (
+    Document,
+    Collection,
+    Series,
+    Page,
+    DublinCoreMetadata,
+    TextBlock,
+)
 
 from biblios.forms import DocumentForm, FilePondUploadForm
-from .base import OrgPermissionRequiredMixin, get_org_by_page
+from .base import (
+    OrgPermissionRequiredMixin,
+    get_org_by_page,
+    get_org_by_document,
+    get_org_for_export,
+)
 
 logger = logging.getLogger("django")
 
@@ -52,14 +65,34 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
     def get_form(self, *args, **kwargs):
         form = super().get_form(*args, **kwargs)
 
-        # Update the Series field so it only shows values owned by the current Collection
-        collection = Collection.objects.filter(
+        # Get the current collection from URL
+        collection = Collection.objects.get(
             owner__short_name=self.kwargs.get("short_name"),
             slug=self.kwargs.get("collection_slug"),
-        ).first()
+        )
+
+        # This view can be called from either a collection or a series.
+        # When it's the series, we'll want to use that in the form
+        series = None
+        if self.kwargs.get("series_slug"):
+            series = Series.objects.get(
+                slug=self.kwargs.get("series_slug"), collection=collection
+            )
+
+        # Pre-populate collection field
+        form.initial["collection"] = collection.id
+
+        # Filter collection queryset to only show current collection
+        form.fields["collection"].queryset = Collection.objects.filter(id=collection.id)
+
+        # Update the Series field so it only shows values owned by the current Collection
         form.fields["series"].queryset = form.fields["series"].queryset.filter(
             collection=collection
         )
+
+        # If the form was called from a Series page, set that as the default
+        if series:
+            form.initial["series"] = series.id
 
         return form
 
@@ -83,14 +116,79 @@ class DocumentCreateView(OrgPermissionRequiredMixin, CreateView):
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        collection = Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+        context["collection"] = collection
+        return context
+
 
 class DocumentUpdateView(OrgPermissionRequiredMixin, UpdateView):
     model = Document
+    form_class = DocumentForm
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "biblios/document_form.html"
+
+    def _get_collection(self):
+        """Helper to get the current collection."""
+        return Collection.objects.get(
+            owner__short_name=self.kwargs.get("short_name"),
+            slug=self.kwargs.get("collection_slug"),
+        )
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        collection = self._get_collection()
+        form.fields["series"].queryset = form.fields["series"].queryset.filter(
+            collection=collection
+        )
+        form.fields["collection"].widget = forms.HiddenInput()
+        return form
+
+    def form_valid(self, form):
+        """Ensure collection is set correctly before saving."""
+        form.instance.collection = self._get_collection()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(
+            "document",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+                "identifier": self.object.identifier,
+            },
+        )
 
 
 class DocumentDeleteView(OrgPermissionRequiredMixin, DeleteView):
     model = Document
-    success_url = reverse_lazy("index")
+    slug_field = "identifier"
+    slug_url_kwarg = "identifier"
+    template_name = "biblios/document_confirm_delete.html"
+
+    def get_object(self, queryset=None):
+        """Get document by URL parameters."""
+        return get_object_or_404(
+            Document,
+            collection__owner__short_name=self.kwargs.get("short_name"),
+            collection__slug=self.kwargs.get("collection_slug"),
+            identifier=self.kwargs.get("identifier"),
+        )
+
+    def get_success_url(self):
+        """Redirect to collection page after deletion."""
+        return reverse(
+            "collection",
+            kwargs={
+                "short_name": self.kwargs.get("short_name"),
+                "collection_slug": self.kwargs.get("collection_slug"),
+            },
+        )
 
 
 class MetadataDetail(OrgPermissionRequiredMixin, DetailView):
@@ -284,6 +382,72 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         )
 
 
+@permission_required("biblios.delete_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST"])
+def delete_page(request, short_name, collection_slug, identifier, number):
+    """Delete a page and redirect back to document detail."""
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+    page.delete()
+    return redirect(
+        "document",
+        short_name=short_name,
+        collection_slug=collection_slug,
+        identifier=identifier,
+    )
+
+
+@permission_required("biblios.change_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST"])
+def reorder_page(request, short_name, collection_slug, identifier, number):
+    """Reorder a page by swapping its number with the page above or below."""
+    from django.db import transaction
+    
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+    
+    direction = request.GET.get('direction', '').lower()
+    if direction not in ['up', 'down']:
+        return JsonResponse({'success': False, 'error': 'Invalid direction'}, status=400)
+    
+    pages = list(page.document.pages.order_by('number'))
+    if len(pages) <= 1:
+        return JsonResponse({'success': False, 'error': 'Cannot reorder single page'}, status=400)
+    
+    current_index = next(i for i, p in enumerate(pages) if p.id == page.id)
+    offset = -1 if direction == 'up' else 1
+
+    # Cannot move the first or last page
+    if (direction == 'up' and current_index == 0) or (direction == 'down' and current_index == len(pages) - 1):
+        return JsonResponse({'success': False, 'error': f'Cannot move {direction}'}, status=400)
+    
+    try:
+        with transaction.atomic():
+            target_page = pages[current_index + offset]
+            # Swap the page numbers using a temporary number to avoid unique constraint violation
+            temp, current_num, target_num = 99999, page.number, target_page.number
+            page.number, target_page.number = temp, current_num
+            page.save(update_fields=['number'])
+            target_page.save(update_fields=['number'])
+            page.number = target_num
+            page.save(update_fields=['number'])
+        return JsonResponse({'success': True})
+    except Exception as error:
+        logger.error('Error reordering page: %s', error)
+        return JsonResponse({'success': False, 'error': 'Reorder failed'}, status=500)
+
+
+@permission_required("biblios.update_page", fn=get_org_by_page, raise_exception=True)
 @require_http_methods(["POST"])
 def extract_text(request, short_name, collection_slug, identifier, number):
     page = Page.objects.select_related("document__collection__owner").get(
@@ -320,6 +484,9 @@ def extract_text(request, short_name, collection_slug, identifier, number):
     return render(request, "biblios/components/forms/extraction_loading.html", context)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_pdf(request, short_name, collection_slug, identifier, use_image=True):
     """
     Generates a PDF of a given doc ID.
@@ -335,6 +502,9 @@ def export_pdf(request, short_name, collection_slug, identifier, use_image=True)
     return doc.export_pdf(use_image)
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_text(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -347,6 +517,9 @@ def export_text(request, short_name, collection_slug, identifier):
     return doc.export_text()
 
 
+@permission_required(
+    "biblios.view_document", fn=get_org_for_export, raise_exception=True
+)
 def export_xml(request, short_name, collection_slug, identifier):
     """
     Generates a text file of a given doc ID.
@@ -359,9 +532,7 @@ def export_xml(request, short_name, collection_slug, identifier):
     return doc.export_xml()
 
 
-@permission_required(
-    "biblios.view_organization", fn=get_org_by_page, raise_exception=True
-)
+@permission_required("biblios.view_page", fn=get_org_by_page, raise_exception=True)
 def check_words(request, short_name, collection_slug, identifier, number):
     """Respond to the textblock polling request."""
     page = get_object_or_404(
@@ -391,3 +562,31 @@ def check_words(request, short_name, collection_slug, identifier, number):
         # If the text blocks don't exist yet, return 204 No Content
         # Or whatever HTML should get swapped in while extraction is running
         return HttpResponse(status=204)
+
+
+@permission_required(
+    "biblios.change_document", fn=get_org_by_document, raise_exception=True
+)
+@require_http_methods(["POST", "PATCH"])
+def update_document_status(request, short_name, collection_slug, identifier):
+    """Update a Document's status field"""
+    document = get_object_or_404(
+        Document,
+        identifier=identifier,
+        collection__slug=collection_slug,
+        collection__owner__short_name=short_name,
+    )
+
+    status = request.POST.get("status", "").strip()
+    if status not in Document.STATUS_CHOICES:
+        return JsonResponse({"error": "Invalid status value"}, status=400)
+
+    document.status = status
+    document.save(update_fields=["status"])
+
+    logger.info("Updated document %s status to %s", identifier, status)
+
+    return JsonResponse({
+        "status": document.status,
+        "status_display": Document.STATUS_CHOICES.get(document.status),
+    })

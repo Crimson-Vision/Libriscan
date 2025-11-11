@@ -18,6 +18,14 @@ class WordKeyboard {
 
     const { key } = event;
     
+    // Prevent keyboard navigation during auto-advance to avoid double-advancing
+    if (this.wordDetails.updateHandler?.isAutoAdvancing) {
+      if (key === 'ArrowLeft' || key === 'ArrowRight') {
+        event.preventDefault();
+        return;
+      }
+    }
+    
     if (key === 'ArrowLeft') {
       event.preventDefault();
       this.wordDetails.goToPrevWord();
@@ -33,6 +41,9 @@ class WordKeyboard {
     } else if (key === 'a' || key === 'A') {
       event.preventDefault();
       this.wordDetails.metadata.accept();
+    } else if (key === 'f' || key === 'F') {
+      event.preventDefault();
+      this.wordDetails.reviewFlag?.toggleFlag();
     }
   }
 

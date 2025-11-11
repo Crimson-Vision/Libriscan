@@ -41,7 +41,7 @@ class WordRevert {
 
       this.wordDetails.updateHandler.applyWordUpdate(data);
 
-      if (data.print_control !== undefined) this.wordDetails.metadata.updatePrintControlDisplay(data.print_control);
+      if (data.print_control !== undefined) this.wordDetails.metadata.updateWordVisibilityControlDisplay(data.print_control);
 
       const auditHistoryTab = document.getElementById('wordAuditHistoryTab');
       if (auditHistoryTab?.checked && this.wordDetails.auditHistory) {

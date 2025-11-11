@@ -73,7 +73,113 @@ Perform the following steps to get this repo up and running on your computer:
 
 ---
 
-## Special Notes
+## CSS Setup (Tailwind / DaisyUI)
+
+**Reference:** [daisyUI Django Installation Guide](https://daisyui.com/docs/install/django/?lang=en)
+
+### One-Time Initial Setup
+
+**1. Navigate to CSS directory:**
+
+```bash
+cd libriscan/biblios/static/css
+```
+
+**2. Download Tailwind CSS executable (choose your platform - run ONLY ONE):**
+
+```bash
+# macOS Apple Silicon (M1/M2/M3)
+curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-arm64
+
+# macOS Intel
+# curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-macos-x64
+
+# Linux ARM64
+# curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-arm64
+
+# Linux x64
+# curl -sLo tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+
+# Windows x64
+# curl -sLo tailwindcss.exe https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-windows-x64.exe
+```
+
+**3. Make executable (macOS/Linux only):**
+
+```bash
+chmod +x tailwindcss
+```
+
+**4. Download daisyUI plugins:**
+
+```bash
+curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.mjs
+curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.mjs
+```
+
+**5. Verify `input.css` configuration:**
+
+The `input.css` file should be configured to scan your templates and JavaScript files:
+
+```css
+@import "tailwindcss";
+
+@source "../../templates/**/*.html";
+@source "../../static/js/**/*.js";
+@source not "./tailwindcss.exe";
+@source not "./daisyui{,*}.mjs";
+
+@plugin "./daisyui.mjs";
+
+@plugin "./daisyui-theme.mjs" {
+  /* custom themes */
+}
+```
+
+**6. Generate `output.css` (first time):**
+
+```bash
+./tailwindcss -i input.css -o output.css
+```
+
+**Windows users:**
+
+```bash
+tailwindcss.exe -i input.css -o output.css
+```
+
+### Development Workflow
+
+When making CSS/template changes, run in two terminals:
+
+**Terminal 1 - Tailwind (watch mode):**
+
+```bash
+cd libriscan/biblios/static/css
+./tailwindcss -i input.css -o output.css --watch
+```
+
+**Windows users:**
+
+```bash
+cd libriscan/biblios/static/css
+tailwindcss.exe -i input.css -o output.css --watch
+```
+
+**Terminal 2 - Django:**
+
+```bash
+cd libriscan
+python manage.py runserver
+```
+
+**Notes:**
+- Only run Tailwind when changing CSS/templates. `output.css` is auto-generated - don't edit manually.
+- The `input.css` file scans:
+  - `biblios/templates/**/*.html` - All HTML template files
+  - `biblios/static/js/**/*.js` - JavaScript files (for dynamically generated classes)
+- If you add templates or JS files in other locations, update the `@source` directives in `input.css`.
+
 
 ### Admin Portal
 

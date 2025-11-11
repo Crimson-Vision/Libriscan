@@ -211,3 +211,12 @@ launch.json
 libriscan/static/
 mnt/
 staticfiles/
+
+# Tailwind CSS standalone executables
+libriscan/biblios/static/css/tailwindcss
+libriscan/biblios/static/css/tailwindcss.exe
+
+# DaisyUI plugin files
+libriscan/biblios/static/css/daisyui.mjs
+libriscan/biblios/static/css/daisyui-theme.mjs
+node_modules/

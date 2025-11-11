@@ -1,4 +1,5 @@
 {% extends "biblios/base.html" %}
+{% load static %}
 {% block content %}
         <!-- Breadcrumb Navigation with Icons -->
         <nav class="mb-3 text-sm breadcrumbs">
@@ -43,39 +44,167 @@
             {{ document }}
               </span>
           </li>
-            </ul>
-        </nav></svg>
-            </ul>
-        </nav>
+        </ul>
+      </nav>
 
         <!-- Document Header Card -->
         <div class="card bg-base-100 shadow mb-6">
             <div class="card-body">
-                <h2 class="card-title text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center size-8 rounded-full bg-warning/20">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                      </svg>
-                    </span>
-                    {{ document }}
-                </h2>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3 flex-1">
+                        <h2 class="card-title text-xl font-bold flex items-center gap-2">
+                            <span class="inline-flex items-center justify-center size-8 rounded-full bg-warning/20">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                              </svg>
+                            </span>
+                            {{ document }}
+                            <a href="{% url 'document_update' keys.owner keys.collection_slug document.identifier %}" 
+                               class="btn btn-ghost btn-xs tooltip tooltip-right"
+                               data-tip="Edit title">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                </svg>
+                            </a>
+                        </h2>
+                        <!-- Status Dropdown -->
+                        {% include "biblios/components/status/status_dropdown.html" %}
+                    </div>
+                    <button 
+                        type="button" 
+                        class="btn btn-ghost btn-sm btn-error tooltip tooltip-left"
+                        data-tip="Delete document"
+                        onclick="showDeleteDocumentModal('{{ document.identifier }}', '{% url 'document_delete' keys.owner keys.collection_slug document.identifier %}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                    </button>
+                </div>
                 
                 <!-- Pages Section -->
-                <div class="mb-2 text-base font-semibold text-base-content/80">Pages in this document:</div>
-                  <ul class="bg-base-100 rounded-box shadow divide-base-200">
+                <div class="mb-4">
+                  <h3 class="text-base font-semibold text-base-content/80 mb-3">Pages in this document:</h3>
+                  <div class="space-y-2" id="pagesContainer">
                     {% for page in document.pages.all %}
-                      <li class="px-4 py-3 flex items-center justify-between hover:bg-secondary/10 transition rounded-box">
-                        <a href="{{ page.get_absolute_url }}" class="flex items-center gap-3 group">
-                          <span class="inline-flex items-center justify-center size-6 rounded bg-info/10">
-                            <span class="text-xs font-medium text-info">{{ page.number }}</span>
-                          </span>
-                          <span class="text-sm font-medium group-hover:underline">Page {{ page.number }}</span>
-                        </a>
-                      </li>
+                      <a href="{{ page.get_absolute_url }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group block cursor-pointer outline outline-1 outline-base-300 hover:outline-primary/50 page-card" data-page-number="{{ page.number }}">
+                        <div class="card-body p-4">
+                          <div class="flex items-start gap-4">
+                            <!-- Arrow Buttons (Reorder) -->
+                            {% if document.pages.count > 1 %}
+                            <div class="flex-shrink-0 flex flex-col gap-2">
+                              <button 
+                                type="button"
+                                class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.first %}btn-disabled opacity-50{% endif %}"
+                                data-tip="Move up"
+                                {% if forloop.first %}disabled{% endif %}
+                                hx-post="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=up"
+                                hx-swap="none"
+                                hx-trigger="click"
+                                onclick="event.stopPropagation()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                                </svg>
+                              </button>
+                              <button 
+                                type="button"
+                                class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.last %}btn-disabled opacity-50{% endif %}"
+                                data-tip="Move down"
+                                {% if forloop.last %}disabled{% endif %}
+                                hx-post="{% url 'page_reorder' keys.owner keys.collection_slug document.identifier page.number %}?direction=down"
+                                hx-swap="none"
+                                hx-trigger="click"
+                                onclick="event.stopPropagation()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                </svg>
+                              </button>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Page Number Badge -->
+                            <div class="flex-shrink-0">
+                              <div class="flex items-center justify-center size-10 rounded-lg bg-info/10 group-hover:bg-info/20 transition-colors">
+                                <span class="text-sm font-semibold text-info">{{ page.number }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Page Content -->
+                            <div class="flex-1 min-w-0">
+                              <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span class="text-base font-semibold text-base-content group-hover:text-primary transition-colors">
+                                  Page {{ page.number }}
+                                </span>
+                                <!-- Status Badges -->
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                  {% if not page.has_extraction %}
+                                    <span class="badge badge-sm badge-warning">New</span>
+                                  {% elif page.has_extraction %}
+                                    <span class="badge badge-sm badge-success">Transcribed</span>
+                                  {% endif %}
+                                </div>
+                              </div>
+                              
+                              <!-- Snippet Preview -->
+                              {% if page.snippet %}
+                                <blockquote class="text-sm text-base-content/70 line-clamp-2 mb-2 border-l-4 border-primary/30 pl-3 italic">
+                                  "{{ page.snippet }}"
+                                </blockquote>
+                              {% else %}
+                                <p class="text-sm text-base-content/50 italic mb-2">No preview available</p>
+                              {% endif %}
+                              
+                              <!-- Metadata -->
+                              <div class="flex items-center gap-3 text-xs flex-wrap">
+                                {% if page.history.exists %}
+                                  {% with created=page.history.earliest %}
+                                    <span class="flex items-center gap-1.5 whitespace-nowrap">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-info/70">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                      </svg>
+                                      <span class="text-[10px] font-semibold text-info/80 uppercase tracking-wide">Created:</span>
+                                      <span class="text-base-content/70 font-medium">{{ created.history_date|date:"M d, Y" }} {{ created.history_date|time:"g:i A" }} {{ created.history_date|date:"T" }}</span>
+                                    </span>
+                                  {% endwith %}
+                                {% endif %}
+                                {% if page.history.count > 1 %}
+                                  {% with created=page.history.earliest latest=page.history.latest %}
+                                    {% if latest.history_date != created.history_date %}
+                                      <span class="flex items-center gap-1.5 whitespace-nowrap">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3 text-accent/70">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                                        </svg>
+                                        <span class="text-[10px] font-semibold text-accent/80 uppercase tracking-wide">Last Modified:</span>
+                                        <span class="text-base-content/70 font-medium">{{ latest.history_date|date:"M d, Y" }} {{ latest.history_date|time:"g:i A" }} {{ latest.history_date|date:"T" }}</span>
+                                      </span>
+                                    {% endif %}
+                                  {% endwith %}
+                                {% endif %}
+                              </div>
+                            </div>
+                            
+                            <!-- Delete Button -->
+                            <div class="flex-shrink-0">
+                        <button 
+                          type="button" 
+                                class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
+                          data-tip="Delete page"
+                                onclick="event.stopPropagation(); event.preventDefault(); showDeletePageModal({{ page.number }}, '{% url 'page_delete' keys.owner keys.collection_slug document.identifier page.number %}')">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>
+                        </button>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
                     {% empty %}
-                      <li class="px-4 py-3 text-center text-sm opacity-60">No pages in this document yet.</li>
+                      <div class="card bg-base-100 border border-base-300">
+                        <div class="card-body p-6 text-center">
+                          <p class="text-sm text-base-content/60">No pages in this document yet.</p>
+                        </div>
+                      </div>
                     {% endfor %}
-                  </ul>
+                  </div>
                   <div class="mt-4 flex justify-end">
                       <a href="{% url 'page_create' keys.owner keys.collection_slug document.identifier %}" class="btn btn-secondary btn-md">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -86,27 +215,156 @@
                   </div>
                 </div>
 
-                <!-- Downloads Export Section -->
-                <div>
-                    <div class="mb-3 text-base font-semibold text-base-content/80 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
-                        Export options:
+                <!-- Export Section -->
+                 {% if document.can_export %}
+                <div class="mt-6 pt-6 border-t border-base-300">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-base-content flex items-center gap-2 mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                            </svg>
+                            Export Document
+                        </h3>
+                        <p class="text-sm text-base-content/60 ml-7">Download your document in various formats</p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <a href="{% url 'export_pdf' keys.owner keys.collection_slug document.identifier %}" class="btn btn btn-error btn-sm justify-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- PDF with Images Card -->
+                        <a href="{% url 'export_pdf' keys.owner keys.collection_slug document.identifier %}" 
+                           class="card bg-base-100 border-2 border-base-300 hover:border-primary hover:shadow-lg transition-all duration-200 group">
+                            <div class="card-body p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-lg bg-primary/10 p-3 group-hover:bg-primary/20 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
                             PDF with Images
+                                        </h4>
+                                        <p class="text-xs text-base-content/60 line-clamp-2">
+                                            Full document with embedded page images
+                                        </p>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-base-content/40 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </a>
-                        <a href="{% url 'export_textpdf' keys.owner keys.collection_slug document.identifier %}" class="btn btn btn-warning btn-sm justify-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+
+                        <!-- Text-only PDF Card -->
+                        <a href="{% url 'export_textpdf' keys.owner keys.collection_slug document.identifier %}" 
+                           class="card bg-base-100 border-2 border-base-300 hover:border-primary hover:shadow-lg transition-all duration-200 group">
+                            <div class="card-body p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-lg bg-primary/10 p-3 group-hover:bg-primary/20 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
                             Text-only PDF
+                                        </h4>
+                                        <p class="text-xs text-base-content/60 line-clamp-2">
+                                            PDF format with extracted text only
+                                        </p>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-base-content/40 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </a>
-                        <a href="{% url 'export_text' keys.owner keys.collection_slug document.identifier %}" class="btn btn btn-success btn-sm justify-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+
+                        <!-- Plain Text Card -->
+                        <a href="{% url 'export_text' keys.owner keys.collection_slug document.identifier %}" 
+                           class="card bg-base-100 border-2 border-base-300 hover:border-primary hover:shadow-lg transition-all duration-200 group">
+                            <div class="card-body p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="rounded-lg bg-primary/10 p-3 group-hover:bg-primary/20 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-semibold text-base text-base-content group-hover:text-primary transition-colors mb-1">
                             Plain Text
+                                        </h4>
+                                        <p class="text-xs text-base-content/60 line-clamp-2">
+                                            Simple text file with extracted content
+                                        </p>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-base-content/40 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </div>
                         </a>
-                    </div>
+                      </div>
                 </div>
+                {% endif %}
             </div>
         </div>
+
+        <!-- Delete Document Confirmation Modal -->
+        {% include "biblios/components/delete_document_modal.html" %}
+
+        <!-- Delete Page Confirmation Modal -->
+        {% include "biblios/components/delete_page_modal.html" %}
+
+<!-- Status Dropdown Script -->
+<script src="{% static 'js/document_status.js' %}"></script>
+<script>
+    // Initialize status dropdown when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentStatus = '{{ document.status }}';
+        window.initStatusDropdown(currentStatus);
+    });
+</script>
+{% if document.pages.count > 1 %}
+<script>
+    document.body.addEventListener('htmx:afterRequest', function(event) {
+        const target = event.target;
+        const xhr = event.detail.xhr;
+        if (!xhr || !target.hasAttribute('hx-post') || !target.getAttribute('hx-post').includes('/reorder/')) return;
+        
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (xhr.status === 200 && response.success) {
+                const url = target.getAttribute('hx-post');
+                const pageNumber = parseInt(url.match(/page(\d+)\/reorder/)[1]);
+                const direction = url.includes('direction=up') ? 'up' : 'down';
+                const cards = Array.from(document.querySelectorAll('.page-card'));
+                const currentCard = cards.find(c => parseInt(c.dataset.pageNumber) === pageNumber);
+                const targetCard = cards[cards.indexOf(currentCard) + (direction === 'up' ? -1 : 1)];
+                if (currentCard && targetCard) {
+                    // Swap the cards in the DOM by calculating the distance between the cards and then translating them by that distance
+                    const distance = targetCard.getBoundingClientRect().top - currentCard.getBoundingClientRect().top;
+                    [currentCard, targetCard].forEach(card => {
+                        card.classList.add('transition-transform', 'duration-500', 'ease-in-out', 'z-10');
+                        card.style.transform = `translateY(${card === currentCard ? distance : -distance}px)`;
+                    });
+                    setTimeout(() => window.location.reload(), 500);
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                LibriscanUtils.showToast(response.error || 'Failed to reorder page', 'error');
+            }
+        } catch (error) {
+            LibriscanUtils.showToast('Failed to reorder page', 'error');
+        }
+    });
+</script>
+{% endif %}
 {% endblock content %}
+

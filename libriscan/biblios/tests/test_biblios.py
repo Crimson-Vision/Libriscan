@@ -2,7 +2,12 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 
+
 from biblios.models import Document, Organization, UserRole, TextBlock, Page
+
+import logging
+
+logger = logging.getLogger("django")
 
 
 class UserModelTests(TestCase):
@@ -76,13 +81,13 @@ class BibliosTests(TestCase):
         from biblios.views import merge_blocks
         import json
 
-        # Test that words on different lines can't be merged
-        block1 = 20
-        block2 = 21
+        # Test that the first printable word on a line can't be merged
+        # Block 10 is the third word on the line in the fixture, but 8 and 9 are marked Omit
+        block1 = 10
 
         page = Page.objects.get(id=1)
 
-        request = self.factory.post("merge", {"block1": block1, "block2": block2})
+        request = self.factory.post("merge", {"block": block1})
         request.user = self.user
 
         response = merge_blocks(
@@ -95,7 +100,7 @@ class BibliosTests(TestCase):
 
         self.assertEqual(
             json.loads(response.text).get("error"),
-            "Only sequential text on the same line can be merged",
+            "The selected word must have another printable word before it on the same line",
         )
         self.assertEqual(response.status_code, 400)
 
@@ -103,7 +108,7 @@ class BibliosTests(TestCase):
         block3 = 29
         block4 = 30
 
-        request = self.factory.post("merge", {"block1": block3, "block2": block4})
+        request = self.factory.post("merge", {"block": block4})
         request.user = self.user
 
         response = merge_blocks(
@@ -121,3 +126,98 @@ class BibliosTests(TestCase):
 
         # Don't check the whole thing, but make sure the new text block at least has the correctly merged text
         self.assertEqual(new.get("text"), f"{b3.text}{b4.text}")
+
+    def test_update_word(self):
+        """Test updating a TextBlock's text from the front end."""
+        from biblios.views import update_word
+        from decimal import Decimal
+
+        word = TextBlock.objects.get(id=1)
+
+        new_text = "KNOW"
+
+        self.assertNotEqual(word.text, new_text)
+        self.assertNotEqual(word.confidence, word.CONF_ACCEPTED)
+
+        request = self.factory.post("update_word", {"text": new_text})
+        request.user = self.user
+
+        update_word(
+            request,
+            word.page.document.collection.owner.short_name,
+            word.page.document.collection.slug,
+            word.page.document.identifier,
+            word.page.number,
+            word.id,
+        )
+
+        word = TextBlock.objects.get(id=1)
+
+        self.assertEqual(word.text, new_text)
+        self.assertEqual(word.confidence, Decimal(str(word.CONF_ACCEPTED)))
+
+    def test_update_print_control(self):
+        """Test updating a TextBlock's word visibility control from the front end."""
+        from biblios.views import update_print_control
+
+        word = TextBlock.objects.get(id=1)
+
+        new_print_control = word.OMIT
+
+        self.assertNotEqual(word.print_control, word.OMIT)
+
+        request = self.factory.post(
+            "update_print_control", {"print_control": new_print_control}
+        )
+        request.user = self.user
+
+        update_print_control(
+            request,
+            word.page.document.collection.owner.short_name,
+            word.page.document.collection.slug,
+            word.page.document.identifier,
+            word.page.number,
+            word.id,
+        )
+
+        word = TextBlock.objects.get(id=1)
+
+        self.assertEqual(word.print_control, new_print_control)
+
+    def test_revert_word(self):
+        """Test reverting a TextBlock's from the front end."""
+        from biblios.views import revert_word
+
+        # Clone the first textblock, just to make sure we have a normal audit history
+        word = TextBlock.objects.get(id=1)
+        word.pk = None
+        word.save()
+
+        e = word.history.earliest()
+        original_word = e.text
+
+        word.text = f"{word.text}abcde12345"
+        word.save()
+
+        # Confirm that the word has been changed
+        self.assertNotEqual(word.text, original_word)
+
+        request = self.factory.post("revert_word")
+        request.user = self.user
+
+        revert_word(
+            request,
+            word.page.document.collection.owner.short_name,
+            word.page.document.collection.slug,
+            word.page.document.identifier,
+            word.page.number,
+            word.id,
+        )
+
+        # Check that the textblock has been reverted to the original
+        word = TextBlock.objects.get(id=word.id)
+        self.assertEqual(word.text, original_word)
+
+        # Check that the textblock has the "reverted" reason
+        latest = word.history.latest()
+        self.assertEqual(latest.history_change_reason, "Revert to original")

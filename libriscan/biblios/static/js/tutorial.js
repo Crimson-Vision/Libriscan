@@ -110,7 +110,7 @@ class LibriscanTutorial {
         element: '#clickedWordsContainer',
         popover: {
           title: '✏️ Word Details Panel',
-          description: 'When you click on a word, its details appear here. You can edit the text, view alternative suggestions, change metadata (text type and print control), check confidence levels, and see the complete history of changes.',
+          description: 'When you click on a word, its details appear here. You can edit the text, view alternative suggestions, change metadata (text type and word visibility control), check confidence levels, and see the complete history of changes.',
           side: 'top',
           align: 'start'
         }
@@ -246,15 +246,15 @@ class LibriscanTutorial {
         element: '#typeControlConfidenceStatContainer',
         popover: {
           title: '📊 Word Metadata',
-          description: 'View and edit word properties including print control (how the word is handled in exports) and confidence level (OCR accuracy).',
+          description: 'View and edit word properties including word visibility control (how the word is handled in exports) and confidence level (OCR accuracy).',
           side: 'top',
           align: 'center'
         }
       },
       {
-        element: '#printControlDropdownBtn',
+        element: '#wordVisibilityControlDropdownBtn',
         popover: {
-          title: '🎛️ Print Control',
+          title: '🎛️ Word Visibility Control',
           description: 'Control how the word is handled in exports:<br/>' +
             '• <strong>Include (I)</strong> - Include the word normally in output<br/>' +
             '• <strong>Merge (M)</strong> - Merge this word with the previous word<br/>' +

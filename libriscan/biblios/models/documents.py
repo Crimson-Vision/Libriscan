@@ -1,15 +1,12 @@
 import logging
 
-
-from huey.contrib.djhuey import HUEY as huey
-
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.functional import cached_property
 
-
 from simple_history.models import HistoricalRecords
+from simple_history.utils import update_change_reason
 
 from biblios.access_rules import is_org_editor, is_org_viewer
 from biblios.models.base import BibliosModel
@@ -169,6 +166,9 @@ class DublinCoreMetadata(BibliosModel):
 
 
 class Page(BibliosModel):
+    # How many words should the page snippets be?
+    SNIPPET_LENGTH = 20
+
     document = models.ForeignKey(
         Document, on_delete=models.CASCADE, related_name="pages"
     )
@@ -190,6 +190,14 @@ class Page(BibliosModel):
 
     def __str__(self):
         return f"{self.document} page {self.number}"
+
+    def save(self, *args, **kwargs):
+        # Propagate the save history up to the page
+        doc = self.document
+        doc.save()
+        update_change_reason(doc, "Edited page")
+
+        super().save(**kwargs)
 
     def get_absolute_url(self):
         keys = {
@@ -219,6 +227,27 @@ class Page(BibliosModel):
     @cached_property
     def extraction_key(self):
         return f"extracting-{self.id}"
+
+    @property
+    def snippet(self):
+        # Pulling the text into a list at the start means this property will only introduce one additional DB query
+        words = list(self.words.filter(print_control=TextBlock.INCLUDE))
+        snippet = ""
+        # We might not have any words yet
+        if not words:
+            snippet = "(No extracted text)"
+        # Use the full text if it's short enough
+        elif len(words) <= self.SNIPPET_LENGTH:
+            print(len(words))
+            snippet = " ".join([w.text for w in words])
+        # Otherwise, construct our snippet
+        else:
+            snip = int(self.SNIPPET_LENGTH / 2)
+            first = " ".join([w.text for w in words[:snip]])
+            last = " ".join([w.text for w in words[-snip:]])
+
+            snippet = f"{first} ... {last}"
+        return snippet
 
     # Hand off this work to the Huey background task
     def generate_extraction(self):
@@ -265,6 +294,7 @@ class TextBlock(BibliosModel):
         decimal_places=3,
         validators=[MinValueValidator(0), MaxValueValidator(CONF_ACCEPTED)],
     )
+    review = models.BooleanField(default=False)
 
     # Controls whether this word should be included from document exports.
     # Include: a normal word to include in the exported file
@@ -327,6 +357,12 @@ class TextBlock(BibliosModel):
             update_fields := kwargs.get("update_fields")
         ) is not None and "text" in update_fields:
             kwargs["update_fields"] = {"suggestions"}.union(update_fields)
+
+        # Propagate the save history up to the page
+        page = self.page
+        page.save()
+        update_change_reason(page, "Edited word")
+
         super().save(**kwargs)
 
     @property
@@ -347,6 +383,7 @@ class TextBlock(BibliosModel):
     def suggestions_json(self):
         """Returns suggestions as a JSON string for template rendering"""
         import json
+
         if not self.suggestions:
             return "[]"
         try:
