@@ -65,35 +65,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Search functionality
+  // Search functionality - Inline table filtering only
   const searchInput = document.getElementById('homepage-search');
   const searchResults = document.getElementById('homepage-search-results');
-  let searchTimeout;
   
   if (searchInput && searchResults) {
     searchInput.addEventListener('input', function(e) {
       const query = e.target.value.trim().toLowerCase();
       
-      // Clear previous timeout
-      clearTimeout(searchTimeout);
-      
-      // Filter the table/grid immediately
+      // Filter the table/grid immediately (inline filtering)
       filterTable(query);
       
-      // Hide dropdown results if query is empty
-      if (query.length === 0) {
-        searchResults.classList.add('hidden');
-        searchResults.innerHTML = '';
-        return;
-      }
-      
-      // Wait 300ms after user stops typing before showing dropdown
-      searchTimeout = setTimeout(() => {
-        performSearch(query);
-      }, 300);
+      // Always hide dropdown (we only use inline table filtering)
+      searchResults.classList.add('hidden');
+      searchResults.innerHTML = '';
     });
     
-    // Close dropdown results when clicking outside
+    // Close dropdown results when clicking outside (kept for safety)
     document.addEventListener('click', function(e) {
       if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
         searchResults.classList.add('hidden');
@@ -170,37 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
           card.style.display = 'none';
         }
       });
-    }
-  }
-  
-  async function performSearch(query) {
-    try {
-      const data = await LibriscanUtils.fetchJSON(`/api/search/?q=${encodeURIComponent(query)}`);
-      
-      if (data.results && data.results.length > 0) {
-        // Inline display results
-        searchResults.innerHTML = data.results.map(doc => `
-          <a href="${doc.url}" class="block p-3 hover:bg-base-200 transition-colors border-b border-base-300 last:border-b-0">
-            <div class="font-medium text-base">${doc.identifier}</div>
-            <div class="text-sm text-base-content/70">
-              ${doc.organization} > ${doc.collection}${doc.series ? ' > ' + doc.series : ' > <span class="text-base-content/50">Orphaned</span>'}
-            </div>
-          </a>
-        `).join('');
-        searchResults.classList.remove('hidden');
-      } else {
-        searchResults.innerHTML = '<div class="p-4 text-center text-base-content/60">No documents found</div>';
-        searchResults.classList.remove('hidden');
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      searchResults.innerHTML = `<div class="p-4 text-center text-error">Search error: ${error.message}</div>`;
-      searchResults.classList.remove('hidden');
-      
-      // Show toast notification for errors
-      if (window.LibriscanUtils?.showToast) {
-        window.LibriscanUtils.showToast('Search failed. Please try again.', 'error');
-      }
     }
   }
   
