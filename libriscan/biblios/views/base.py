@@ -2,7 +2,7 @@ import logging
 
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, Subquery
@@ -21,7 +21,7 @@ logger = logging.getLogger("django")
 # Strictly speaking this belongs in access_rules.py, but it causes a circular import with models.py
 class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
     def get_permission_object(self):
-        return Organization.objects.get(short_name=self.kwargs.get("short_name"))
+        return get_object_or_404(Organization, short_name=self.kwargs.get("short_name"))
 
 
 # This is a verbose way of handling RBAC on a collections page
@@ -31,73 +31,75 @@ class OrgPermissionRequiredMixin(AutoPermissionRequiredMixin):
 # the permission 'biblios.view_organization' on it.
 # If so, they can access this page. If not, they get a 403.
 def get_org_by_collection(request, short_name, collection_slug):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_document(request, short_name, collection_slug, identifier):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_page(request, short_name, collection_slug, identifier, number):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_by_word(request, short_name, collection_slug, identifier, number, word_id):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def get_org_for_export(
     request, short_name, collection_slug, identifier, use_image=False
 ):
-    return Organization.objects.get(short_name=short_name)
+    return get_object_or_404(Organization, short_name=short_name)
 
 
 def index(request):
     context = {"app_name": "Libriscan"}
-    
+
     if request.user.is_authenticated:
         # The most recent doc edited by the user
         history = Document.history.filter(history_user=request.user)
         context["latest_doc"] = history.latest().instance if history.exists() else None
-        
+
         # Get all organizations user has access to
         all_roles = request.user.userrole_set.all()
         user_orgs = all_roles.values_list("organization", flat=True)
-        
+
         # All documents in user's organizations
-        all_docs = Document.objects.filter(
-            collection__owner__in=user_orgs
-        ).order_by('-id')
-        
+        all_docs = Document.objects.filter(collection__owner__in=user_orgs).order_by(
+            "-id"
+        )
+
         # Paginate All Documents (10 per page)
         paginator = Paginator(all_docs, 10)
-        page_num = request.GET.get('page', 1)
+        page_num = request.GET.get("page", 1)
         context["all_documents"] = paginator.get_page(page_num)
-        
+
         # All docs in all orgs the user is a member of (for backward compatibility)
         context["documents"] = Document.objects.filter(
             collection__owner__in=Subquery(all_roles.values("organization"))
         )
-        
+
         # Pending Reviews (archivist only)
         arc_roles = all_roles.filter(role=UserRole.ARCHIVIST)
         context["needs_review"] = Document.objects.filter(
             collection__owner__in=Subquery(arc_roles.values("organization")),
             status=Document.REVIEW,
         )
-        
+
         if arc_roles.exists():
             pending = context["needs_review"]
-            pending_page = request.GET.get('pending_page', 1)
+            pending_page = request.GET.get("pending_page", 1)
             pending_paginator = Paginator(pending, 10)
             context["pending_reviews"] = pending_paginator.get_page(pending_page)
-        
+
         # Recent TextBlocks (Where You Left Off) - Use historical records
         # Get recent TextBlock history records (not instances, to preserve history_user)
-        context["recent_textblocks"] = TextBlock.history.filter(
-            history_user=request.user
-        ).select_related('page__document').order_by('-history_date')[:5]
-    
+        context["recent_textblocks"] = (
+            TextBlock.history.filter(history_user=request.user)
+            .select_related("page__document")
+            .order_by("-history_date")[:5]
+        )
+
     return render(request, "biblios/index.html", context)
 
 
