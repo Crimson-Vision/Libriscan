@@ -43,7 +43,7 @@ class DocumentForm(forms.ModelForm):
 class PageForm(forms.ModelForm):
     class Meta:
         model = Page
-        fields = ("document", "number", "image")
+        fields = ("document", "number", "image", "identifier")
 
 
 class FilePondUploadForm(forms.Form):
