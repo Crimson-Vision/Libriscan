@@ -121,10 +121,6 @@ def index(request):
 
         context["recent_textblocks"] = unique_textblocks
 
-        # Filter to get unique documents - most recent edit per document
-        seen_documents = set()
-        unique_textblocks = []
-
         try:
             for textblock in all_recent:
                 try:
