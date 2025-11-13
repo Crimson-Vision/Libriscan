@@ -116,7 +116,7 @@ def index(request):
                     # Skip records with bad data
                     continue
         except Exception:
-            pass
+            unique_textblocks = []
 
         context["recent_textblocks"] = unique_textblocks
     return render(request, "biblios/index.html", context)
