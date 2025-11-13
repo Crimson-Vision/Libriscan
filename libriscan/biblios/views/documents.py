@@ -272,8 +272,11 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
             {"document": Document.objects.get(identifier=self.kwargs.get("identifier"))}
         )
 
-        # Bind the image file to the form data when we instatiate it
+        # Bind the image file to the form data when we instantiate it
         form = PageForm(post, request.FILES)
+
+        # Prevent the doc from becoming selectable when there's an error on the form
+        form.fields["document"].widget = forms.HiddenInput()
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
 
@@ -407,7 +410,7 @@ def delete_page(request, short_name, collection_slug, identifier, number):
 def reorder_page(request, short_name, collection_slug, identifier, number):
     """Reorder a page by swapping its number with the page above or below."""
     from django.db import transaction
-    
+
     page = get_object_or_404(
         Page,
         document__collection__owner__short_name=short_name,
@@ -415,36 +418,44 @@ def reorder_page(request, short_name, collection_slug, identifier, number):
         document__identifier=identifier,
         number=number,
     )
-    
-    direction = request.GET.get('direction', '').lower()
-    if direction not in ['up', 'down']:
-        return JsonResponse({'success': False, 'error': 'Invalid direction'}, status=400)
-    
-    pages = list(page.document.pages.order_by('number'))
+
+    direction = request.GET.get("direction", "").lower()
+    if direction not in ["up", "down"]:
+        return JsonResponse(
+            {"success": False, "error": "Invalid direction"}, status=400
+        )
+
+    pages = list(page.document.pages.order_by("number"))
     if len(pages) <= 1:
-        return JsonResponse({'success': False, 'error': 'Cannot reorder single page'}, status=400)
-    
+        return JsonResponse(
+            {"success": False, "error": "Cannot reorder single page"}, status=400
+        )
+
     current_index = next(i for i, p in enumerate(pages) if p.id == page.id)
-    offset = -1 if direction == 'up' else 1
+    offset = -1 if direction == "up" else 1
 
     # Cannot move the first or last page
-    if (direction == 'up' and current_index == 0) or (direction == 'down' and current_index == len(pages) - 1):
-        return JsonResponse({'success': False, 'error': f'Cannot move {direction}'}, status=400)
-    
+    if (direction == "up" and current_index == 0) or (
+        direction == "down" and current_index == len(pages) - 1
+    ):
+        return JsonResponse(
+            {"success": False, "error": f"Cannot move {direction}"}, status=400
+        )
+
     try:
         with transaction.atomic():
             target_page = pages[current_index + offset]
             # Swap the page numbers using a temporary number to avoid unique constraint violation
             temp, current_num, target_num = 99999, page.number, target_page.number
             page.number, target_page.number = temp, current_num
-            page.save(update_fields=['number'])
-            target_page.save(update_fields=['number'])
+            page.save(update_fields=["number"])
+            target_page.save(update_fields=["number"])
             page.number = target_num
-            page.save(update_fields=['number'])
-        return JsonResponse({'success': True})
+            page.save(update_fields=["number"])
+        return JsonResponse({"success": True})
     except Exception as error:
-        logger.error('Error reordering page: %s', error)
-        return JsonResponse({'success': False, 'error': 'Reorder failed'}, status=500)
+        logger.error("Error reordering page: %s", error)
+        return JsonResponse({"success": False, "error": "Reorder failed"}, status=500)
 
 
 @permission_required("biblios.update_page", fn=get_org_by_page, raise_exception=True)
@@ -586,7 +597,9 @@ def update_document_status(request, short_name, collection_slug, identifier):
 
     logger.info("Updated document %s status to %s", identifier, status)
 
-    return JsonResponse({
-        "status": document.status,
-        "status_display": Document.STATUS_CHOICES.get(document.status),
-    })
+    return JsonResponse(
+        {
+            "status": document.status,
+            "status_display": Document.STATUS_CHOICES.get(document.status),
+        }
+    )
