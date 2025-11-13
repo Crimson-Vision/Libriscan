@@ -22,11 +22,9 @@
             <div class="flex flex-wrap gap-1.5 items-baseline" id="word-container">
             {% if words %}
               {% for word in words %}
-                {% ifchanged word.line %}
+                  {% ifchanged word.line %}
                   {% if not forloop.first %}
-                    <div class="w-full my-1" tabindex="-1" aria-hidden="true">
-                      <div class="h-px bg-gradient-to-r from-transparent via-base-300/30 to-transparent"></div>
-                    </div>
+                    <div class="divider w-full my-1" tabindex="-1" aria-hidden="true"></div>
                   {% endif %}
                   <span class="badge badge-xs badge-ghost text-base-content/50 font-mono font-normal px-1.5 py-0.5 mr-0.5" tabindex="-1" aria-hidden="true">{{ word.line }}</span>
                 {% endifchanged %}
