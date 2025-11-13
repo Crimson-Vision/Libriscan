@@ -28,24 +28,57 @@ class ConfidenceToggle {
     this.applyPreferencesImmediately();
     this.attachEventListeners();
   }
+  
+  getAllToggles() {
+    return [...Object.values(this.toggles), document.getElementById('toggle-line-display')].filter(Boolean);
+  }
+  
+  toggleLineDisplay(isVisible) {
+    document.querySelectorAll('.line-number-badge, .line-divider').forEach(el => {
+      el.style.display = isVisible ? '' : 'none';
+    });
+  }
+  
+  saveDisplayPreferences() {
+    const toggle = document.getElementById('toggle-line-display');
+    try {
+      localStorage.setItem('displayTogglePrefs', JSON.stringify({ lineDisplay: toggle?.checked ?? true }));
+    } catch (error) {
+      console.warn('Failed to save display preferences:', error);
+    }
+  }
+  
+  loadDisplayPreferences() {
+    try {
+      const saved = localStorage.getItem('displayTogglePrefs');
+      return saved ? JSON.parse(saved) : { lineDisplay: true };
+    } catch (error) {
+      return { lineDisplay: true };
+    }
+  }
 
   /**
    * Apply saved preferences immediately to prevent UI flash
    */
   applyPreferencesImmediately() {
     const prefs = this.loadPreferencesSync();
+    const displayPrefs = this.loadDisplayPreferences();
     
     Object.entries(this.toggles).forEach(([level, checkbox]) => {
       if (!checkbox) return;
-      
       const isVisible = prefs[level] ?? true;
       checkbox.checked = isVisible;
       this.container.classList.toggle(`hide-confidence-${level}`, !isVisible);
-      
       if (level === 'accepted') {
         this._updateAcceptedButtonClasses(isVisible);
       }
     });
+    
+    const lineDisplayToggle = document.getElementById('toggle-line-display');
+    if (lineDisplayToggle) {
+      lineDisplayToggle.checked = displayPrefs.lineDisplay !== false;
+      this.toggleLineDisplay(lineDisplayToggle.checked);
+    }
     
     this.syncToggleAll();
   }
@@ -66,23 +99,33 @@ class ConfidenceToggle {
   }
 
   attachEventListeners() {
-    // Individual toggle handlers
     Object.entries(this.toggles).forEach(([level, checkbox]) => {
       checkbox?.addEventListener('change', (event) => {
-        event.stopPropagation(); // Keep dropdown open
+        event.stopPropagation();
         this.toggleIndicator(level, checkbox.checked);
         this.syncToggleAll();
         this.savePreferences();
       });
     });
     
-    // "All" toggle handler
+    const lineDisplayToggle = document.getElementById('toggle-line-display');
+    lineDisplayToggle?.addEventListener('change', (event) => {
+      event.stopPropagation();
+      this.toggleLineDisplay(lineDisplayToggle.checked);
+      this.saveDisplayPreferences();
+      this.syncToggleAll();
+    });
+    
     this.toggleAll?.addEventListener('change', (event) => {
-      event.stopPropagation(); // Keep dropdown open
+      event.stopPropagation();
       const isChecked = this.toggleAll.checked;
-      Object.entries(this.toggles).forEach(([level, checkbox]) => {
-        if (checkbox) {
-          checkbox.checked = isChecked;
+      this.getAllToggles().forEach(toggle => {
+        toggle.checked = isChecked;
+        if (toggle.id === 'toggle-line-display') {
+          this.toggleLineDisplay(isChecked);
+          this.saveDisplayPreferences();
+        } else {
+          const level = toggle.id.replace('toggle-', '');
           this.toggleIndicator(level, isChecked);
         }
       });
@@ -109,8 +152,7 @@ class ConfidenceToggle {
 
   syncToggleAll() {
     if (!this.toggleAll) return;
-    this.toggleAll.checked = Object.values(this.toggles)
-      .every(checkbox => checkbox?.checked);
+    this.toggleAll.checked = this.getAllToggles().every(toggle => toggle.checked);
   }
 
   savePreferences() {
@@ -150,9 +192,6 @@ class ConfidenceToggle {
     return checkbox ? checkbox.checked : true;
   }
 
-  /**
-   * Reinitialize after HTMX swap
-   */
   reinit() {
     this.container = document.getElementById('word-container');
     if (!this.container) return;
