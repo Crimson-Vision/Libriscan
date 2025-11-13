@@ -116,9 +116,7 @@ def index(request):
                     continue
         except Exception:
             # If query fails entirely, just set empty list
-            unique_textblocks = []
-
-        context["recent_textblocks"] = unique_textblocks
+        context["recent_textblocks"] = list(seen_documents.values())
 
     return render(request, "biblios/index.html", context)
 
