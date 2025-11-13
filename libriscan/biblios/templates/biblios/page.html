@@ -198,11 +198,11 @@
             hx-swap="outerHTML"
             class="btn btn-primary w-full"
             id="extractBtn"
-            {% if not page.document.extractable %}disabled{% endif %}>
+            {% if not page.can_extract %}disabled{% endif %}>
             Extract
           </button>
-          <p class="mb-4 {% if not page.document.extractable %}text-error{% endif %}">
-            {% if page.document.extractable %}
+          <p class="mb-4 {% if not page.can_extract %}text-error{% endif %}">
+            {% if page.can_extract %}
               Click <span class="font-bold">Extract</span> for intelligent extraction.
             {% else %}
               Text extraction is not available. Please configure a cloud service for this organization.

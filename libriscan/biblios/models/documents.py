@@ -64,15 +64,6 @@ class Document(BibliosModel):
             page__document=self, print_control=TextBlock.INCLUDE
         ).exists()
 
-    @property
-    def extractable(self):
-        """Checks if the document's owner has a cloud service configured."""
-        from biblios.models.organizations import CloudService
-
-        return CloudService.objects.filter(
-            organization=self.collection.owner
-        ).exists()
-
     def __str__(self):
         return self.identifier
 

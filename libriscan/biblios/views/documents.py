@@ -468,8 +468,8 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
-    # Validate that the document is extractable
-    if not page.document.extractable:
+    # Validate that the page can be extracted
+    if not page.can_extract:
         return HttpResponse(
             "Text extraction is not available. Please configure a cloud service for this organization.",
             status=400
