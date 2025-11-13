@@ -47,8 +47,16 @@ class WordNavigation {
   selectFirstWord() {
     setTimeout(() => {
       const lastEditedId = this.wordDetails.container?.dataset.lastEditedWordId;
-      const wordToSelect = (lastEditedId && WordBlockManager.getWordBlock(lastEditedId)) 
-        || document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}`);
+      let wordToSelect = lastEditedId ? WordBlockManager.getWordBlock(lastEditedId) : null;
+      
+      if (!wordToSelect) {
+        // Find word with line 0 and number 0 (first word in first line)
+        wordToSelect = document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}[data-word-line="0"][data-word-number="0"]`);
+        // Fallback to first word block if line 0, number 0 doesn't exist
+        if (!wordToSelect) {
+          wordToSelect = document.querySelector(`.${WordDetailsConfig.WORD_BLOCK_CLASS}`);
+        }
+      }
       
       if (wordToSelect) wordToSelect.click();
     }, WordDetailsConfig.AUTO_ADVANCE_DELAY);
