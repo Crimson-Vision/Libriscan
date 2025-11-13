@@ -92,14 +92,33 @@ def index(request):
             pending_paginator = Paginator(pending, 10)
             context["pending_reviews"] = pending_paginator.get_page(pending_page)
 
-        # Recent TextBlocks (Where You Left Off) - Use historical records
-        # Get recent TextBlock history records (not instances, to preserve history_user)
-        context["recent_textblocks"] = (
-            TextBlock.history.filter(history_user=request.user)
+        # Recent TextBlocks (Where You Left Off) 
+        all_recent = (
+            TextBlock.history.filter(history_user=request.user)  
             .select_related("page__document")
-            .order_by("-history_date")[:5]
+            .order_by("-history_date")
         )
 
+        # Filter to get unique documents - most recent edit per document
+        seen_documents = set()
+        unique_textblocks = []
+
+        try:
+            for textblock in all_recent:
+                try:
+                    doc_id = textblock.page.document.id
+                    if doc_id not in seen_documents:
+                        seen_documents.add(doc_id)
+                        unique_textblocks.append(textblock)
+                        if len(unique_textblocks) >= 5:
+                            break
+                except Exception:
+                    # Skip records with bad data
+                    continue
+        except Exception:
+            unique_textblocks = []
+
+        context["recent_textblocks"] = unique_textblocks
     return render(request, "biblios/index.html", context)
 
 
