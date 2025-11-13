@@ -468,6 +468,13 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
+    # Validate that the document is extractable
+    if not page.document.extractable:
+        return HttpResponse(
+            "Text extraction is not available. Please configure a cloud service for this organization.",
+            status=400
+        )
+
     if extract_time := huey.get(page.extraction_key, peek=True):
         if datetime.today() - extract_time > timedelta(minutes=10):
             logger.error(f"Extraction timed out for page {page.id}")
