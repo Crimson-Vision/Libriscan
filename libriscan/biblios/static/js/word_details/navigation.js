@@ -22,9 +22,15 @@ class WordNavigation {
 
     let currentPosition = 1;
     let button = currentButton;
-    while (button.previousElementSibling?.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS)) {
-      currentPosition++;
-      button = button.previousElementSibling;
+    let prevSibling = button.previousElementSibling;
+    
+    // Skip over non-word-block elements (dividers, badges, etc.) when counting
+    while (prevSibling) {
+      if (prevSibling.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS)) {
+        currentPosition++;
+        button = prevSibling;
+      }
+      prevSibling = prevSibling.previousElementSibling;
     }
 
     if (this.wordDetails.prevWordBtn) {

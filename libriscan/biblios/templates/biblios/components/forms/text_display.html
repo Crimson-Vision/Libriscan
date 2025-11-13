@@ -24,9 +24,11 @@
               {% for word in words %}
                 {% ifchanged word.line %}
                   {% if not forloop.first %}
-                    <div class="w-full border-t border-base-300/40 my-1"></div>
+                    <div class="w-full my-1" tabindex="-1" aria-hidden="true">
+                      <div class="h-px bg-gradient-to-r from-transparent via-base-300/30 to-transparent"></div>
+                    </div>
                   {% endif %}
-                  <span class="badge badge-xs badge-ghost text-base-content/50 font-mono font-normal px-1.5 py-0.5 mr-0.5">{{ word.line }}</span>
+                  <span class="badge badge-xs badge-ghost text-base-content/50 font-mono font-normal px-1.5 py-0.5 mr-0.5" tabindex="-1" aria-hidden="true">{{ word.line }}</span>
                 {% endifchanged %}
                 <button 
                   class="btn {% if word.review %}btn-error btn-xs{% elif word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash btn-xs{% else %}btn-ghost btn-xs{% endif %} word-block no-animation normal-case text-xs font-normal px-2 py-1 h-auto min-h-0 rounded-md
