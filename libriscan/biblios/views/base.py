@@ -121,22 +121,6 @@ def index(request):
 
         context["recent_textblocks"] = unique_textblocks
 
-        try:
-            for textblock in all_recent:
-                try:
-                    doc_id = textblock.page.document.id
-                    if doc_id not in seen_documents:
-                        seen_documents.add(doc_id)
-                        unique_textblocks.append(textblock)
-                        if len(unique_textblocks) >= 5:
-                            break
-                except Exception:
-                    # Skip records with bad data
-                    continue
-        except Exception:
-            unique_textblocks = []
-
-        context["recent_textblocks"] = unique_textblocks
     return render(request, "biblios/index.html", context)
 
 
