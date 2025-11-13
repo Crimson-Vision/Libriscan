@@ -5,15 +5,40 @@ const fetchJSON = LibriscanUtils.fetchJSON.bind(LibriscanUtils);
 document.addEventListener('DOMContentLoaded', function() {
   const tabs = document.querySelectorAll('#main-tabs .tab');
   const panels = document.querySelectorAll('.tab-panel');
+  const viewToggle = document.querySelector('.btn-group');
   
   // Apply initial styling to first tab using Tailwind classes
   if (tabs[0]) {
     tabs[0].classList.add('btn-primary', 'font-semibold', 'shadow-md', '-translate-y-0.5');
   }
   
+  // Initialize ViewToggle module for list/grid functionality
+  const viewToggleAPI = ViewToggle.init({
+    listBtnId: 'list-view-btn',
+    gridBtnId: 'grid-view-btn',
+    tabs: [
+      {
+        tabId: 'all-documents-tab',
+        tableSelector: '#all-documents .overflow-x-auto'
+      },
+      {
+        tabId: 'pending-reviews-tab',
+        tableSelector: '#pending-reviews .overflow-x-auto'
+      }
+    ]
+  });
+  
+  // Initialize view toggle visibility on page load
+  const initialHash = window.location.hash.slice(1);
+  if (initialHash === 'recent-work-tab') {
+    viewToggle?.classList.add('hidden');
+  }
+  
   tabs.forEach(tab => {
     tab.addEventListener('click', function(e) {
       e.preventDefault();
+      
+      const targetId = this.getAttribute('data-tab');
       
       // Remove active styling from all tabs
       tabs.forEach(t => {
@@ -27,8 +52,25 @@ document.addEventListener('DOMContentLoaded', function() {
       panels.forEach(panel => panel.classList.add('hidden'));
       
       // Show target panel
-      const targetId = this.getAttribute('data-tab');
       document.getElementById(targetId).classList.remove('hidden');
+      
+      // Show/hide List/Grid buttons based on tab
+      if (targetId === 'recent-work-tab') {
+        viewToggle?.classList.add('hidden');
+      } else {
+        viewToggle?.classList.remove('hidden');
+        
+        // Apply current view mode to the newly visible tab
+        if (viewToggleAPI) {
+          viewToggleAPI.applyToTab(targetId);
+        }
+      }
+      
+      // Re-apply current search filter to newly visible tab
+      const searchInput = document.getElementById('homepage-search');
+      if (searchInput && searchInput.value.trim()) {
+        filterAllTabs(searchInput.value.trim().toLowerCase());
+      }
       
       // Save active tab in URL without scrolling
       history.replaceState(null, null, `#${targetId}`);
@@ -41,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (hash && document.getElementById(hash)) {
       const tabToActivate = document.querySelector(`[data-tab="${hash}"]`);
       if (tabToActivate) {
-        // Prevents scroll jump
         tabs.forEach(t => {
           t.classList.remove('tab-active', 'btn-primary', 'font-semibold', 'shadow-md', '-translate-y-0.5');
         });
@@ -49,6 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         panels.forEach(panel => panel.classList.add('hidden'));
         document.getElementById(hash).classList.remove('hidden');
+        
+        // Show/hide view toggle based on restored tab
+        if (hash === 'recent-work-tab') {
+          viewToggle?.classList.add('hidden');
+        } else {
+          viewToggle?.classList.remove('hidden');
+        }
       }
     }
   }
@@ -56,23 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Restore tab on page load
   restoreActiveTab();
   
-  // List/Grid toggle buttons
-  const listBtn = document.getElementById('list-view-btn');
-  const gridBtn = document.getElementById('grid-view-btn');
-  
-  if (listBtn && gridBtn) {
-    listBtn.addEventListener('click', function() {
-      listBtn.classList.add('btn-primary');
-      gridBtn.classList.remove('btn-primary');
-    });
-    
-    gridBtn.addEventListener('click', function() {
-      gridBtn.classList.add('btn-primary');
-      listBtn.classList.remove('btn-primary');
-    });
-  }
-  
-  // Search functionality - Inline table filtering only
+  // Search functionality - Filters across ALL tabs
   const searchInput = document.getElementById('homepage-search');
   const searchResults = document.getElementById('homepage-search-results');
   
@@ -80,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', function(e) {
       const query = e.target.value.trim().toLowerCase();
       
-      // Filter the table/grid immediately (inline filtering)
-      filterTable(query);
+      // Filter ALL tabs immediately
+      filterAllTabs(query);
       
       // Always hide dropdown (we only use inline table filtering)
       searchResults.classList.add('hidden');
@@ -96,171 +128,147 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Filter table rows AND grid cards based on search query
-  function filterTable(query) {
-    const lowerQuery = query.toLowerCase();
-    const table = document.querySelector('#all-documents table');
-    const gridContainer = document.getElementById('documents-grid');
-    let visibleCount = 0;
+  /**
+   * Filter all tabs based on search query
+   * @param {string} query - The search query (already lowercased)
+   */
+  function filterAllTabs(query) {
+    // Filter All Documents tab
+    filterTableRows('#all-documents table', '#all-documents', query);
     
-    // Filter table rows
-    if (table) {
-      const rows = table.querySelectorAll('tbody tr');
-      
-      rows.forEach(row => {
-        if (query === '') {
-          row.style.display = '';
-          visibleCount++;
-          return;
-        }
-        
-        const cells = row.querySelectorAll('td');
-        let rowText = '';
-        
-        // Get text from Document ID, Org, Collection, Series columns
-        cells.forEach((cell, index) => {
-          if (index < 4) { // Only search in first 4 columns
-            rowText += cell.textContent.toLowerCase() + ' ';
-          }
-        });
-        
-        if (rowText.includes(lowerQuery)) {
-          row.style.display = '';
-          visibleCount++;
-        } else {
-          row.style.display = 'none';
-        }
-      });
-      
-      // Show/hide "no results" message
-      const tableContainer = document.querySelector('#all-documents .overflow-x-auto');
-      let noResultsMsg = document.getElementById('no-filter-results');
-      
-      if (visibleCount === 0 && query !== '') {
-        if (!noResultsMsg) {
-          noResultsMsg = document.createElement('div');
-          noResultsMsg.id = 'no-filter-results';
-          noResultsMsg.className = 'alert alert-info mt-4';
-          noResultsMsg.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span>No documents match your search. Try a different term.</span>
-          `;
-          tableContainer.parentElement.appendChild(noResultsMsg);
-        }
-      } else if (noResultsMsg) {
-        noResultsMsg.remove();
-      }
-    }
+    // Filter Pending Reviews tab (if it exists)
+    filterTableRows('#pending-reviews table', '#pending-reviews', query);
     
-    // Filter grid cards
-    if (gridContainer && !gridContainer.classList.contains('hidden')) {
-      const gridCards = gridContainer.querySelectorAll('.card');
-      gridCards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        if (query === '' || text.includes(lowerQuery)) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
+    // Filter Where You Left Off cards
+    filterCards('#recent-textblocks .card', query);
+    
+    // Filter grid views (if they exist and are visible)
+    filterGridCards('all-documents-tab-grid', query);
+    filterGridCards('pending-reviews-tab-grid', query);
   }
   
-  // View toggle for All Documents tab - GRID IMPLEMENTATION
-  const listViewBtn = document.getElementById('list-view-btn');
-  const gridViewBtn = document.getElementById('grid-view-btn');
-  const tableContainer = document.querySelector('#all-documents-tab .overflow-x-auto');
-  
-  if (listViewBtn && gridViewBtn && tableContainer) {
-    // Create grid container
-    const gridContainer = document.createElement('div');
-    gridContainer.id = 'documents-grid';
-    gridContainer.className = 'hidden grid grid-cols-3 gap-4';
-    tableContainer.parentNode.insertBefore(gridContainer, tableContainer.nextSibling);
+  /**
+   * Filter table rows for a specific tab
+   * @param {string} tableSelector - CSS selector for the table
+   * @param {string} containerSelector - CSS selector for the container
+   * @param {string} query - Search query (lowercased)
+   */
+  function filterTableRows(tableSelector, containerSelector, query) {
+    const table = document.querySelector(tableSelector);
+    if (!table) return;
     
-    // List view click
-    listViewBtn.addEventListener('click', () => {
-      listViewBtn.classList.add('btn-primary');
-      gridViewBtn.classList.remove('btn-primary');
-      tableContainer.classList.remove('hidden');
-      gridContainer.classList.add('hidden');
-    });
+    const rows = table.querySelectorAll('tbody tr');
+    let visibleCount = 0;
     
-    // Grid view click
-    gridViewBtn.addEventListener('click', () => {
-      gridViewBtn.classList.add('btn-primary');
-      listViewBtn.classList.remove('btn-primary');
-      tableContainer.classList.add('hidden');
-      gridContainer.classList.remove('hidden');
+    rows.forEach(row => {
+      if (query === '') {
+        row.style.display = '';
+        visibleCount++;
+        return;
+      }
       
-      // Generate cards if not already done
-      if (gridContainer.children.length === 0) {
-        generateGridCards();
-        
-        // Re-apply search filter after cards are generated using requestAnimationFrame
-        requestAnimationFrame(() => {
-          const searchInput = document.getElementById('homepage-search');
-          if (searchInput && searchInput.value.trim()) {
-            const query = searchInput.value.trim().toLowerCase();
-            const gridCards = gridContainer.querySelectorAll('.card');
-            gridCards.forEach(card => {
-              const text = card.textContent.toLowerCase();
-              card.style.display = text.includes(query) ? '' : 'none';
-            });
-          }
-        });
+      const cells = row.querySelectorAll('td');
+      let rowText = '';
+      
+      // Get text from Document ID, Org, Collection, Series columns
+      cells.forEach((cell, index) => {
+        if (index < 4) { // Only search in first 4 columns
+          rowText += cell.textContent.toLowerCase() + ' ';
+        }
+      });
+      
+      if (rowText.includes(query)) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
       }
     });
     
-    /**
-     * Generate grid cards from table rows (client-side view toggle).
-     * Note: For large datasets, use server-side rendering for better performance.
-     * 
-     * @returns {void}
-     */
-    function generateGridCards() {
-      const rows = tableContainer.querySelectorAll('tbody tr');
-      const fragment = document.createDocumentFragment();
+    // Show/hide "no results" message for this tab
+    showNoResultsMessage(containerSelector, visibleCount, query);
+  }
+  
+  /**
+   * Filter grid cards for a specific grid container
+   * @param {string} gridId - ID of the grid container
+   * @param {string} query - Search query (lowercased)
+   */
+  function filterGridCards(gridId, query) {
+    const gridContainer = document.getElementById(gridId);
+    if (!gridContainer || gridContainer.classList.contains('hidden')) return;
+    
+    const gridCards = gridContainer.querySelectorAll('.card');
+    gridCards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      if (query === '' || text.includes(query)) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+  
+  /**
+   * Filter cards in "Where You Left Off" tab
+   * @param {string} cardSelector - CSS selector for cards
+   * @param {string} query - Search query (lowercased)
+   */
+  function filterCards(cardSelector, query) {
+    const cards = document.querySelectorAll(cardSelector);
+    if (cards.length === 0) return;
+    
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+      if (query === '') {
+        card.style.display = '';
+        visibleCount++;
+        return;
+      }
       
-      rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const docId = cells[0]?.textContent.trim();
-        const org = cells[1]?.textContent.trim();
-        const collection = cells[2]?.textContent.trim();
-        const series = cells[3]?.textContent.trim() || 'No Series';
-        const statusBadge = cells[4]?.querySelector('.badge');
-        const status = statusBadge?.textContent.trim();
-        const statusClass = statusBadge?.className || '';
-        const openLink = cells[5]?.querySelector('a')?.href;
-        
-        const card = document.createElement('div');
-        card.className = 'card bg-base-200 shadow-md hover:shadow-lg transition-shadow';
-        card.innerHTML = `
-          <div class="card-body">
-            <h3 class="card-title text-base">${docId}</h3>
-            <div class="space-y-1 text-sm">
-              <p><span class="font-semibold">Org:</span> ${org}</p>
-              <p><span class="font-semibold">Collection:</span> ${collection}</p>
-              <p><span class="font-semibold">Series:</span> ${series}</p>
-              <div class="${statusClass}">${status}</div>
-            </div>
-            <div class="card-actions justify-end mt-4">
-              <a href="${openLink}" class="btn btn-sm btn-primary gap-2">
-                Open
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
-              </a>
-            </div>
-          </div>
+      const text = card.textContent.toLowerCase();
+      if (text.includes(query)) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    // Show/hide "no results" message for Where You Left Off tab
+    showNoResultsMessage('#recent-textblocks', visibleCount, query);
+  }
+  
+  /**
+   * Show or hide "no results" message for a tab
+   * @param {string} containerSelector - CSS selector for the container
+   * @param {number} visibleCount - Number of visible items
+   * @param {string} query - Search query
+   */
+  function showNoResultsMessage(containerSelector, visibleCount, query) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    
+    const msgId = `no-filter-results-${containerSelector.replace(/[^a-z0-9]/gi, '-')}`;
+    let noResultsMsg = document.getElementById(msgId);
+    
+    if (visibleCount === 0 && query !== '') {
+      if (!noResultsMsg) {
+        noResultsMsg = document.createElement('div');
+        noResultsMsg.id = msgId;
+        noResultsMsg.className = 'alert alert-info mt-4';
+        noResultsMsg.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>No results match your search. Try a different term.</span>
         `;
-        fragment.appendChild(card);
-      });
-      
-      // Batch DOM update for better performance
-      gridContainer.appendChild(fragment);
+        container.appendChild(noResultsMsg);
+      }
+      noResultsMsg.style.display = '';
+    } else if (noResultsMsg) {
+      noResultsMsg.style.display = 'none';
     }
   }
 });
