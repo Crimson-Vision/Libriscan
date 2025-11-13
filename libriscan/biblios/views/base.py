@@ -108,8 +108,7 @@ def index(request):
                 try:
                     doc_id = textblock.page.document.id
                     if doc_id not in seen_documents:
-                        seen_documents.add(doc_id)
-                        unique_textblocks.append(textblock)
+                        seen_documents[doc_id] = textblock
                         if len(unique_textblocks) >= 5:
                             break
                 except Exception:
