@@ -134,6 +134,7 @@ body * {
       if (identifierInput) {
         identifierInput.disabled = false;
         const filename = file.filename || file.name || '';
+        // Remove extension and replace all whitespace (spaces, tabs, etc.) with underscores
         const nameWithoutExt = filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
         identifierInput.value = nameWithoutExt;
       }

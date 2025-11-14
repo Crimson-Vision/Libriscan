@@ -107,6 +107,7 @@
                 const isValid = !submitBtn.disabled;
                 identifierInput.disabled = !isValid;
                 if (isValid && !identifierInput.value) {
+                    // Remove extension and replace all whitespace (spaces, tabs, etc.) with underscores
                     const filename = fileInput.files[0].name.replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
                     identifierInput.value = filename;
                 }
