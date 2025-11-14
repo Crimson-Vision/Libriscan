@@ -73,14 +73,14 @@ body * {
 <!-- Drag Drop Prevention Script -->
 <script>
   // Prevent default drag behavior outside upload area
-  document.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  document.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
   }, false);
 
-  document.addEventListener('drop', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  document.addEventListener('drop', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
   }, false);
 </script>
 
@@ -187,8 +187,8 @@ body * {
   // Validate identifier input on change (remove whitespace)
   const identifierInput = document.getElementById('identifierInput');
   if (identifierInput) {
-    identifierInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\s/g, '');
+    identifierInput.addEventListener('input', (event) => {
+      event.target.value = event.target.value.replace(/\s/g, '');
     });
   }
 
