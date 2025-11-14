@@ -116,7 +116,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#tutorialFab',
+        element: '#help-button',
         popover: {
           title: '🎓 Help Button',
           description: 'Click this button anytime to access tutorials and learn about keyboard shortcuts. Now let\'s explore the keyboard shortcuts that will help you work faster!',
@@ -140,7 +140,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#raw-text-content .word-block:first-child',
+        element: '#word-container',
         popover: {
           title: '🖱️ Step 1: Select a Word',
           description: 'First, click on any word in the extracted text. This activates the word details panel and enables all keyboard shortcuts for navigation and editing.',
@@ -185,7 +185,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#confidenceStat',
+        element: '#confidenceLevelSection',
         popover: {
           title: '✅ Press "A" to Accept',
           description: '<strong>Press the A key</strong> to accept the current word. This sets the confidence to 100% and automatically advances to the next word for faster workflow.',
