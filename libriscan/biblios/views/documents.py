@@ -468,6 +468,13 @@ def extract_text(request, short_name, collection_slug, identifier, number):
         number=number,
     )
 
+    # Validate that the page can be extracted
+    if not page.can_extract:
+        return HttpResponse(
+            "Text extraction is not available. The page may already have text blocks, or a cloud service may not be configured for this organization.",
+            status=400
+        )
+
     if extract_time := huey.get(page.extraction_key, peek=True):
         if datetime.today() - extract_time > timedelta(minutes=10):
             logger.error(f"Extraction timed out for page {page.id}")

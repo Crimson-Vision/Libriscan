@@ -186,6 +186,8 @@
   <div id="rightColumn" class="h-full w-full">
       {% if page.words.exists %}
         {% include "biblios/components/forms/text_display.html" with words=page.words.all %}
+      {% elif extracting %}
+        {% include "biblios/components/forms/extraction_loading.html" with short_name=keys.owner collection_slug=keys.collection_slug identifier=keys.doc number=page.number owner=page.document.collection.owner %}
       {% else %}
        <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
         <div class="card-body flex flex-col justify-center items-center h-full text-center p-6">
@@ -196,10 +198,16 @@
             hx-swap="outerHTML"
             class="btn btn-primary w-full"
             id="extractBtn"
-            {% if page.has_extraction %}disabled{% endif %}>
+            {% if not page.can_extract %}disabled{% endif %}>
             Extract
           </button>
-          <p class="mb-4">Click <span class="font-bold">Extract</span> for intelligent extraction.</p>
+          <p class="mb-4 {% if not page.can_extract %}text-error{% endif %}">
+            {% if page.can_extract %}
+              Click <span class="font-bold">Extract</span> for intelligent extraction.
+            {% else %}
+              Text extraction is not available. The page may already have text blocks, or a cloud service may not be configured for this organization.
+            {% endif %}
+          </p>
         </div>  
       </div>
       {% endif %}
