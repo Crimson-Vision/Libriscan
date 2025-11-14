@@ -92,7 +92,7 @@ class LibriscanTutorial {
         element: '#textDisplay',
         popover: {
           title: '🔎 Extracted Text',
-          description: 'This area shows all the extracted words from the page. Words are color-coded by confidence level - green for high confidence, yellow for medium, and red for low. Click any word to view and edit its details.',
+          description: 'This area shows all the extracted words from the page. Words are color-coded by confidence level - green for high confidence, yellow for medium, and red for low. Each word has a line number and word number for reference. Line dividers separate different lines of text. Click any word to view and edit its details.',
           side: 'left',
           align: 'start'
         }
@@ -100,8 +100,13 @@ class LibriscanTutorial {
       {
         element: '#confidenceFilter',
         popover: {
-          title: '🎨 Confidence Filter',
-          description: 'Use this filter to show or hide words based on their confidence levels. This helps you focus on words that need review by filtering out already-accepted or high-confidence words.',
+          title: '🎨 Confidence Filter & Indicators',
+          description: 'This filter controls which visual indicators are shown on words. You can toggle visibility for:<br/>' +
+            '• <strong>Confidence levels:</strong> High, Medium, Low, Accepted<br/>' +
+            '• <strong>Word visibility controls:</strong> Omit, Merge with Prior<br/>' +
+            '• <strong>Review flags:</strong> Words flagged for review<br/>' +
+            '• <strong>Line Numbers & Dividers:</strong> Show/hide line numbers and dividers<br/><br/>' +
+            'Use this to customize what you see and focus on specific types of words that need attention.',
           side: 'left',
           align: 'start'
         }
@@ -110,7 +115,7 @@ class LibriscanTutorial {
         element: '#clickedWordsContainer',
         popover: {
           title: '✏️ Word Details Panel',
-          description: 'When you click on a word, its details appear here. You can edit the text, view alternative suggestions, change metadata (text type and word visibility control), check confidence levels, and see the complete history of changes.',
+          description: '<strong>First, click on any word in the extracted text above</strong> to open the word details panel here. Once open, you can edit the text, view alternative suggestions, change metadata (text type and word visibility control), check confidence levels, and see the complete history of changes.',
           side: 'top',
           align: 'start'
         }
@@ -253,15 +258,6 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#typeControlConfidenceStatContainer',
-        popover: {
-          title: '📊 Word Metadata',
-          description: 'View and edit word properties including word visibility control (how the word is handled in exports) and confidence level (OCR accuracy).',
-          side: 'top',
-          align: 'center'
-        }
-      },
-      {
         element: '#wordVisibilityControlDropdownBtn',
         popover: {
           title: '🎛️ Word Visibility Control',
@@ -274,7 +270,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#confidenceStat',
+        element: '#confidenceLevelSection',
         popover: {
           title: '📈 Confidence Level',
           description: 'Shows the OCR confidence level for this word. Lower confidence words may need review. Click "Accept" (or press A) to set the confidence to 100%.',
@@ -295,9 +291,18 @@ class LibriscanTutorial {
         element: '#wordAuditHistoryTab',
         popover: {
           title: '📜 Audit History',
-          description: 'View the complete history of changes made to this word, including who made the changes and when they were made.',
-          side: 'bottom',
+          description: 'Click the Audit History tab to view the complete edit history of the current word. This shows all changes made to the word over time, including who made the changes, when they were made, and what the previous values were. This is useful for tracking edits and understanding the word\'s evolution.',
+          side: 'top',
           align: 'center'
+        }
+      },
+      {
+        element: '#wordActionsDropdownIcon',
+        popover: {
+          title: '↩️ Revert to Original',
+          description: 'The "Revert to Original" action (available in the actions menu dropdown when a word has been edited) allows you to restore a word to its original OCR-extracted value. This is useful if you\'ve made changes that you want to undo. A confirmation dialog will appear to prevent accidental reverts.',
+          side: 'right',
+          align: 'start'
         }
       },
       {
