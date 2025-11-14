@@ -390,6 +390,29 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
         )
 
 
+@permission_required("biblios.change_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST", "PATCH"])
+def update_page_identifier(request, short_name, collection_slug, identifier, number):
+    """Update a Page's identifier field"""
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+
+    new_identifier = request.POST.get("identifier", "").strip()
+    
+    if new_identifier and (' ' in new_identifier or len(new_identifier) > 30):
+        return JsonResponse({"error": "Invalid identifier"}, status=400)
+
+    page.identifier = new_identifier or None
+    page.save(update_fields=["identifier"])
+
+    return JsonResponse({"display": page.identifier or "Untitled"})
+
+
 @permission_required("biblios.delete_page", fn=get_org_by_page, raise_exception=True)
 @require_http_methods(["POST"])
 def delete_page(request, short_name, collection_slug, identifier, number):

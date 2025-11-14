@@ -132,12 +132,12 @@
               <div class="flex items-center justify-center">
                 <div class="w-full">
                   <div class="dropdown dropdown-hover w-full">
-                    <div tabindex="0" role="button" class="btn btn-sm w-full" aria-label="Select page">{% if page.identifier %}{{ page.identifier }}{% else %}Untitled{% endif %}</div>
+                    <div tabindex="0" role="button" class="btn btn-sm w-full" aria-label="Select page">Page {{ page.number }}</div>
                     <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-48 p-2 shadow max-h-60 overflow-y-auto">
                       {% for page_num in all_pages %}
                         {% if page_num == page.number %}
                           <li><a class="active flex justify-between">
-                            <span>{% if page.identifier %}{{ page.identifier }}{% else %}Untitled{% endif %}</span>
+                            <span>Page {{ page_num }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
                               <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
             </svg>

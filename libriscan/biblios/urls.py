@@ -155,6 +155,11 @@ urlpatterns = [
                                             name="page",
                                         ),
                                         path(
+                                            "page<int:number>/identifier/",
+                                            views.update_page_identifier,
+                                            name="page_identifier_update",
+                                        ),
+                                        path(
                                             "page<int:number>/delete/",
                                             views.delete_page,
                                             name="page_delete",
