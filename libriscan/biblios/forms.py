@@ -47,8 +47,8 @@ class PageForm(forms.ModelForm):
     
     def clean_identifier(self):
         identifier = self.cleaned_data.get("identifier")
-        if identifier and ' ' in identifier:
-            raise forms.ValidationError("Identifier cannot contain whitespace.")
+        if identifier and not identifier.isalnum():
+            raise forms.ValidationError("Identifier must contain only alphanumeric characters.")
         return identifier
 
 
