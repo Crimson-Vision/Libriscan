@@ -1,5 +1,44 @@
 {% extends "biblios/base.html" %}
 {% load static %}
+
+{% block tutorial_section %}
+<!-- Tutorials Section - Only on Document View -->
+<li class="menu-title">
+  <span class="flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+    </svg>
+    Tutorials
+  </span>
+</li>
+<li>
+  <a id="startDocumentTutorial" class="active">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+    </svg>
+    <div class="flex flex-col items-start">
+      <span class="font-semibold">Document Walkthrough</span>
+      <span class="text-xs opacity-70">Learn the basics</span>
+    </div>
+  </a>
+</li>
+<li>
+  <a id="startPageCardTutorial">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+    </svg>
+    <div class="flex flex-col items-start">
+      <span class="font-semibold">Page Card Guide</span>
+      <span class="text-xs opacity-70">In-depth page features</span>
+    </div>
+  </a>
+</li>
+{% endblock %}
+
+{% block tutorial_divider %}
+<div class="divider my-1"></div>
+{% endblock %}
+
 {% block content %}
         <!-- Breadcrumb Navigation with Icons -->
         <nav class="mb-3 text-sm breadcrumbs">
@@ -91,7 +130,7 @@
                           <div class="flex items-start gap-4">
                             <!-- Arrow Buttons (Reorder) -->
                             {% if document.pages.count > 1 %}
-                            <div class="flex-shrink-0 flex flex-col gap-2">
+                            <div class="flex-shrink-0 flex flex-col gap-2 page-reorder-buttons" data-page="{{ page.number }}">
                               <button 
                                 type="button"
                                 class="btn btn-ghost btn-sm text-base-content/60 hover:bg-primary/10 hover:text-primary transition-colors duration-200 tooltip tooltip-right {% if forloop.first %}btn-disabled opacity-50{% endif %}"
@@ -122,16 +161,16 @@
                             {% endif %}
                             
                             <!-- Page Number Badge -->
-                            <div class="flex-shrink-0">
+                            <div class="flex-shrink-0 page-number-badge" data-page="{{ page.number }}">
                               <div class="flex items-center justify-center size-10 rounded-lg bg-info/10 group-hover:bg-info/20 transition-colors">
                                 <span class="text-sm font-semibold text-info">{{ page.number }}</span>
                               </div>
                             </div>
                             
                             <!-- Page Content -->
-                            <div class="flex-1 min-w-0">
+                            <div class="flex-1 min-w-0 page-content" data-page="{{ page.number }}">
                               <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                <span class="text-base font-semibold text-base-content group-hover:text-primary transition-colors">
+                                <span class="text-base font-semibold text-base-content group-hover:text-primary transition-colors page-identifier-section" data-page="{{ page.number }}">
                                   <span class="page-identifier-display">{% if page.identifier %}{{ page.identifier }}{% else %}Untitled{% endif %}</span>
                                   <input type="text" 
                                          name="identifier"
@@ -143,13 +182,13 @@
                                          hx-trigger="blur"
                                          hx-swap="none">
                                 </span>
-                                <button class="btn btn-ghost btn-xs btn-square edit-identifier-btn tooltip tooltip-right" data-page="{{ page.number }}" data-tip="Edit identifier">
+                                <button class="btn btn-ghost btn-xs btn-square edit-identifier-btn tooltip tooltip-right page-edit-identifier-btn" data-page="{{ page.number }}" data-tip="Edit identifier">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                   </svg>
                                 </button>
                                 <!-- Status Badges -->
-                                <div class="flex items-center gap-1.5 flex-wrap">
+                                <div class="flex items-center gap-1.5 flex-wrap page-status-badges" data-page="{{ page.number }}">
                                   {% if not page.has_extraction %}
                                     <span class="badge badge-sm badge-warning">New</span>
                                   {% elif page.has_extraction %}
@@ -159,6 +198,7 @@
                               </div>
                               
                               <!-- Snippet Preview -->
+                              <div class="page-snippet" data-page="{{ page.number }}">
                               {% if page.snippet %}
                                 <blockquote class="text-sm text-base-content/70 line-clamp-2 mb-2 border-l-4 border-primary/30 pl-3 italic">
                                   "{{ page.snippet }}"
@@ -166,9 +206,10 @@
                               {% else %}
                                 <p class="text-sm text-base-content/50 italic mb-2">No preview available</p>
                               {% endif %}
+                              </div>
                               
                               <!-- Metadata -->
-                              <div class="flex items-center gap-3 text-xs flex-wrap">
+                              <div class="flex items-center gap-3 text-xs flex-wrap page-metadata" data-page="{{ page.number }}">
                                 {% if page.history.exists %}
                                   {% with created=page.history.earliest %}
                                     <span class="flex items-center gap-1.5 whitespace-nowrap">
@@ -197,11 +238,12 @@
                             </div>
                             
                             <!-- Delete Button -->
-                            <div class="flex-shrink-0">
+                            <div class="flex-shrink-0 page-delete-button" data-page="{{ page.number }}">
                         <button 
                           type="button" 
-                                class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
+                                class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left page-delete-btn"
                           data-tip="Delete page"
+                          data-page="{{ page.number }}"
                                 onclick="event.stopPropagation(); event.preventDefault(); showDeletePageModal({{ page.number }}, '{% url 'page_delete' keys.owner keys.collection_slug document.identifier page.number %}')">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
