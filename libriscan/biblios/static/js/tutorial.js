@@ -40,6 +40,21 @@ class LibriscanTutorial {
       event.preventDefault();
       this.startCollectionWalkthrough();
     });
+
+    document.getElementById('startDocumentFormTutorial')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.startDocumentFormWalkthrough();
+    });
+
+    document.getElementById('startSeriesFormTutorial')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.startSeriesFormWalkthrough();
+    });
+
+    document.getElementById('startPageFormTutorial')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.startPageFormWalkthrough();
+    });
   }
 
   createDriver(steps) {
@@ -720,7 +735,7 @@ class LibriscanTutorial {
         element: addSeriesBtn,
         popover: {
           title: '➕ Add New Series',
-          description: 'Click this button to create a new series within this collection. Series help organize related documents together. For example, you might create a series for "Annual Reports" or "Correspondence" to group similar documents.',
+          description: 'Click this button to create a new series within this collection. Series help organize related documents together. For example, you might create a series for "Local Deeds" or "Correspondence" to group similar documents.',
           side: 'top',
           align: 'center'
         }
@@ -792,6 +807,362 @@ class LibriscanTutorial {
         align: 'center'
       }
     });
+
+    const driver = this.createDriver(steps);
+    driver?.drive();
+  }
+
+  startDocumentFormWalkthrough() {
+    // Get form elements
+    const formCard = document.getElementById('documentFormCard');
+    const formTitle = document.getElementById('documentFormTitle');
+    const identifierField = document.getElementById('documentIdentifierField');
+    const identifierInput = identifierField?.querySelector('input[type="text"]');
+    const seriesField = document.getElementById('documentSeriesField');
+    const seriesSelect = document.getElementById(seriesField?.querySelector('select')?.id || '');
+    const longSField = document.getElementById('documentLongSField');
+    const longSCheckbox = longSField?.querySelector('input[type="checkbox"]');
+    const cancelBtn = document.getElementById('documentFormCancelBtn');
+    const submitBtn = document.getElementById('documentFormSubmitBtn');
+    const isEditMode = formTitle?.textContent?.includes('Edit');
+    
+    // Check if series options exist (more than just the default "-----" option)
+    const hasSeriesOptions = seriesSelect && seriesSelect.options.length > 1;
+
+    const steps = [
+      {
+        element: formCard || 'body',
+        popover: {
+          title: isEditMode ? '✏️ Edit Document' : '📄 Create Document',
+          description: isEditMode 
+            ? 'This form allows you to edit an existing document. You can update the identifier, change the series assignment, and modify long s detection settings.'
+            : 'This form allows you to create a new document in your collection. Fill in the required fields to get started.',
+          side: 'center',
+          align: 'center'
+        }
+      },
+      {
+        element: 'nav.breadcrumbs',
+        popover: {
+          title: '📍 Breadcrumb Navigation',
+          description: 'Use the breadcrumbs at the top to navigate back to the Organization or Collection. Click on any level to return to that page.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: identifierField || formCard || 'body',
+        popover: {
+          title: '🏷️ Document Identifier',
+          description: 'The identifier is a unique name for your document. <strong>Requirements:</strong><br/>' +
+            '• Must be URL-friendly (letters, numbers, and hyphens only)<br/>' +
+            '• Maximum 25 characters<br/>' +
+            '• Spaces are automatically converted to hyphens<br/>' +
+            '• Special characters are automatically removed<br/><br/>' +
+            'The identifier appears in the document URL and helps identify the document in lists.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: identifierInput || identifierField || formCard || 'body',
+        popover: {
+          title: '✍️ Identifier Input',
+          description: 'As you type, the identifier is automatically formatted to be URL-friendly. Invalid characters are removed, and spaces become hyphens. This ensures your document has a clean, accessible URL.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: seriesField || formCard || 'body',
+        popover: {
+          title: '📂 Series (Optional)',
+          description: hasSeriesOptions
+            ? 'The series dropdown allows you to assign this document to an existing series within the collection. Series help organize related documents together. Select a series from the dropdown, or leave it as "-----" to keep the document at the collection level.'
+            : 'Series allow you to organize related documents together. Currently, there are no series in this collection. You can create a series first, then assign documents to it, or leave this field empty to add the document directly to the collection.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: longSField || formCard || 'body',
+        popover: {
+          title: '🔤 Long S Detection',
+          description: 'The long s (⟨ſ⟩) was a historical letterform used in older texts. When enabled, this feature helps OCR recognize and convert the long s character to a modern "s" during text extraction. <strong>Recommended:</strong> Keep this enabled for historical documents, as it improves text recognition accuracy.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: cancelBtn || formCard || 'body',
+        popover: {
+          title: '❌ Cancel',
+          description: 'Click Cancel to discard your changes and return to the collection page without saving. Any information you\'ve entered will be lost.',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: submitBtn || formCard || 'body',
+        popover: {
+          title: isEditMode ? '💾 Save Changes' : '✅ Submit',
+          description: isEditMode
+            ? 'Click Submit to save your changes to the document. The document will be updated with the new identifier, series assignment, and long s detection setting.'
+            : 'Click Submit to create the new document. After creation, you\'ll be redirected to the document page where you can add pages and extract text.',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: 'body',
+        popover: {
+          title: '✅ Form Complete!',
+          description: 'You now understand how to create or edit documents:<br/>' +
+            '• <strong>Identifier:</strong> URL-friendly name (required)<br/>' +
+            '• <strong>Series:</strong> Optional organization grouping<br/>' +
+            '• <strong>Long S Detection:</strong> Improves OCR for historical documents<br/>' +
+            '• <strong>Cancel:</strong> Discard changes and return<br/>' +
+            '• <strong>Submit:</strong> Save and create/edit document<br/><br/>' +
+            'After creating a document, you can add pages and start extracting text!',
+          side: 'center',
+          align: 'center'
+        }
+      }
+    ];
+
+    const driver = this.createDriver(steps);
+    driver?.drive();
+  }
+
+  startSeriesFormWalkthrough() {
+    // Get form elements
+    const formCard = document.getElementById('seriesFormCard');
+    const formTitle = document.getElementById('seriesFormTitle');
+    const nameField = document.getElementById('seriesNameField');
+    const nameInput = document.getElementById('id_name');
+    const slugField = document.getElementById('seriesSlugField');
+    const slugInput = document.getElementById('id_slug');
+    const cancelBtn = document.getElementById('seriesFormCancelBtn');
+    const submitBtn = document.getElementById('seriesFormSubmitBtn');
+    const isEditMode = formTitle?.textContent?.includes('Edit');
+
+    const steps = [
+      {
+        element: formCard || 'body',
+        popover: {
+          title: isEditMode ? '✏️ Edit Series' : '📂 Create New Series',
+          description: isEditMode
+            ? 'This form allows you to edit an existing series. You can update the series name and slug.'
+            : 'This form allows you to create a new series in your collection. Series help organize related documents together. Fill in the required fields to get started.',
+          side: 'center',
+          align: 'center'
+        }
+      },
+      {
+        element: 'nav.breadcrumbs',
+        popover: {
+          title: '📍 Breadcrumb Navigation',
+          description: 'Use the breadcrumbs at the top to navigate back to the Organization or Collection. Click on any level to return to that page.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: nameField || formCard || 'body',
+        popover: {
+          title: '📝 Series Name',
+          description: 'Enter a descriptive name for your series. This is the display name that will appear in lists and navigation. Examples: "Local Deeds", "Correspondence", "Research Papers". The name can contain spaces and special characters.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: nameInput || nameField || formCard || 'body',
+        popover: {
+          title: '✍️ Auto-Generated Slug',
+          description: 'As you type the series name, the slug field below is automatically generated. The slug is a URL-friendly version of the name (lowercase, with spaces converted to hyphens). You can manually edit the slug if needed, but it must follow the format: lowercase letters, numbers, and hyphens only.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: slugField || formCard || 'body',
+        popover: {
+          title: '🔗 Series Slug',
+          description: 'The slug is a URL-friendly identifier for your series. <strong>Requirements:</strong><br/>' +
+            '• Only lowercase letters, numbers, and hyphens<br/>' +
+            '• No spaces or special characters<br/>' +
+            '• Used in the series URL<br/><br/>' +
+            'The slug is automatically generated from the series name, but you can edit it manually if you want a different URL format.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: slugInput || slugField || formCard || 'body',
+        popover: {
+          title: '⚠️ Slug Format',
+          description: 'If you manually edit the slug, make sure it follows the required format. Invalid characters will be rejected. The slug must be unique within the collection.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: cancelBtn || formCard || 'body',
+        popover: {
+          title: '❌ Cancel',
+          description: 'Click Cancel to discard your changes and return to the collection page without saving. Any information you\'ve entered will be lost.',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: submitBtn || formCard || 'body',
+        popover: {
+          title: isEditMode ? '💾 Update Series' : '✅ Create Series',
+          description: isEditMode
+            ? 'Click "Update Series" to save your changes. The series will be updated with the new name and slug.'
+            : 'Click "Create Series" to create the new series. After creation, you\'ll be redirected to the collection page where you can see your new series and start adding documents to it.',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: 'body',
+        popover: {
+          title: '✅ Series Form Complete!',
+          description: 'You now understand how to create or edit series:<br/>' +
+            '• <strong>Series Name:</strong> Display name (can contain spaces)<br/>' +
+            '• <strong>Slug:</strong> URL-friendly identifier (auto-generated, can be edited)<br/>' +
+            '• <strong>Cancel:</strong> Discard changes and return<br/>' +
+            '• <strong>Submit:</strong> Save and create/edit series<br/><br/>' +
+            'After creating a series, you can add documents to organize your collection!',
+          side: 'center',
+          align: 'center'
+        }
+      }
+    ];
+
+    const driver = this.createDriver(steps);
+    driver?.drive();
+  }
+
+  startPageFormWalkthrough() {
+    // Get form elements
+    const header = document.getElementById('pageUploadHeader');
+    const formCard = document.getElementById('pageUploadCard');
+    const numberField = document.getElementById('pageField_number');
+    const numberInput = numberField?.querySelector('input[type="number"]');
+    const imageField = document.getElementById('pageField_image');
+    const imageInput = imageField?.querySelector('input[type="file"]');
+    const identifierField = document.getElementById('pageField_identifier');
+    const identifierInput = identifierField?.querySelector('input[type="text"]');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const steps = [
+      {
+        element: header || formCard || 'body',
+        popover: {
+          title: '📤 Upload Page',
+          description: 'This form allows you to add a new page to your document. You\'ll upload a page image, and then extract text from it using OCR. Let\'s go through each field step by step.',
+          side: 'center',
+          align: 'center'
+        }
+      },
+      {
+        element: numberField || formCard || 'body',
+        popover: {
+          title: '🔢 Page Number',
+          description: 'Enter the page number for this page. This number determines the order of pages in your document. Pages are typically numbered sequentially starting from 1, but you can use any numbering scheme that makes sense for your document.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: numberInput || numberField || formCard || 'body',
+        popover: {
+          title: '📝 Numbering Tips',
+          description: 'The page number helps organize your document. You can use:<br/>' +
+            '• Sequential numbers: 1, 2, 3...<br/>' +
+            '• Roman numerals: i, ii, iii...<br/>' +
+            '• Custom numbering: A-1, B-2...<br/><br/>' +
+            'The number appears in page navigation and helps you identify pages quickly.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: imageField || formCard || 'body',
+        popover: {
+          title: '🖼️ Page Image',
+          description: '<strong>This is the most important field!</strong> Upload a JPG or PNG image file of the page you want to transcribe. <strong>Requirements:</strong><br/>' +
+            '• File format: JPG or PNG only<br/>' +
+            '• Maximum size: 5.0 MB (or as configured)<br/>' +
+            '• Image should be clear and readable<br/><br/>' +
+            'After uploading, you\'ll be able to extract text from this image using OCR.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: imageInput || imageField || formCard || 'body',
+        popover: {
+          title: '📁 File Selection',
+          description: 'Click the "Choose File" button to select an image from your computer. Once you select a valid file, the upload button will be enabled. The system will automatically validate the file format and size.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: identifierField || formCard || 'body',
+        popover: {
+          title: '🏷️ Page Identifier',
+          description: 'The page identifier is automatically generated from the filename when you upload an image. It\'s a unique name for the page (without spaces) that helps identify it. The identifier field is disabled until a valid image is selected.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: identifierInput || identifierField || formCard || 'body',
+        popover: {
+          title: '✏️ Editing Identifier',
+          description: 'After selecting a valid image file, the identifier field becomes enabled. You can edit it if needed, but remember:<br/>' +
+            '• No spaces allowed (spaces are automatically removed)<br/>' +
+            '• Based on the uploaded filename by default<br/>' +
+            '• Can be changed to any identifier you prefer<br/><br/>' +
+            'The identifier appears in page lists and helps you identify pages at a glance.',
+          side: 'bottom',
+          align: 'start'
+        }
+      },
+      {
+        element: submitBtn || formCard || 'body',
+        popover: {
+          title: '⬆️ Upload Page',
+          description: 'The upload button is disabled until you select a valid image file. Once enabled, click "Upload Page" to:<br/>' +
+            '1. Upload the page image to the server<br/>' +
+            '2. Create the page record in the document<br/>' +
+            '3. Redirect you to the page view<br/><br/>' +
+            'After uploading, you can extract text from the page using OCR.',
+          side: 'top',
+          align: 'center'
+        }
+      },
+      {
+        element: 'body',
+        popover: {
+          title: '✅ Upload Complete!',
+          description: 'You now understand how to upload pages:<br/>' +
+            '• <strong>Page Number:</strong> Sequential or custom numbering<br/>' +
+            '• <strong>Image:</strong> JPG or PNG file (max 5.0 MB)<br/>' +
+            '• <strong>Identifier:</strong> Auto-generated from filename (can be edited)<br/>' +
+            '• <strong>Upload:</strong> Submit to add the page<br/><br/>' +
+            '<strong>Next Steps:</strong> After uploading, you\'ll be taken to the page view where you can extract text and start editing!',
+          side: 'center',
+          align: 'center'
+        }
+      }
+    ];
 
     const driver = this.createDriver(steps);
     driver?.drive();

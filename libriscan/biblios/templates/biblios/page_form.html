@@ -1,20 +1,48 @@
 {% extends "biblios/base.html" %}
+{% load static %}
+
+{% block tutorial_section %}
+<!-- Tutorials Section - Only on Page Form View -->
+<li class="menu-title">
+  <span class="flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+    </svg>
+    Tutorials
+  </span>
+</li>
+<li>
+  <a id="startPageFormTutorial" class="active">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+    </svg>
+    <div class="flex flex-col items-start">
+      <span class="font-semibold">Page Upload Guide</span>
+      <span class="text-xs opacity-70">Learn the basics</span>
+    </div>
+  </a>
+</li>
+{% endblock %}
+
+{% block tutorial_divider %}
+<div class="divider my-1"></div>
+{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-base-200 to-base-300 py-12 px-4">
     <div class="max-w-2xl mx-auto">
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold mb-2">Upload Page</h1>
+        <div class="text-center mb-8" id="pageUploadHeader">
+            <h1 class="text-4xl font-bold mb-2" id="pageUploadTitle">Upload Page</h1>
             <p class="text-base-content/70">Add a new page to your document</p>
         </div>
 
-        <div class="card bg-base-100 shadow-2xl">
+        <div class="card bg-base-100 shadow-2xl" id="pageUploadCard">
             <div class="card-body">
-                <form enctype="multipart/form-data" method="post">
+                <form enctype="multipart/form-data" method="post" id="pageUploadForm">
                     {% csrf_token %}
-                    <div class="space-y-6">
+                    <div class="space-y-6" id="pageUploadFields">
                         {% for field in form.visible_fields %}
-                        <div class="form-control">
+                        <div class="form-control" id="pageField_{{ field.name }}">
                             <label class="label">
                                 <span class="label-text font-semibold">{{ field.label }}</span>
                             </label>
