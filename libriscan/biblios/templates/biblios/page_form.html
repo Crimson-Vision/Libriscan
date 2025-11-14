@@ -126,8 +126,8 @@
         
         // Remove whitespace from identifier input
         if (identifierInput) {
-            identifierInput.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/\s/g, '');
+            identifierInput.addEventListener('input', (event) => {
+                event.target.value = event.target.value.replace(/\s/g, '');
             });
         }
     });
