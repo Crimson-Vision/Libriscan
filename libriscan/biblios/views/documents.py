@@ -471,7 +471,7 @@ def extract_text(request, short_name, collection_slug, identifier, number):
     # Validate that the page can be extracted
     if not page.can_extract:
         return HttpResponse(
-            "Text extraction is not available. Please configure a cloud service for this organization.",
+            "Text extraction is not available. The page may already have text blocks, or a cloud service may not be configured for this organization.",
             status=400
         )
 
