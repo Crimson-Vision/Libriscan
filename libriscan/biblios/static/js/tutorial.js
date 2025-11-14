@@ -203,6 +203,15 @@ class LibriscanTutorial {
         }
       },
       {
+        element: '#reviewFlagBtn',
+        popover: {
+          title: '🚩 Press "F" to Flag for Review',
+          description: '<strong>Press the F key</strong> to toggle the review flag on the current word. Flagged words are highlighted in red and can be easily found later for review. This is useful for marking words that need attention without stopping your workflow.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
         element: 'body',
         popover: {
           title: '🚀 Quick Recap',
@@ -211,8 +220,9 @@ class LibriscanTutorial {
             '• <kbd>E</kbd> - Edit current word<br/>' +
             '• <kbd>Enter</kbd> - Save changes<br/>' +
             '• <kbd>Esc</kbd> - Cancel editing<br/>' +
-            '• <kbd>A</kbd> - Accept<br/>' +
-            '• <kbd>1-9</kbd> - Apply suggestions<br/><br/>' +
+            '• <kbd>A</kbd> - Accept word<br/>' +
+            '• <kbd>1-9</kbd> - Apply suggestions<br/>' +
+            '• <kbd>F</kbd> - Flag for review<br/><br/>' +
             '<strong>Pro tip:</strong> Accepting words or applying suggestions will automatically advance to the next word!',
           side: 'center',
           align: 'center'
