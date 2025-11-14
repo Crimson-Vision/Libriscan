@@ -132,7 +132,7 @@
                             <div class="flex-1 min-w-0">
                               <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                                 <span class="text-base font-semibold text-base-content group-hover:text-primary transition-colors">
-                                  Page {{ page.number }}
+                                  {% if page.identifier %}{{ page.identifier }}{% else %}Untitled{% endif %}
                                 </span>
                                 <!-- Status Badges -->
                                 <div class="flex items-center gap-1.5 flex-wrap">
