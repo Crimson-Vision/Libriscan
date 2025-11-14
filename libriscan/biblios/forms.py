@@ -44,6 +44,12 @@ class PageForm(forms.ModelForm):
     class Meta:
         model = Page
         fields = ("document", "number", "image", "identifier")
+    
+    def clean_identifier(self):
+        identifier = self.cleaned_data.get("identifier")
+        if identifier and ' ' in identifier:
+            raise forms.ValidationError("Identifier cannot contain whitespace.")
+        return identifier
 
 
 class FilePondUploadForm(forms.Form):

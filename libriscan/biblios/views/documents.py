@@ -27,7 +27,7 @@ from biblios.models import (
     TextBlock,
 )
 
-from biblios.forms import DocumentForm, FilePondUploadForm
+from biblios.forms import DocumentForm, FilePondUploadForm, PageForm
 from .base import (
     OrgPermissionRequiredMixin,
     get_org_by_page,
@@ -237,7 +237,7 @@ class MetadataUpdateView(OrgPermissionRequiredMixin, UpdateView):
 
 class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Page
-    fields = ("number", "image")
+    form_class = PageForm
 
     def get_initial(self, **kwargs):
         """Dynamically construct initial values for some fields"""
@@ -261,8 +261,6 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         return context
 
     def post(self, request, **kwargs):
-        from biblios.forms import PageForm
-
         self.object = None
 
         # Create a mutable copy of the POST object and add the parent Document to it
@@ -279,6 +277,13 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         form.fields["document"].widget = forms.HiddenInput()
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Configure document field as hidden
+        if "document" in form.fields:
+            form.fields["document"].widget = forms.HiddenInput()
+        return form
 
 
 @require_http_methods(["POST"])

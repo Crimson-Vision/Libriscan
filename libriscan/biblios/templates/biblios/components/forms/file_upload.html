@@ -35,6 +35,24 @@ body * {
              accept="image/tiff,image/jpeg,image/png"
              data-max-file-size="5MB">
 
+      <!-- Identifier Input -->
+      <div class="form-control mt-4">
+        <label class="label">
+          <span class="label-text font-semibold">Identifier</span>
+        </label>
+        <input type="text" 
+               id="identifierInput" 
+               name="identifier" 
+               class="input input-bordered w-full" 
+               placeholder="Enter identifier (no spaces)"
+               disabled
+               pattern="[^\s]+"
+               title="Identifier cannot contain whitespace">
+        <label class="label">
+          <span class="label-text-alt">Identifier cannot contain whitespace</span>
+        </label>
+      </div>
+
              <!-- Upload and Analyze Buttons Side by Side -->
              <div class="flex gap-2 mt-4 w-full">
                <button id="uploadBtn" 
@@ -110,6 +128,15 @@ body * {
         return;
       }
       document.getElementById('uploadBtn').disabled = false;
+      
+      // Enable identifier input and pre-populate with filename (without extension)
+      const identifierInput = document.getElementById('identifierInput');
+      if (identifierInput) {
+        identifierInput.disabled = false;
+        const filename = file.filename || file.name || '';
+        const nameWithoutExt = filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
+        identifierInput.value = nameWithoutExt;
+      }
     },
     onprocessfile: (error, file) => {
       const btn = document.getElementById('uploadBtn');
@@ -122,6 +149,13 @@ body * {
       
       if (error) {
         console.error('Upload error:', error);
+        // Disable identifier input on error
+        const identifierInput = document.getElementById('identifierInput');
+        if (identifierInput) {
+          identifierInput.disabled = true;
+        }
+      } else {
+        // Keep identifier input enabled after successful upload
       }
       // Disable upload button after processing
       btn.disabled = true;
@@ -133,6 +167,13 @@ body * {
     const btn = document.getElementById('uploadBtn');
     const spinner = document.getElementById('uploadSpinner');
     const btnText = document.getElementById('uploadBtnText');
+    const identifierInput = document.getElementById('identifierInput');
+    
+    // Validate identifier before upload
+    if (identifierInput && identifierInput.value.trim() && /\s/.test(identifierInput.value)) {
+      alert('Identifier cannot contain whitespace');
+      return;
+    }
     
     // Show loading state
     btn.disabled = true;
@@ -141,6 +182,14 @@ body * {
     
     pond.processFiles();
   });
+  
+  // Validate identifier input on change (remove whitespace)
+  const identifierInput = document.getElementById('identifierInput');
+  if (identifierInput) {
+    identifierInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\s/g, '');
+    });
+  }
 
   // Enable Analyze button after upload
   pond.on('processfile', (error, file) => {
