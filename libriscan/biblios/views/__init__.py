@@ -25,6 +25,7 @@ from .documents import (
     PageDetail,
     delete_page,
     reorder_page,
+    update_page_identifier,
     handle_upload,
     extract_text,
     export_pdf,

@@ -39,6 +39,17 @@
                                 <label class="label">
                                     <span class="label-text-alt">Please provide a JPG or PNG image with a maximum size of {{ max_upload_size|filesizeformat }}</span>
                                 </label>
+                            {% elif field.name == "identifier" %}
+                                <input type="text" name="{{ field.html_name }}" id="{{ field.id_for_label }}" 
+                                    class="input input-bordered input-lg w-full" 
+                                    value="{{ field.value|default_if_none:'' }}" 
+                                    placeholder="Enter identifier (no spaces)"
+                                    disabled
+                                    pattern="[^\s]+"
+                                    title="Identifier cannot contain whitespace">
+                                <label class="label">
+                                    <span class="label-text-alt">Identifier cannot contain whitespace</span>
+                                </label>
                             {% else %}
                                 {{ field }}
                             {% endif %}
@@ -75,6 +86,10 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.querySelector('input[type="file"]');
+        const identifierInput = document.querySelector('input[name="identifier"]');
+        const submitBtn = document.querySelector('#submitBtn');
+        
         LibriscanUtils.setupFileValidation(
             'input[type="file"]',
             '#submitBtn',
@@ -85,6 +100,36 @@
                 allowedExtensions: [".jpg", ".jpeg", ".png"]
             }
         );
+        
+        // Enable identifier input when file is valid (button enabled)
+        const checkFileValid = () => {
+            if (identifierInput && fileInput && fileInput.files[0]) {
+                const isValid = !submitBtn.disabled;
+                identifierInput.disabled = !isValid;
+                if (isValid && !identifierInput.value) {
+                    // Remove extension and replace all whitespace (spaces, tabs, etc.) with underscores
+                    const filename = fileInput.files[0].name.replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
+                    identifierInput.value = filename;
+                }
+            }
+        };
+        
+        fileInput.addEventListener('change', () => {
+            setTimeout(checkFileValid, 100);
+        });
+        
+        // Watch for button state changes
+        const observer = new MutationObserver(checkFileValid);
+        if (submitBtn) {
+            observer.observe(submitBtn, { attributes: true, attributeFilter: ['disabled'] });
+        }
+        
+        // Remove whitespace from identifier input
+        if (identifierInput) {
+            identifierInput.addEventListener('input', (event) => {
+                event.target.value = event.target.value.replace(/\s/g, '');
+            });
+        }
     });
 </script>
 {% endblock %}

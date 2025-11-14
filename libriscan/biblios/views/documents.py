@@ -27,7 +27,7 @@ from biblios.models import (
     TextBlock,
 )
 
-from biblios.forms import DocumentForm, FilePondUploadForm
+from biblios.forms import DocumentForm, FilePondUploadForm, PageForm
 from .base import (
     OrgPermissionRequiredMixin,
     get_org_by_page,
@@ -237,7 +237,7 @@ class MetadataUpdateView(OrgPermissionRequiredMixin, UpdateView):
 
 class PageCreateView(OrgPermissionRequiredMixin, CreateView):
     model = Page
-    fields = ("number", "image")
+    form_class = PageForm
 
     def get_initial(self, **kwargs):
         """Dynamically construct initial values for some fields"""
@@ -261,8 +261,6 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         return context
 
     def post(self, request, **kwargs):
-        from biblios.forms import PageForm
-
         self.object = None
 
         # Create a mutable copy of the POST object and add the parent Document to it
@@ -279,6 +277,13 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         form.fields["document"].widget = forms.HiddenInput()
 
         return self.form_valid(form) if form.is_valid() else self.form_invalid(form)
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Configure document field as hidden
+        if "document" in form.fields:
+            form.fields["document"].widget = forms.HiddenInput()
+        return form
 
 
 @require_http_methods(["POST"])
@@ -383,6 +388,29 @@ class PageDetail(OrgPermissionRequiredMixin, DetailView):
             document__identifier=doc,
             number=number,
         )
+
+
+@permission_required("biblios.change_page", fn=get_org_by_page, raise_exception=True)
+@require_http_methods(["POST", "PATCH"])
+def update_page_identifier(request, short_name, collection_slug, identifier, number):
+    """Update a Page's identifier field"""
+    page = get_object_or_404(
+        Page,
+        document__collection__owner__short_name=short_name,
+        document__collection__slug=collection_slug,
+        document__identifier=identifier,
+        number=number,
+    )
+
+    new_identifier = request.POST.get("identifier", "").strip()
+    
+    if new_identifier and (' ' in new_identifier or len(new_identifier) > 30):
+        return JsonResponse({"error": "Invalid identifier"}, status=400)
+
+    page.identifier = new_identifier or None
+    page.save(update_fields=["identifier"])
+
+    return JsonResponse({"display": page.identifier or "Untitled"})
 
 
 @permission_required("biblios.delete_page", fn=get_org_by_page, raise_exception=True)
