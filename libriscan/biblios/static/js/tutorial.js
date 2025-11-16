@@ -14,6 +14,7 @@ const TUTORIAL_CONFIG = {
   'startAllDocumentsTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startAllDocumentsWalkthrough' },
   'startPendingReviewsTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startPendingReviewsWalkthrough' },
   'startWhereYouLeftOffTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startWhereYouLeftOffWalkthrough' },
+  'startNavigationTutorial': { path: 'navigation.js', class: 'NavigationTutorials', method: 'startNavigationWalkthrough' },
   'startDocumentFormTutorial': { path: 'forms/document.js', class: 'DocumentFormTutorials', method: 'startDocumentFormWalkthrough' },
   'startSeriesFormTutorial': { path: 'forms/series.js', class: 'SeriesFormTutorials', method: 'startSeriesFormWalkthrough' },
   'startPageFormTutorial': { path: 'forms/page.js', class: 'PageFormTutorials', method: 'startPageFormWalkthrough' },
