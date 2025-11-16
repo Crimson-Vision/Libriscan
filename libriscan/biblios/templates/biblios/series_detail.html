@@ -1,4 +1,7 @@
 {% extends "biblios/base.html" %}
+
+{% block title %}{{ series }} · {{ series.collection }} · {{ series.collection.owner.short_name }} · Libriscan{% endblock %}
+
 {% block content %}
         <!-- Breadcrumb Navigation with Icons -->
         <nav class="mb-3 text-sm breadcrumbs">
