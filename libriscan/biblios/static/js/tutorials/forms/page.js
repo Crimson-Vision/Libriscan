@@ -3,10 +3,7 @@
 import { TutorialBase } from '../base.js';
 
 export class PageFormTutorials extends TutorialBase {
-  // Event listeners are handled by the main tutorial.js loader
-
   startPageFormWalkthrough() {
-    // Get form elements
     const header = document.getElementById('pageUploadHeader');
     const formCard = document.getElementById('pageUploadCard');
     const numberField = document.getElementById('pageField_number');
@@ -22,7 +19,7 @@ export class PageFormTutorials extends TutorialBase {
         element: header || formCard || 'body',
         popover: {
           title: '📤 Upload Page',
-          description: 'This form allows you to add a new page to your document. You\'ll upload a page image, and then extract text from it using OCR. Let\'s go through each field step by step.',
+          description: '<strong>Add a new page to your document:</strong> Upload a page image, then extract text from it using OCR. Let\'s go through each field step by step.',
           side: 'center',
           align: 'center'
         }
@@ -31,31 +28,16 @@ export class PageFormTutorials extends TutorialBase {
         element: numberField || formCard || 'body',
         popover: {
           title: '🔢 Page Number',
-          description: 'Enter the page number for this page. This number determines the order of pages in your document. Pages are typically numbered sequentially starting from 1, but you can use any numbering scheme that makes sense for your document.',
+          description: '<strong>Sequential position in the document:</strong><br/>• Typically numbered 1, 2, 3...<br/>• Determines the order of pages<br/>• Helps organize your document<br/>• Appears in page navigation',
           side: 'right',
-          align: 'start'
-        }
-      },
-      {
-        element: numberInput || numberField || formCard || 'body',
-        popover: {
-          title: '📝 Numbering Tips',
-          description: 'The page number helps organize your document. You can use:<br/>' +
-            '• Sequential numbers: 1, 2, 3...<br/>' +
-            'The number appears in page navigation and helps you identify pages quickly.',
-          side: 'bottom',
           align: 'start'
         }
       },
       {
         element: imageField || formCard || 'body',
         popover: {
-          title: '🖼️ Page Image',
-          description: '<strong>This is the most important field!</strong> Upload a JPG or PNG image file of the page you want to transcribe. <strong>Requirements:</strong><br/>' +
-            '• File format: JPG or PNG only<br/>' +
-            '• Maximum size: 5.0 MB (or as configured)<br/>' +
-            '• Image should be clear and readable<br/><br/>' +
-            'After uploading, you\'ll be able to extract text from this image using OCR.',
+          title: '🖼️ Page Image (Required)',
+          description: '<strong>⚠️ This is the most important field!</strong><br/>• Upload a JPG or PNG image file<br/>• Maximum size: 5.0 MB (or as configured)<br/>• Image should be clear and readable<br/><br/>After uploading, you\'ll be able to extract text from this image using OCR.',
           side: 'right',
           align: 'start'
         }
@@ -64,7 +46,7 @@ export class PageFormTutorials extends TutorialBase {
         element: imageInput || imageField || formCard || 'body',
         popover: {
           title: '📁 File Selection',
-          description: 'Click the "Choose File" button to select an image from your computer. Once you select a valid file, the upload button will be enabled. The system will automatically validate the file format and size.',
+          description: '<strong>Select your image:</strong><br/>• Click "Choose File" to select an image from your computer<br/>• Once selected, the system validates format and size automatically<br/>• Upload button becomes enabled when a valid file is selected',
           side: 'bottom',
           align: 'start'
         }
@@ -73,7 +55,7 @@ export class PageFormTutorials extends TutorialBase {
         element: identifierField || formCard || 'body',
         popover: {
           title: '🏷️ Page Identifier',
-          description: 'The page identifier is automatically generated from the filename when you upload an image. It\'s a unique name for the page (without spaces) that helps identify it. The identifier field is disabled until a valid image is selected.',
+          description: '<strong>Auto-generated from filename:</strong><br/>• Unique name for the page (no spaces)<br/>• Generated when image is selected<br/>• Helps identify the page in lists<br/><br/>The identifier field is disabled until a valid image is selected.',
           side: 'right',
           align: 'start'
         }
@@ -82,11 +64,7 @@ export class PageFormTutorials extends TutorialBase {
         element: identifierInput || identifierField || formCard || 'body',
         popover: {
           title: '✏️ Editing Identifier',
-          description: 'After selecting a valid image file, the identifier field becomes enabled. You can edit it if needed, but remember:<br/>' +
-            '• No spaces allowed (spaces are automatically removed)<br/>' +
-            '• Based on the uploaded filename by default<br/>' +
-            '• Can be changed to any identifier you prefer<br/><br/>' +
-            'The identifier appears in page lists and helps you identify pages at a glance.',
+          description: '<strong>After selecting an image:</strong><br/>• Identifier field becomes editable<br/>• Based on the uploaded filename by default<br/>• Spaces are automatically removed<br/>• You can change it to any identifier you prefer<br/><br/>The identifier appears in page lists.',
           side: 'bottom',
           align: 'start'
         }
@@ -95,11 +73,7 @@ export class PageFormTutorials extends TutorialBase {
         element: submitBtn || formCard || 'body',
         popover: {
           title: '⬆️ Upload Page',
-          description: 'The upload button is disabled until you select a valid image file. Once enabled, click "Upload Page" to:<br/>' +
-            '1. Upload the page image to the server<br/>' +
-            '2. Create the page record in the document<br/>' +
-            '3. Redirect you to the page view<br/><br/>' +
-            'After uploading, you can extract text from the page using OCR.',
+          description: '<strong>Button is disabled until valid image is selected.</strong> Once enabled, clicking "Upload Page" will:<br/>1. Upload the image to the server<br/>2. Create the page record in the document<br/>3. Redirect you to the page view<br/><br/>Then you can extract text from the page using OCR.',
           side: 'top',
           align: 'center'
         }
@@ -108,12 +82,7 @@ export class PageFormTutorials extends TutorialBase {
         element: 'body',
         popover: {
           title: '✅ Upload Complete!',
-          description: 'You now understand how to upload pages:<br/>' +
-            '• <strong>Page Number:</strong> Sequential or custom numbering<br/>' +
-            '• <strong>Image:</strong> JPG or PNG file (max 5.0 MB)<br/>' +
-            '• <strong>Identifier:</strong> Auto-generated from filename (can be edited)<br/>' +
-            '• <strong>Upload:</strong> Submit to add the page<br/><br/>' +
-            '<strong>Next Steps:</strong> After uploading, you\'ll be taken to the page view where you can extract text and start editing!',
+          description: '<strong>You now understand page uploads:</strong><br/>• <strong>Page Number:</strong> Sequential or custom numbering<br/>• <strong>Image:</strong> JPG or PNG file (max 5.0 MB)<br/>• <strong>Identifier:</strong> Auto-generated from filename (editable)<br/>• <strong>Upload:</strong> Submit to add the page<br/><br/><strong>Next steps:</strong> After uploading, you\'ll be taken to the page view where you can extract text and start editing!',
           side: 'center',
           align: 'center'
         }
