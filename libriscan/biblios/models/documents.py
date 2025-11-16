@@ -165,6 +165,10 @@ class DublinCoreMetadata(BibliosModel):
         return f"{self.document} Metadata"
 
 
+def image_path(instance, filename):
+    return f"pages/{instance.document.collection.owner.short_name}/{filename}"
+
+
 class Page(BibliosModel):
     # How many words should the page snippets be?
     SNIPPET_LENGTH = 20
@@ -173,7 +177,7 @@ class Page(BibliosModel):
         Document, on_delete=models.CASCADE, related_name="pages"
     )
     number = models.SmallIntegerField(default=1)
-    image = models.ImageField(blank=True, upload_to="pages")
+    image = models.ImageField(blank=True, upload_to=image_path)
     # This should be a bit longer than the Document identifier, since it's likely to include that with a suffix
     identifier = models.CharField(max_length=30, blank=True, null=True)
     history = HistoricalRecords()
