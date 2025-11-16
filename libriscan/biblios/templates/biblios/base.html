@@ -103,7 +103,13 @@
   <script src="{% static 'js/word_details/audit_history_renderer.js' %}"></script>
   <script src="{% static 'js/word_details/audit_history.js' %}"></script>
   <script src="{% static 'js/word_details/main.js' %}"></script>
-  <script src="{% static 'js/tutorial.js' %}"></script>
+  
+  <!-- Tutorial System - Load as module for ES6 imports -->
+  <script type="module">
+    // Set base path for tutorial modules
+    window.TUTORIAL_BASE_PATH = '{% static "js/tutorials/" %}';
+  </script>
+  <script type="module" src="{% static 'js/tutorial.js' %}"></script>
   
   <!-- Page-specific scripts -->
   {% block scripts %}{% endblock %}
