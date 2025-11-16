@@ -1,6 +1,8 @@
 {% extends "biblios/base.html" %}
 {% load static %}
 
+{% block title %}{{page}} · {% if page.document.series %}{{ page.document.series }} · {% endif %}{{ page.document.collection }} · {{ page.document.collection.owner.short_name}} · Libriscan{% endblock %}
+
 {% block tutorial_section %}
 <!-- Tutorials Section - Only on Page View -->
 <li class="menu-title">
