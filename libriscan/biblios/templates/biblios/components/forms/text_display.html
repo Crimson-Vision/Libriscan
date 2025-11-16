@@ -3,20 +3,20 @@
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
 <div id="textDisplay" class="card bg-base-100 shadow-sm h-full">
-  <div class="card-body p-0">
+  <div id="text-display-card-body" class="card-body p-0">
     <!-- Tabs with Filter Dropdown -->
-    <div class="relative">
-      <div class="tabs tabs-lift">
+    <div id="text-tabs-wrapper" class="relative">
+      <div id="text-tabs" class="tabs tabs-lift">
         <!-- Raw Text Tab -->
-        <label class="tab">
-          <input type="radio" name="text_tabs" checked="checked" />
+        <label id="raw-text-tab-label" class="tab">
+          <input id="raw-text-tab-input" type="radio" name="text_tabs" checked="checked" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
           <span class="hidden sm:inline">Raw Text</span>
         </label>
         <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-4">
-          <div class="h-[45vh] overflow-y-auto">
+          <div id="raw-text-scrollable" class="h-[45vh] overflow-y-auto">
             <!-- Word block with confidence indicators -->
             <!-- Limits for geometry coordinates removed from data-words-json -->
             <div class="flex flex-wrap gap-1.5 items-baseline" id="word-container">
@@ -69,20 +69,20 @@
         </div>
 
         <!-- Formatted Tab -->
-        <label class="tab">
-          <input type="radio" name="text_tabs" />
+        <label id="formatted-text-tab-label" class="tab">
+          <input id="formatted-text-tab-input" type="radio" name="text_tabs" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
           </svg>
           <span class="hidden sm:inline">Formatted</span>
         </label>
-        <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div id="formatted-text-content" class="tab-content bg-base-100 border-base-300 p-6">
           {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
         </div>
       </div>
 
       <!-- Filter Dropdown (Absolute Positioned Top Right) -->
-      <div class="absolute top-2 right-4 z-10">
+      <div id="confidence-toggle-wrapper" class="absolute top-2 right-4 z-10">
         {% include 'biblios/components/forms/confidence_toggle.html' %}
       </div>
     </div>

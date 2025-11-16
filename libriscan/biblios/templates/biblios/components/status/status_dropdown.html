@@ -5,15 +5,16 @@
             <span id="statusIcon"></span>
             <span id="statusText">{{ document.get_status_display }}</span>
         </span>
-        <span class="flex items-center justify-center px-2 py-1.5 bg-base-200/60 hover:bg-base-200/80 transition-colors rounded-r-lg">
+        <span id="status-dropdown-arrow" class="flex items-center justify-center px-2 py-1.5 bg-base-200/60 hover:bg-base-200/80 transition-colors rounded-r-lg">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3 text-base-content/60">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
             </svg>
         </span>
     </div>
-    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300 mt-2">
+    <ul id="status-dropdown-menu" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300 mt-2">
         <li>
-            <a href="#" 
+            <a id="status-option-new"
+               href="#" 
                class="status-option flex items-center gap-2 px-3 py-2 rounded-lg transition-colors" 
                data-status="N"
                hx-post="{% url 'document_status_update' keys.owner keys.collection_slug document.identifier %}"
@@ -29,7 +30,8 @@
             </a>
         </li>
         <li>
-            <a href="#" 
+            <a id="status-option-in-progress"
+               href="#" 
                class="status-option flex items-center gap-2 px-3 py-2 rounded-lg transition-colors" 
                data-status="I"
                hx-post="{% url 'document_status_update' keys.owner keys.collection_slug document.identifier %}"
@@ -45,7 +47,8 @@
             </a>
         </li>
         <li>
-            <a href="#" 
+            <a id="status-option-ready-for-review"
+               href="#" 
                class="status-option flex items-center gap-2 px-3 py-2 rounded-lg transition-colors" 
                data-status="R"
                hx-post="{% url 'document_status_update' keys.owner keys.collection_slug document.identifier %}"
@@ -61,7 +64,8 @@
             </a>
         </li>
         <li>
-            <a href="#" 
+            <a id="status-option-approved"
+               href="#" 
                class="status-option flex items-center gap-2 px-3 py-2 rounded-lg transition-colors" 
                data-status="A"
                hx-post="{% url 'document_status_update' keys.owner keys.collection_slug document.identifier %}"
