@@ -148,5 +148,81 @@ export class OrganizationTutorials extends TutorialBase {
     const driver = this.createDriver(steps);
     driver?.drive();
   }
+
+  startOrganizationListWalkthrough() {
+    const organizationsList = document.querySelector('.list');
+    const organizationsEmpty = document.getElementById('organizations-empty');
+    
+    // Check if organizations exist by looking for list items with links (not the empty state)
+    const organizationLinks = organizationsList?.querySelectorAll('li > a.list-row');
+    const hasOrganizations = !organizationsEmpty && organizationLinks && organizationLinks.length > 0;
+
+    // If no organizations, only show the empty state message
+    if (!hasOrganizations && organizationsEmpty) {
+      const steps = [
+        {
+          element: organizationsEmpty || organizationsList || 'body',
+          popover: {
+            title: '📭 No Organizations Found',
+            description: '<strong>You don\'t have access to any organizations yet.</strong><br/><br/>To get access to an organization, you need to be added by an administrator.<br/><br/><strong>Please contact your system administrator</strong> to request access to an organization.',
+            side: 'top',
+            align: 'center'
+          }
+        }
+      ];
+      const driver = this.createDriver(steps);
+      driver?.drive();
+      return;
+    }
+
+    // If organizations exist, show the full tutorial
+    const steps = [
+      {
+        element: 'body',
+        popover: {
+          title: 'Welcome to Organizations! 🏛️',
+          description: 'This page shows all organizations you have access to. Let\'s explore how to work with organizations.',
+          side: 'center',
+          align: 'center'
+        }
+      }
+    ];
+
+    const firstOrgLink = organizationLinks?.[0];
+    if (firstOrgLink) {
+      steps.push({
+        element: firstOrgLink || organizationsList || 'body',
+        popover: {
+          title: '🏛️ Organization Entry',
+          description: '<strong>Each organization shows:</strong><br/>• Organization icon<br/>• Full organization name<br/>• Short name (abbreviation)<br/><br/><strong>Click on any organization</strong> to view its details, collections, and documents.',
+          side: 'right',
+          align: 'start'
+        }
+      });
+    }
+
+    steps.push({
+      element: organizationsList || 'body',
+      popover: {
+        title: '📋 Your Organizations',
+        description: '<strong>All organizations you can access are listed here:</strong><br/>• Each organization has its own collections and documents<br/>• Your role may differ across organizations<br/>• Click any organization to start working with it',
+        side: 'top',
+        align: 'start'
+      }
+    });
+
+    steps.push({
+      element: 'body',
+      popover: {
+        title: '✅ Organization List Complete!',
+        description: '<strong>You now understand the organization list:</strong><br/>• View all organizations you can access<br/>• Click any organization to view details<br/>• Each organization has its own collections and documents<br/><br/>Click on an organization to get started!',
+        side: 'center',
+        align: 'center'
+      }
+    });
+
+    const driver = this.createDriver(steps);
+    driver?.drive();
+  }
 }
 

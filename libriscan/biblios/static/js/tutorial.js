@@ -10,6 +10,7 @@ const TUTORIAL_CONFIG = {
   'startPageCardTutorial': { path: 'document.js', class: 'DocumentTutorials', method: 'startPageCardWalkthrough' },
   'startCollectionTutorial': { path: 'collection.js', class: 'CollectionTutorials', method: 'startCollectionWalkthrough' },
   'startOrganizationTutorial': { path: 'organization.js', class: 'OrganizationTutorials', method: 'startOrganizationWalkthrough' },
+  'startOrganizationListTutorial': { path: 'organization.js', class: 'OrganizationTutorials', method: 'startOrganizationListWalkthrough' },
   'startHomepageTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startHomepageWalkthrough' },
   'startAllDocumentsTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startAllDocumentsWalkthrough' },
   'startPendingReviewsTutorial': { path: 'homepage.js', class: 'HomepageTutorials', method: 'startPendingReviewsWalkthrough' },
