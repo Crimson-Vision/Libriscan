@@ -32,10 +32,10 @@
 
 {% block content %}
   <!-- Breadcrumb Navigation with Icons -->
-  <nav class="mb-3 text-sm breadcrumbs">
+  <nav id="collection-breadcrumb" class="mb-3 text-sm breadcrumbs">
     <ul>
       <li>
-        <a href="{{ collection.owner.get_absolute_url }}"
+        <a id="breadcrumb-organization-link" href="{{ collection.owner.get_absolute_url }}"
            class="flex items-center gap-1 hover:underline text-primary">
           <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +51,7 @@
         </a>
       </li>
       <li>
-        <a href="{{ collection.get_absolute_url }}"
+        <a id="breadcrumb-collection-link" href="{{ collection.get_absolute_url }}"
            class="flex items-center gap-1 hover:underline text-primary">
           <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -67,10 +67,10 @@
       </li>
     </ul>
   </nav>
-  <div class="card bg-base-100 shadow mb-6">
-    <div class="card-body">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="card-title text-xl font-bold flex items-center gap-2">
+  <div id="collection-header-card" class="card bg-base-100 shadow mb-6">
+    <div id="collection-header-card-body" class="card-body">
+      <div id="collection-header-actions" class="flex items-center justify-between mb-4">
+        <h2 id="collection-title" class="card-title text-xl font-bold flex items-center gap-2">
           <span class="inline-flex items-center justify-center size-8 rounded-full bg-accent/10">
             <svg xmlns="http://www.w3.org/2000/svg"
                  class="size-5 text-accent"
@@ -104,13 +104,13 @@
       </div>
       <!-- Series Section -->
       <div class="mb-4" id="collectionSeriesSection">
-        <h3 class="text-base font-semibold text-base-content/80 mb-3">Series in this collection:</h3>
+        <h3 id="series-section-title" class="text-base font-semibold text-base-content/80 mb-3">Series in this collection:</h3>
         <div class="space-y-2" id="collectionSeriesList">
           {% for series in collection.series_set.all %}
-            <div class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
+            <div id="series-card-{{ series.slug }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between">
-                  <a href="{{ series.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
+                  <a id="series-link-{{ series.slug }}" href="{{ series.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                     <span class="inline-flex items-center justify-center size-10 rounded-lg bg-secondary/10 group-hover/link:bg-secondary/20 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg"
                            fill="none"
@@ -124,6 +124,7 @@
                     <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ series }}</span>
                   </a>
                   <button 
+                    id="series-delete-btn-{{ series.slug }}"
                     type="button" 
                     class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                     data-tip="Delete series"
@@ -136,14 +137,14 @@
               </div>
             </div>
           {% empty %}
-            <div class="card bg-base-100 border border-base-300">
+            <div id="series-empty" class="card bg-base-100 border border-base-300">
               <div class="card-body p-6 text-center">
                 <p class="text-sm text-base-content/60">No series in this collection yet.</p>
               </div>
             </div>
           {% endfor %}
         </div>
-        <div class="mt-4 flex justify-end">
+        <div id="series-actions" class="mt-4 flex justify-end">
           <a href="{% url 'series_create' collection.owner.short_name collection.slug %}"
              id="collectionAddSeriesBtn"
              class="btn btn-primary btn-md">
@@ -156,13 +157,13 @@
       </div>
       <!-- Documents Section -->
       <div class="mb-4" id="collectionDocumentsSection">
-        <h3 class="text-base font-semibold text-base-content/80 mb-3">Documents in this collection:</h3>
+        <h3 id="documents-section-title" class="text-base font-semibold text-base-content/80 mb-3">Documents in this collection:</h3>
         <div class="space-y-2" id="collectionDocumentsList">
           {% for doc in documents %}
-            <div class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
+            <div id="document-card-{{ doc.identifier }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between">
-                  <a href="{{ doc.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
+                  <a id="document-link-{{ doc.identifier }}" href="{{ doc.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                     <span class="inline-flex items-center justify-center size-10 rounded-lg bg-warning/20 group-hover/link:bg-warning/30 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg"
                            fill="none"
@@ -179,6 +180,7 @@
                     </div>
                   </a>
                   <button 
+                    id="document-delete-btn-{{ doc.identifier }}"
                     type="button" 
                     class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                     data-tip="Delete document"
@@ -191,14 +193,14 @@
               </div>
             </div>
           {% empty %}
-            <div class="card bg-base-100 border border-base-300">
+            <div id="documents-empty" class="card bg-base-100 border border-base-300">
               <div class="card-body p-6 text-center">
                 <p class="text-sm text-base-content/60">No documents in this collection yet.</p>
               </div>
             </div>
           {% endfor %}
         </div>
-        <div class="mt-4 flex justify-end">
+        <div id="documents-actions" class="mt-4 flex justify-end">
           <a href="{% url 'document_create' collection.owner.short_name collection.slug %}"
              id="collectionAddDocumentBtn"
              class="btn btn-secondary btn-md">

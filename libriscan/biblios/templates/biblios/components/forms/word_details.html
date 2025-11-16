@@ -11,7 +11,7 @@
       <div class="relative">
         <div role="tablist" class="tabs tabs-lift">
         <!-- Details Tab -->
-        <label class="tab">
+        <label id="word-details-tab-label" class="tab">
           <input type="radio" name="word_details_tabs" id="wordDetailsTab" checked="checked" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
@@ -101,11 +101,11 @@
             </div>
           </div>
           
-          <div class="stats shadow w-full">
-            <div class="stat">
-              <div class="stat-title mb-2 flex items-center gap-2">
+          <div id="word-suggestions-stats" class="stats shadow w-full">
+            <div id="word-suggestions-stat" class="stat">
+              <div id="word-suggestions-title" class="stat-title mb-2 flex items-center gap-2">
                 Suggestions
-                <span class="badge badge-ghost badge-xs tooltip tooltip-right" data-tip="Press 1-9 to apply suggestions quickly">
+                <span id="word-suggestions-shortcut-badge" class="badge badge-ghost badge-xs tooltip tooltip-right" data-tip="Press 1-9 to apply suggestions quickly">
                   <kbd class="kbd kbd-xs">1-9</kbd>
                 </span>
               </div>
@@ -117,7 +117,7 @@
         </div>
         
         <!-- Audit History Tab -->
-        <label class="tab">
+        <label id="word-audit-history-tab-label" class="tab">
           <input type="radio" name="word_details_tabs" id="wordAuditHistoryTab" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -163,26 +163,26 @@
 
 <!-- Revert to Original Confirmation Modal -->
 <dialog id="revertConfirmationModal" class="modal">
-  <div class="modal-box">
-    <div class="flex items-center gap-3 mb-4">
+  <div id="revert-modal-box" class="modal-box">
+    <div id="revert-modal-header" class="flex items-center gap-3 mb-4">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-warning">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
       </svg>
-      <h3 class="font-bold text-lg">Confirm Revert to Original</h3>
+      <h3 id="revert-modal-title" class="font-bold text-lg">Confirm Revert to Original</h3>
     </div>
-    <p class="py-2">
+    <p id="revert-modal-message" class="py-2">
       Are you sure you want to revert this word to its original value?
     </p>
-    <div class="alert alert-warning mt-4">
+    <div id="revert-modal-warning" class="alert alert-warning mt-4">
       <span class="text-sm font-semibold">This action cannot be undone.</span>
     </div>
-    <p class="text-sm text-base-content/70 mt-4">
+    <p id="revert-modal-sub-message" class="text-sm text-base-content/70 mt-4">
       All current changes will be permanently lost.
     </p>
-    <div class="modal-action">
+    <div id="revert-modal-actions" class="modal-action">
       <form method="dialog">
-        <button class="btn btn-ghost" value="cancel">Cancel</button>
-        <button class="btn btn-error" value="confirm">Revert to Original</button>
+        <button id="revert-modal-cancel-btn" class="btn btn-ghost" value="cancel">Cancel</button>
+        <button id="revert-modal-confirm-btn" class="btn btn-error" value="confirm">Revert to Original</button>
       </form>
     </div>
   </div>

@@ -73,12 +73,12 @@
   {% include "biblios/components/navigation/navbar.html" %}
 
   <!-- Main Content -->
-  <main class="container mx-auto px-4 flex-grow">
+  <main id="main-content" class="container mx-auto px-4 flex-grow">
     {% block content %}{% endblock content %}
   </main>
 
   <!-- Footer -->
-  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
+  <footer id="app-footer" class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
     <div>
       <p>Copyright © 2025 - All rights reserved by LibriScan</p>
     </div>
@@ -136,7 +136,7 @@
           </span>
         </li>
         <li>
-          <a href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=bug_report.yaml" 
+          <a id="help-bug-report-link" href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=bug_report.yaml" 
              target="_blank" 
              rel="noopener noreferrer"
              class="gap-2">
@@ -150,7 +150,7 @@
           </a>
         </li>
         <li>
-          <a href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=feature_request.yaml" 
+          <a id="help-feature-request-link" href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=feature_request.yaml" 
              target="_blank" 
              rel="noopener noreferrer"
              class="gap-2">
