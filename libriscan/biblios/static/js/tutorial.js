@@ -352,6 +352,7 @@ class LibriscanTutorial {
     // Check if pages exist
     const hasPages = document.querySelector('.page-card') !== null;
     const pagesContainer = document.getElementById('pagesContainer');
+    const pagesSection = document.getElementById('pages-section');
     
     const steps = [
       {
@@ -364,7 +365,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: 'nav.breadcrumbs',
+        element: '#document-breadcrumb',
         popover: {
           title: '📍 Breadcrumb Navigation',
           description: 'Use the breadcrumbs at the top to navigate back to the Organization or Collection. Click on any level to go back to that section.',
@@ -373,7 +374,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '.card-title',
+        element: '#document-header-card',
         popover: {
           title: '📚 Document Header',
           description: 'The document title is displayed here. You can edit the title using the edit icon, change the document status using the status dropdown, or delete the document using the delete button.',
@@ -382,7 +383,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '#pagesContainer',
+        element: pagesSection ? '#pages-section' : '#pagesContainer',
         popover: {
           title: hasPages ? '📃 Pages in Document' : '📃 Pages Section',
           description: hasPages 
@@ -411,8 +412,9 @@ class LibriscanTutorial {
       }
     } else {
       // Add step for empty state
+      const pagesEmpty = document.getElementById('pages-empty');
       steps.push({
-        element: pagesContainer?.querySelector('.card') || 'body',
+        element: pagesEmpty || pagesContainer?.querySelector('.card') || 'body',
         popover: {
           title: '📭 No Pages Yet',
           description: 'This document doesn\'t have any pages yet. You\'ll need to add pages and upload images to start extracting text. Use the "Add New Page" button below to get started.',
@@ -423,7 +425,7 @@ class LibriscanTutorial {
     }
 
     // Add "Add New Page" button step
-    const addPageButton = document.querySelector('a[href*="page/new"]');
+    const addPageButton = document.getElementById('page-create-link') || document.querySelector('a[href*="page/new"]');
     if (addPageButton) {
       steps.push({
         element: addPageButton,
@@ -437,7 +439,7 @@ class LibriscanTutorial {
     }
 
     // Add export section if it exists
-    const exportSection = Array.from(document.querySelectorAll('h3')).find(h => h.textContent.includes('Export Document'))?.closest('.border-t');
+    const exportSection = document.getElementById('export-section');
     if (exportSection) {
       steps.push({
         element: exportSection,
@@ -483,15 +485,16 @@ class LibriscanTutorial {
       return;
     }
 
-    // Find elements within the first page card using classes
-    const pageNumberBadge = firstPageCard.querySelector('.page-number-badge');
-    const pageIdentifierSection = firstPageCard.querySelector('.page-identifier-section');
-    const pageEditIdentifierBtn = firstPageCard.querySelector('.page-edit-identifier-btn');
-    const pageStatusBadges = firstPageCard.querySelector('.page-status-badges');
-    const pageSnippet = firstPageCard.querySelector('.page-snippet');
-    const pageMetadata = firstPageCard.querySelector('.page-metadata');
-    const pageReorderButtons = firstPageCard.querySelector('.page-reorder-buttons');
-    const pageDeleteBtn = firstPageCard.querySelector('.page-delete-btn');
+    // Try to find elements by ID first (more reliable), fall back to class selectors
+    const pageNumber = firstPageCard.dataset?.pageNumber || firstPageCard.getAttribute('data-page-number');
+    const pageNumberBadge = pageNumber ? document.getElementById(`page-number-badge-${pageNumber}`) : firstPageCard.querySelector('.page-number-badge');
+    const pageIdentifierSection = pageNumber ? document.getElementById(`page-identifier-section-${pageNumber}`) : firstPageCard.querySelector('.page-identifier-section');
+    const pageEditIdentifierBtn = pageNumber ? document.getElementById(`page-edit-identifier-btn-${pageNumber}`) : firstPageCard.querySelector('.page-edit-identifier-btn');
+    const pageStatusBadges = pageNumber ? document.getElementById(`page-status-badges-${pageNumber}`) : firstPageCard.querySelector('.page-status-badges');
+    const pageSnippet = pageNumber ? document.getElementById(`page-snippet-${pageNumber}`) : firstPageCard.querySelector('.page-snippet');
+    const pageMetadata = pageNumber ? document.getElementById(`page-metadata-${pageNumber}`) : firstPageCard.querySelector('.page-metadata');
+    const pageReorderButtons = pageNumber ? document.getElementById(`page-reorder-buttons-${pageNumber}`) : firstPageCard.querySelector('.page-reorder-buttons');
+    const pageDeleteBtn = pageNumber ? document.getElementById(`page-delete-btn-${pageNumber}`) : firstPageCard.querySelector('.page-delete-btn');
     const hasMultiplePages = document.querySelectorAll('.page-card').length > 1;
 
     const steps = [
@@ -657,7 +660,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: 'nav.breadcrumbs',
+        element: '#collection-breadcrumb',
         popover: {
           title: '📍 Breadcrumb Navigation',
           description: 'Use the breadcrumbs at the top to navigate back to the Organization. Click on the organization name to return to the organization page.',
@@ -666,7 +669,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: '.card-title',
+        element: '#collection-title',
         popover: {
           title: '📁 Collection Header',
           description: 'The collection name is displayed here. You can edit the collection name using the edit icon, or delete the entire collection using the delete button.',
@@ -675,7 +678,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: editBtn || '.card-title',
+        element: editBtn || '#collection-title',
         popover: {
           title: '✏️ Edit Collection',
           description: 'Click the edit icon to modify the collection name and other properties. This allows you to update the collection information without affecting its contents.',
@@ -684,7 +687,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: deleteBtn || '.card-title',
+        element: deleteBtn || '#collection-title',
         popover: {
           title: '🗑️ Delete Collection',
           description: '<strong>⚠️ Warning:</strong> The delete button permanently removes the entire collection, including all series and documents within it. <strong>This action cannot be undone and will result in permanent data loss.</strong> A confirmation dialog will appear when you click delete to prevent accidental deletions.',
@@ -842,7 +845,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: 'nav.breadcrumbs',
+        element: '#page-breadcrumb, #document-breadcrumb, #collection-breadcrumb, nav.breadcrumbs',
         popover: {
           title: '📍 Breadcrumb Navigation',
           description: 'Use the breadcrumbs at the top to navigate back to the Organization or Collection. Click on any level to return to that page.',
@@ -959,7 +962,7 @@ class LibriscanTutorial {
         }
       },
       {
-        element: 'nav.breadcrumbs',
+        element: '#page-breadcrumb, #document-breadcrumb, #collection-breadcrumb, nav.breadcrumbs',
         popover: {
           title: '📍 Breadcrumb Navigation',
           description: 'Use the breadcrumbs at the top to navigate back to the Organization or Collection. Click on any level to return to that page.',
@@ -1084,8 +1087,6 @@ class LibriscanTutorial {
           title: '📝 Numbering Tips',
           description: 'The page number helps organize your document. You can use:<br/>' +
             '• Sequential numbers: 1, 2, 3...<br/>' +
-            '• Roman numerals: i, ii, iii...<br/>' +
-            '• Custom numbering: A-1, B-2...<br/><br/>' +
             'The number appears in page navigation and helps you identify pages quickly.',
           side: 'bottom',
           align: 'start'
