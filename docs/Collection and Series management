@@ -1,0 +1,117 @@
+# LibriScan Collection & Series User Guide
+
+## Overview
+
+LibriScan uses a hierarchical structure to organize and manage digitized library materials. This guide provides comprehensive instructions for managing Collections, Series, Documents, and Pages within the system.
+
+## System Hierarchy
+
+The LibriScan system is organized into the following levels:
+
+- **Organization**: The top-level entity that contains all your collections (e.g., "Crimson Vision")
+- **Collections**: Primary groupings of related Series and documents within your organization
+- **Series**: Subsets within collections that group related documents by topic or category
+- **Documents**: Individual digitized items that contain one or more pages
+- **Pages**: Individual scanned images within a document, with extracted text and metadata
+
+---
+
+## Managing Collections
+
+Collections are the primary organizational units within your organization. They serve as containers for Series and documents related to specific topics or categories.
+
+### Viewing Collections
+
+To view all collections in your organization:
+
+1. Navigate to your organization's main page
+2. All collections will be displayed in the "Collections" section
+3. Click on any collection name to view its contents, including Series and orphaned documents
+
+### Creating a New Collection
+
+To create a new collection:
+
+1. Click the "Add New Collection" button on the organization page
+2. Enter a descriptive Collection Name in the text field
+3. The Slug field will automatically populate with a URL-friendly identifier
+4. Review the auto-generated slug and modify if necessary (letters, numbers, and hyphens only)
+5. Click "Create Collection" to save your new collection
+
+### Editing a Collection
+
+To edit an existing collection:
+
+1. Navigate to the collection page
+2. Click the edit icon (pencil) next to the collection name
+3. Modify the collection name or slug as needed
+4. Click "Save" to apply your changes
+
+### Deleting a Collection
+
+⚠️ **Warning**: This action cannot be undone. All collection data, Series, documents, pages, extracted text, and associated metadata will be permanently deleted.
+
+To delete a collection:
+
+1. Click the trash icon next to the collection name
+2. A confirmation dialog will appear with a warning message
+3. Type "Delete" in the confirmation field exactly as shown
+4. Click "Delete Collection" to permanently remove the collection and all its contents
+
+---
+
+## Managing Series
+
+Series are organizational units within collections that group related documents together. Each collection can contain multiple Series, providing a secondary level of organization.
+
+![Series page showing documents](1763351643789_image.png)
+*Figure 1: Series page displaying documents with various status badges*
+
+### Viewing Series
+
+To view Series within a collection:
+
+1. Navigate to the collection page by clicking on its name
+2. All Series will be listed in the "Series in this collection" section
+3. Each Series displays a count of documents it contains
+4. Click on any Series name to view its documents
+
+### Creating a New Series
+
+To create a new Series within a collection:
+
+1. Navigate to the collection page where you want to add the Series
+2. Click the "Add New Series" button
+3. Enter a descriptive Series Name in the text field
+4. The Slug field will automatically populate with a URL-friendly identifier
+5. Review and modify the slug if necessary (letters, numbers, and hyphens only)
+6. Click "Create Series" to save
+
+### Editing a Series
+
+To edit an existing Series:
+
+1. Navigate to the Series page
+2. Click the edit icon (pencil) next to the Series name
+3. Modify the Series name or slug as needed
+4. Click "Save" to apply your changes
+
+### Deleting a Series
+
+⚠️ **Warning**: This action cannot be undone. All Series data, documents, pages, and associated metadata will be permanently deleted.
+
+![Delete series confirmation dialog](1763351650960_image.png)
+*Figure 2: Confirmation dialog for deleting a document (similar interface for Series)*
+
+To delete a Series:
+
+1. Navigate to the collection containing the Series
+2. Click the trash icon next to the Series name
+3. A confirmation dialog will appear with a warning message
+4. Type "Delete" in the confirmation field exactly as shown
+5. Click "Delete Series" to permanently remove the Series and all its contents
+
+---
+
+
+
