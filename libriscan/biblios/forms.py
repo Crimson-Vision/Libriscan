@@ -43,7 +43,13 @@ class DocumentForm(forms.ModelForm):
 class PageForm(forms.ModelForm):
     class Meta:
         model = Page
-        fields = ("document", "number", "image")
+        fields = ("document", "number", "image", "identifier")
+    
+    def clean_identifier(self):
+        identifier = self.cleaned_data.get("identifier")
+        if identifier and not identifier.isalnum():
+            raise forms.ValidationError("Identifier must contain only alphanumeric characters.")
+        return identifier
 
 
 class FilePondUploadForm(forms.Form):

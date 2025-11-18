@@ -62,11 +62,18 @@ class WordBlockManager {
     const currentButton = this.getWordBlock(wordId);
     if (!currentButton) return null;
 
-    const adjacent = direction === 'prev' 
+    let adjacent = direction === 'prev' 
       ? currentButton.previousElementSibling
       : currentButton.nextElementSibling;
     
-    return adjacent?.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS) ? adjacent : null;
+    // Skip over non-word-block elements (dividers, badges, etc.)
+    while (adjacent && !adjacent.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS)) {
+      adjacent = direction === 'prev' 
+        ? adjacent.previousElementSibling
+        : adjacent.nextElementSibling;
+    }
+    
+    return adjacent;
   }
 
   static syncActiveWordButton(wordId) {

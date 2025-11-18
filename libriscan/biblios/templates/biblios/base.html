@@ -73,12 +73,12 @@
   {% include "biblios/components/navigation/navbar.html" %}
 
   <!-- Main Content -->
-  <main class="container mx-auto px-4 flex-grow">
+  <main id="main-content" class="container mx-auto px-4 flex-grow">
     {% block content %}{% endblock content %}
   </main>
 
   <!-- Footer -->
-  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
+  <footer id="app-footer" class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
     <div>
       <p>Copyright © 2025 - All rights reserved by LibriScan</p>
     </div>
@@ -103,14 +103,20 @@
   <script src="{% static 'js/word_details/audit_history_renderer.js' %}"></script>
   <script src="{% static 'js/word_details/audit_history.js' %}"></script>
   <script src="{% static 'js/word_details/main.js' %}"></script>
-  <script src="{% static 'js/tutorial.js' %}"></script>
+  
+  <!-- Tutorial System - Load as module for ES6 imports -->
+  <script type="module">
+    // Set base path for tutorial modules
+    window.TUTORIAL_BASE_PATH = '{% static "js/tutorials/" %}';
+  </script>
+  <script type="module" src="{% static 'js/tutorial.js' %}"></script>
   
   <!-- Page-specific scripts -->
   {% block scripts %}{% endblock %}
 
   <!-- Floating Help Button (Bug Report + Feature Request + Conditional Tutorials) -->
   <div style="position: fixed; bottom: 5rem; right: 1.5rem; z-index: 50;">
-    <div class="dropdown dropdown-top dropdown-end">
+    <div class="dropdown dropdown-top dropdown-end" id="help-button">
       <label tabindex="0" class="btn btn-circle btn-primary btn-lg shadow-2xl hover:shadow-primary/50 transition-all tooltip tooltip-left flex items-center justify-center" data-tip="Help & Resources">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
@@ -126,6 +132,28 @@
         <!-- Divider (only show if tutorials exist) -->
         {% block tutorial_divider %}{% endblock %}
         
+        <!-- Navigation Tutorial (Available on All Pages) -->
+        <li class="menu-title">
+          <span class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+            Navigation
+          </span>
+        </li>
+        <li>
+          <a id="startNavigationTutorial">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+            </svg>
+            <div class="flex flex-col items-start">
+              <span class="font-semibold">Navigation Guide</span>
+              <span class="text-xs opacity-70">Learn the navbar</span>
+            </div>
+          </a>
+        </li>
+        <div class="divider my-1"></div>
+        
         <!-- GitHub Section (Always Visible on All Pages) -->
         <li class="menu-title">
           <span class="flex items-center gap-2">
@@ -136,7 +164,7 @@
           </span>
         </li>
         <li>
-          <a href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=bug_report.yaml" 
+          <a id="help-bug-report-link" href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=bug_report.yaml" 
              target="_blank" 
              rel="noopener noreferrer"
              class="gap-2">
@@ -150,7 +178,7 @@
           </a>
         </li>
         <li>
-          <a href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=feature_request.yaml" 
+          <a id="help-feature-request-link" href="https://github.com/Crimson-Vision/Libriscan/issues/new?template=feature_request.yaml" 
              target="_blank" 
              rel="noopener noreferrer"
              class="gap-2">

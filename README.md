@@ -6,6 +6,12 @@
 
 ---
 
+## Documentation
+
+📖 **[Page Text Management User Guide](docs/PAGE_TEXT_MANAGEMENT_USER_GUIDE.md)** - Comprehensive guide to editing and managing extracted text, including image viewer controls, word editing, keyboard shortcuts, suggestions, audit history, and more.
+
+---
+
 ## Getting Started
 
 Perform the following steps to get this repo up and running on your computer:

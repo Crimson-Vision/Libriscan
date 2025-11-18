@@ -87,8 +87,8 @@ class WordUpdateHandler {
       this.autoAdvanceTimeout = null;
     }
     
-    const currentButton = WordBlockManager.getWordBlock(this.wordDetails.currentWordId);
-    const hasNextWord = currentButton?.nextElementSibling?.classList.contains(WordDetailsConfig.WORD_BLOCK_CLASS);
+    // Use getAdjacentWordBlock to properly skip over dividers and badges
+    const hasNextWord = WordBlockManager.getAdjacentWordBlock(this.wordDetails.currentWordId, 'next') !== null;
     
     if (hasNextWord) {
       this.isAutoAdvancing = true;

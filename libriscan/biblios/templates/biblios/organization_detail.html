@@ -1,34 +1,65 @@
 {% extends "biblios/base.html" %}
+{% load static %}
+
+{% block tutorial_section %}
+<!-- Tutorials Section - Only on Organization View -->
+<li class="menu-title">
+  <span class="flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+    </svg>
+    Tutorials
+  </span>
+</li>
+<li>
+  <a id="startOrganizationTutorial" class="active">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+    </svg>
+    <div class="flex flex-col items-start">
+      <span class="font-semibold">Organization Walkthrough</span>
+      <span class="text-xs opacity-70">Learn the basics</span>
+    </div>
+  </a>
+</li>
+{% endblock %}
+
+{% block tutorial_divider %}
+<div class="divider my-1"></div>
+{% endblock %}
+
+{% block title %}{{ org }} · Libriscan{% endblock %}
+
 {% block content %}
-  <div class="max-w-2xl mx-auto py-10">
+  <div id="organization-detail-container" class="max-w-2xl mx-auto py-10">
     <!-- Organization Card -->
-    <div class="card bg-base-100 shadow-xl mb-10 border border-base-300 relative">
+    <div id="organization-card" class="card bg-base-100 shadow-xl mb-10 border border-base-300 relative">
       <!-- User Role Badge -->
-      <span class="absolute top-3 right-3 badge badge-soft badge-primary text-xs font-semibold px-3 py-1">
+      <span id="organization-user-role-badge" class="absolute top-3 right-3 badge badge-soft badge-primary text-xs font-semibold px-3 py-1">
       {{ user_role|title }}
       </span>
-      <div class="card-body flex flex-col gap-2">
-      <div class="flex items-center gap-4 mb-2">
-        <span class="inline-flex items-center justify-center size-12 rounded-full bg-primary/10">
+      <div id="organization-card-body" class="card-body flex flex-col gap-2">
+      <div id="organization-header" class="flex items-center gap-4 mb-2">
+        <span id="organization-icon" class="inline-flex items-center justify-center size-12 rounded-full bg-primary/10">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-primary">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
         </svg>
         </span>
-        <span class="text-2xl font-bold">{{ org }}</span>
+        <span id="organization-name" class="text-2xl font-bold">{{ org }}</span>
       </div>
-      <p class="text-base opacity-70 ml-1">{{ org.city|default:"" }}, {{ org.state|default:"" }}</p>
+      <p id="organization-location" class="text-base opacity-70 ml-1">{{ org.city|default:"" }}, {{ org.state|default:"" }}</p>
       </div>
     </div>
 
     <!-- Collections Section -->
-    <div class="mb-4">
-      <h3 class="text-base font-semibold text-base-content/80 mb-3">Collections:</h3>
-      <div class="space-y-2">
+    <div id="collections-section" class="mb-4">
+      <h3 id="collections-section-title" class="text-base font-semibold text-base-content/80 mb-3">Collections:</h3>
+      <div id="collections-list" class="space-y-2">
         {% for c in org.collections.all %}
-          <div class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
+          <div id="collection-card-{{ c.slug }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
             <div class="card-body p-4">
               <div class="flex items-center justify-between">
-                <a href="{{ c.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
+                <a id="collection-link-{{ c.slug }}" href="{{ c.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                   <span class="inline-flex items-center justify-center size-10 rounded-lg bg-accent/10 group-hover/link:bg-accent/20 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -37,6 +68,7 @@
                   <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ c }}</span>
                 </a>
                 <button 
+                  id="collection-delete-btn-{{ c.slug }}"
                   type="button" 
                   class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                   data-tip="Delete collection"
@@ -49,15 +81,15 @@
             </div>
           </div>
         {% empty %}
-          <div class="card bg-base-100 border border-base-300">
+          <div id="collections-empty" class="card bg-base-100 border border-base-300">
             <div class="card-body p-6 text-center">
               <p class="text-sm text-base-content/60">No collections yet.</p>
             </div>
           </div>
         {% endfor %}
       </div>
-      <div class="mt-4 flex justify-end">
-        <a href="{% url 'collection_create' org.short_name %}" class="btn btn-primary btn-md">
+      <div id="collections-actions" class="mt-4 flex justify-end">
+        <a id="collection-create-link" href="{% url 'collection_create' org.short_name %}" class="btn btn-primary btn-md">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>

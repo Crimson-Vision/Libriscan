@@ -174,6 +174,8 @@ class Page(BibliosModel):
     )
     number = models.SmallIntegerField(default=1)
     image = models.ImageField(blank=True, upload_to="pages")
+    # This should be a bit longer than the Document identifier, since it's likely to include that with a suffix
+    identifier = models.CharField(max_length=30, blank=True, null=True)
     history = HistoricalRecords()
 
     class Meta:

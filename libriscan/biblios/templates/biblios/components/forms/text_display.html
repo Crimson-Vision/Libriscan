@@ -3,84 +3,86 @@
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
 <div id="textDisplay" class="card bg-base-100 shadow-sm h-full">
-  <div class="card-body p-0">
+  <div id="text-display-card-body" class="card-body p-0">
     <!-- Tabs with Filter Dropdown -->
-    <div class="relative">
-      <div class="tabs tabs-lift">
+    <div id="text-tabs-wrapper" class="relative">
+      <div id="text-tabs" class="tabs tabs-lift">
         <!-- Raw Text Tab -->
-        <label class="tab">
-          <input type="radio" name="text_tabs" checked="checked" />
+        <label id="raw-text-tab-label" class="tab">
+          <input id="raw-text-tab-input" type="radio" name="text_tabs" checked="checked" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
           <span class="hidden sm:inline">Raw Text</span>
         </label>
-        <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-6">
-          <div class="prose">
-            <div class="h-[45vh] overflow-y-auto">
-              <!-- Word block with confidence indicators -->
-              <!-- Limits for geometry coordinates removed from data-words-json -->
-              <div class="flex flex-wrap" id="word-container">
-              {% if words %}
-                {% for word in words %}
-                  <button 
-                    class="btn {% if word.review %}btn-error{% elif word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash{% else %}btn-ghost{% endif %} btn-sm word-block no-animation normal-case text-sm relative
-                           {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
-                           {% if word.print_control == 'O' %}word-visibility-control-omit{% elif word.print_control == 'M' %}word-visibility-control-merge{% endif %}"
-                    data-word-id="{{ word.id }}"
-                    data-word-text="{{ word.text }}"
-                    data-word-confidence="{{ word.confidence }}"
-                    data-word-confidence-level="{{ word.confidence_level }}"
-                    data-word-line="{{ word.line }}"
-                    data-word-number="{{ word.number }}"
-                    data-word-type="{{ word.text_type }}"
-                    data-word-print-control="{{ word.print_control }}"
-                    data-word-extraction-id="{{ word.extraction_id }}"
-                    data-word-review="{{ word.review|yesno:'true,false' }}"
-                    {# data-word-geo-x0="{{ word.geo_x_0 }}" #}
-                    {# data-word-geo-y0="{{ word.geo_y_0 }}" #}
-                    {# data-word-geo-x1="{{ word.geo_x_1 }}" #}
-                    {# data-word-geo-y1="{{ word.geo_y_1 }}" #}
-                    data-word-suggestions="{{ word.suggestions_json }}"
-                    title="Click to view details">
-                    {% if word.review %}
-                    <span class="review-flag-icon inline-flex items-center mr-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
-                      </svg>
-                    </span>
-                    {% endif %}
-                    <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
-                      {{ word.text }}
-                    </span>
-                  </button>
-                {% endfor %}
-              {% elif error %}
-              <p class="text-base-content/60">{{ error }}</p>            
-            {% else %}
-                <p class="text-base-content/60">No text extracted yet.</p>
-              {% endif %}
-              </div>
+        <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-4">
+          <div id="raw-text-scrollable" class="h-[45vh] overflow-y-auto">
+            <!-- Word block with confidence indicators -->
+            <!-- Limits for geometry coordinates removed from data-words-json -->
+            <div class="flex flex-wrap gap-1.5 items-baseline" id="word-container">
+            {% if words %}
+              {% for word in words %}
+                  {% ifchanged word.line %}
+                    <div class="line-divider divider w-full my-1" tabindex="-1" aria-hidden="true"></div>
+                    <span class="line-number-badge badge badge-xs badge-ghost text-base-content/50 font-mono font-normal px-1.5 py-0.5 mr-0.5" tabindex="-1" aria-hidden="true">{{ word.line }}</span>
+                {% endifchanged %}
+                <button 
+                  class="btn {% if word.review %}btn-error btn-xs{% elif word.confidence_level == 'accepted' or word.confidence >= 99.999 %}btn-dash btn-xs{% else %}btn-ghost btn-xs{% endif %} word-block no-animation normal-case text-xs font-normal px-2 py-1 h-auto min-h-0 rounded-md
+                         {% if word.confidence_level %}confidence-{{ word.confidence_level|lower }}{% endif %}
+                         {% if word.print_control == 'O' %}word-visibility-control-omit{% elif word.print_control == 'M' %}word-visibility-control-merge{% endif %}"
+                  data-word-id="{{ word.id }}"
+                  data-word-text="{{ word.text }}"
+                  data-word-confidence="{{ word.confidence }}"
+                  data-word-confidence-level="{{ word.confidence_level }}"
+                  data-word-line="{{ word.line }}"
+                  data-word-number="{{ word.number }}"
+                  data-word-type="{{ word.text_type }}"
+                  data-word-print-control="{{ word.print_control }}"
+                  data-word-extraction-id="{{ word.extraction_id }}"
+                  data-word-review="{{ word.review|yesno:'true,false' }}"
+                  {# data-word-geo-x0="{{ word.geo_x_0 }}" #}
+                  {# data-word-geo-y0="{{ word.geo_y_0 }}" #}
+                  {# data-word-geo-x1="{{ word.geo_x_1 }}" #}
+                  {# data-word-geo-y1="{{ word.geo_y_1 }}" #}
+                  data-word-suggestions="{{ word.suggestions_json }}"
+                  title="Click to view details">
+                  {% if word.review %}
+                  <span class="review-flag-icon inline-flex items-center mr-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+                    </svg>
+                  </span>
+                  {% endif %}
+                  <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
+                    {{ word.text }}
+                  </span>
+                </button>
+              {% endfor %}
+            {% elif error %}
+            <p class="text-base-content/60 text-sm">{{ error }}</p>            
+          {% else %}
+              <p class="text-base-content/60 text-sm">No text extracted yet.</p>
+            {% endif %}
             </div>
-            {% include 'biblios/components/forms/word_details.html' with words=words %}
           </div>
+          {% include 'biblios/components/forms/word_details.html' with words=words %}
         </div>
 
         <!-- Formatted Tab -->
-        <label class="tab">
-          <input type="radio" name="text_tabs" />
+        <label id="formatted-text-tab-label" class="tab">
+          <input id="formatted-text-tab-input" type="radio" name="text_tabs" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
           </svg>
           <span class="hidden sm:inline">Formatted</span>
         </label>
-        <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div id="formatted-text-content" class="tab-content bg-base-100 border-base-300 p-6">
           {% include 'biblios/components/forms/formatted_text_only.html' with formatted_text=formatted_text words=words %}
         </div>
       </div>
 
       <!-- Filter Dropdown (Absolute Positioned Top Right) -->
-      <div class="absolute top-2 right-4 z-10">
+      <div id="confidence-toggle-wrapper" class="absolute top-2 right-4 z-10">
         {% include 'biblios/components/forms/confidence_toggle.html' %}
       </div>
     </div>

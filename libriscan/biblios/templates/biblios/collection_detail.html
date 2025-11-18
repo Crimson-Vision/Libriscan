@@ -1,10 +1,41 @@
 {% extends "biblios/base.html" %}
+{% load static %}
+
+{% block tutorial_section %}
+<!-- Tutorials Section - Only on Collection View -->
+<li class="menu-title">
+  <span class="flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+    </svg>
+    Tutorials
+  </span>
+</li>
+<li>
+  <a id="startCollectionTutorial" class="active">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+    </svg>
+    <div class="flex flex-col items-start">
+      <span class="font-semibold">Collection Walkthrough</span>
+      <span class="text-xs opacity-70">Learn the basics</span>
+    </div>
+  </a>
+</li>
+{% endblock %}
+
+{% block tutorial_divider %}
+<div class="divider my-1"></div>
+{% endblock %}
+
+{% block title %}{{ collection }} · {{ collection.owner.short_name }} · Libriscan{% endblock %}
+
 {% block content %}
   <!-- Breadcrumb Navigation with Icons -->
-  <nav class="mb-3 text-sm breadcrumbs">
+  <nav id="collection-breadcrumb" class="mb-3 text-sm breadcrumbs">
     <ul>
       <li>
-        <a href="{{ collection.owner.get_absolute_url }}"
+        <a id="breadcrumb-organization-link" href="{{ collection.owner.get_absolute_url }}"
            class="flex items-center gap-1 hover:underline text-primary">
           <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -20,7 +51,7 @@
         </a>
       </li>
       <li>
-        <a href="{{ collection.get_absolute_url }}"
+        <a id="breadcrumb-collection-link" href="{{ collection.get_absolute_url }}"
            class="flex items-center gap-1 hover:underline text-primary">
           <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -36,10 +67,10 @@
       </li>
     </ul>
   </nav>
-  <div class="card bg-base-100 shadow mb-6">
-    <div class="card-body">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="card-title text-xl font-bold flex items-center gap-2">
+  <div id="collection-header-card" class="card bg-base-100 shadow mb-6">
+    <div id="collection-header-card-body" class="card-body">
+      <div id="collection-header-actions" class="flex items-center justify-between mb-4">
+        <h2 id="collection-title" class="card-title text-xl font-bold flex items-center gap-2">
           <span class="inline-flex items-center justify-center size-8 rounded-full bg-accent/10">
             <svg xmlns="http://www.w3.org/2000/svg"
                  class="size-5 text-accent"
@@ -52,6 +83,7 @@
           {{ collection }}
           <a 
             href="{% url 'collection_update' collection.owner.short_name collection.slug %}"
+            id="collectionEditBtn"
             class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
             data-tip="Edit collection">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -61,6 +93,7 @@
         </h2>
         <button 
           type="button" 
+          id="collectionDeleteBtn"
           class="btn btn-ghost btn-sm btn-error tooltip tooltip-left"
           data-tip="Delete collection"
           onclick="showDeleteCollectionModal('{{ collection }}', '{% url 'collection_delete' collection.owner.short_name collection.slug %}')">
@@ -70,14 +103,14 @@
         </button>
       </div>
       <!-- Series Section -->
-      <div class="mb-4">
-        <h3 class="text-base font-semibold text-base-content/80 mb-3">Series in this collection:</h3>
-        <div class="space-y-2">
+      <div class="mb-4" id="collectionSeriesSection">
+        <h3 id="series-section-title" class="text-base font-semibold text-base-content/80 mb-3">Series in this collection:</h3>
+        <div class="space-y-2" id="collectionSeriesList">
           {% for series in collection.series_set.all %}
-            <div class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
+            <div id="series-card-{{ series.slug }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between">
-                  <a href="{{ series.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
+                  <a id="series-link-{{ series.slug }}" href="{{ series.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                     <span class="inline-flex items-center justify-center size-10 rounded-lg bg-secondary/10 group-hover/link:bg-secondary/20 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg"
                            fill="none"
@@ -91,6 +124,7 @@
                     <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ series }}</span>
                   </a>
                   <button 
+                    id="series-delete-btn-{{ series.slug }}"
                     type="button" 
                     class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                     data-tip="Delete series"
@@ -103,15 +137,16 @@
               </div>
             </div>
           {% empty %}
-            <div class="card bg-base-100 border border-base-300">
+            <div id="series-empty" class="card bg-base-100 border border-base-300">
               <div class="card-body p-6 text-center">
                 <p class="text-sm text-base-content/60">No series in this collection yet.</p>
               </div>
             </div>
           {% endfor %}
         </div>
-        <div class="mt-4 flex justify-end">
+        <div id="series-actions" class="mt-4 flex justify-end">
           <a href="{% url 'series_create' collection.owner.short_name collection.slug %}"
+             id="collectionAddSeriesBtn"
              class="btn btn-primary btn-md">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -121,14 +156,14 @@
         </div>
       </div>
       <!-- Documents Section -->
-      <div class="mb-4">
-        <h3 class="text-base font-semibold text-base-content/80 mb-3">Documents in this collection:</h3>
-        <div class="space-y-2">
+      <div class="mb-4" id="collectionDocumentsSection">
+        <h3 id="documents-section-title" class="text-base font-semibold text-base-content/80 mb-3">Documents in this collection:</h3>
+        <div class="space-y-2" id="collectionDocumentsList">
           {% for doc in documents %}
-            <div class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
+            <div id="document-card-{{ doc.identifier }}" class="card card-bordered bg-base-100 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-200 group outline outline-1 outline-base-300 hover:outline-primary/50">
               <div class="card-body p-4">
                 <div class="flex items-center justify-between">
-                  <a href="{{ doc.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
+                  <a id="document-link-{{ doc.identifier }}" href="{{ doc.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                     <span class="inline-flex items-center justify-center size-10 rounded-lg bg-warning/20 group-hover/link:bg-warning/30 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg"
                            fill="none"
@@ -145,6 +180,7 @@
                     </div>
                   </a>
                   <button 
+                    id="document-delete-btn-{{ doc.identifier }}"
                     type="button" 
                     class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                     data-tip="Delete document"
@@ -157,15 +193,16 @@
               </div>
             </div>
           {% empty %}
-            <div class="card bg-base-100 border border-base-300">
+            <div id="documents-empty" class="card bg-base-100 border border-base-300">
               <div class="card-body p-6 text-center">
                 <p class="text-sm text-base-content/60">No documents in this collection yet.</p>
               </div>
             </div>
           {% endfor %}
         </div>
-        <div class="mt-4 flex justify-end">
+        <div id="documents-actions" class="mt-4 flex justify-end">
           <a href="{% url 'document_create' collection.owner.short_name collection.slug %}"
+             id="collectionAddDocumentBtn"
              class="btn btn-secondary btn-md">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
