@@ -14,7 +14,7 @@ Images are organized into subfolders based on the documentation section they sup
 ## Naming Guidelines
 - Use clear, descriptive names (e.g., `delete-page.png`, `create-collection-step1.png`).
 - Keep filenames in lowercase and use hyphens or underscores consistently.
-- Only store images relevant to documentation—avoid large raw design files unless necessary.
+- Only store images relevant to documentation.
 
 ## Example Structure
 ```text
