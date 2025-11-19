@@ -74,7 +74,6 @@ class WordSelector {
       number: parseInt(wordBlock.dataset.wordNumber),
       text_type: wordBlock.dataset.wordType,
       print_control: wordBlock.dataset.wordPrintControl,
-      extraction_id: wordBlock.dataset.wordExtractionId,
       review: wordBlock.dataset.wordReview === 'true',
       suggestions: this._parseSuggestions(wordBlock.dataset.wordSuggestions),
       // Limits for geometry coordinates removed from data-words-json
