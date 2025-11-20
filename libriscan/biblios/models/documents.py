@@ -281,9 +281,6 @@ class TextBlock(BibliosModel):
 
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="words")
 
-    # Extraction ID refers to a single element on the page that is identified as a text block.
-    extraction_id = models.CharField(max_length=50, blank=True)
-
     text = models.CharField(max_length=255)
     text_type = models.CharField(max_length=1, choices=TEXT_TYPE_CHOICES)
 
