@@ -13,674 +13,1376 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
-    replaces = [('biblios', '0001_squashed_0015_merge_20250926_1632'), ('biblios', '0016_alter_page_document'), ('biblios', '0017_textblock_suggestions'), ('biblios', '0018_collection_slug_consortium_slug_series_slug_and_more'), ('biblios', '0019_alter_collection_owner_alter_document_series_and_more'), ('biblios', '0020_historicalcloudservice_historicalcollection_and_more'), ('biblios', '0021_historicaltextblock_line_historicaltextblock_number_and_more'), ('biblios', '0022_alter_page_options_alter_textblock_options'), ('biblios', '0023_dublincoremetadata'), ('biblios', '0024_remove_membership_consortium_and_more'), ('biblios', '0025_document_published_url_document_status_and_more'), ('biblios', '0026_alter_historicaltextblock_confidence_and_more')]
-
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
+        ("auth", "0012_alter_user_first_name_max_length"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username')),
-                ('first_name', models.CharField(blank=True, max_length=150, verbose_name='first name')),
-                ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
-                ('email', models.EmailField(blank=True, max_length=254, verbose_name='email address')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "is_superuser",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        verbose_name="superuser status",
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(
+                        error_messages={
+                            "unique": "A user with that username already exists."
+                        },
+                        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        max_length=150,
+                        unique=True,
+                        validators=[
+                            django.contrib.auth.validators.UnicodeUsernameValidator()
+                        ],
+                        verbose_name="username",
+                    ),
+                ),
+                (
+                    "first_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="first name"
+                    ),
+                ),
+                (
+                    "last_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="last name"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        blank=True, max_length=254, verbose_name="email address"
+                    ),
+                ),
+                (
+                    "is_staff",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates whether the user can log into this admin site.",
+                        verbose_name="staff status",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        verbose_name="active",
+                    ),
+                ),
+                (
+                    "date_joined",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="date joined"
+                    ),
+                ),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.group",
+                        verbose_name="groups",
+                    ),
+                ),
+                (
+                    "user_permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Specific permissions for this user.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.permission",
+                        verbose_name="user permissions",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'user',
-                'verbose_name_plural': 'users',
-                'abstract': False,
+                "verbose_name": "user",
+                "verbose_name_plural": "users",
+                "abstract": False,
             },
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
         migrations.CreateModel(
-            name='Organization',
+            name="Organization",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=75)),
-                ('short_name', models.CharField(max_length=5)),
-                ('city', models.CharField(max_length=25)),
-                ('state', localflavor.us.models.USStateField(max_length=2)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=75)),
+                ("short_name", models.CharField(max_length=5)),
+                ("city", models.CharField(max_length=25)),
+                ("state", localflavor.us.models.USStateField(max_length=2)),
             ],
         ),
         migrations.CreateModel(
-            name='Consortium',
+            name="Consortium",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
             ],
         ),
         migrations.CreateModel(
-            name='Document',
+            name="Document",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('identifier', models.CharField(max_length=25)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("identifier", models.CharField(max_length=25)),
             ],
         ),
         migrations.CreateModel(
-            name='Membership',
+            name="Membership",
             fields=[
-                ('consortium', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.consortium')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.organization')),
-                ('pk', models.CompositePrimaryKey('organization_id', 'consortium_id', blank=True, editable=False, primary_key=True, serialize=False)),
+                (
+                    "consortium",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.consortium",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.organization",
+                    ),
+                ),
+                (
+                    "pk",
+                    models.CompositePrimaryKey(
+                        "organization_id",
+                        "consortium_id",
+                        blank=True,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
             ],
             options={
-                'constraints': [],
+                "constraints": [],
             },
         ),
         migrations.CreateModel(
-            name='Collection',
+            name="Collection",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.organization",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Page',
+            name="Page",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number', models.SmallIntegerField(default=1)),
-                ('document', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.document')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("number", models.SmallIntegerField(default=1)),
+                (
+                    "document",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.document",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Series',
+            name="Series",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('collection', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.collection')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "collection",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.collection",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='document',
-            name='series',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.series'),
+            model_name="document",
+            name="series",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="biblios.series"
+            ),
         ),
         migrations.CreateModel(
-            name='TextBlock',
+            name="TextBlock",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('extraction_id', models.CharField(blank=True, max_length=50)),
-                ('sequence', models.SmallIntegerField(default=1)),
-                ('text', models.CharField(max_length=255)),
-                ('text_type', models.CharField(choices=[('P', 'Printed'), ('H', 'Handwriting')], max_length=1)),
-                ('confidence', models.DecimalField(decimal_places=3, max_digits=5, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('geo_x_0', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_y_0', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_x_1', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_y_1', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('page', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.page')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("extraction_id", models.CharField(blank=True, max_length=50)),
+                ("sequence", models.SmallIntegerField(default=1)),
+                ("text", models.CharField(max_length=255)),
+                (
+                    "text_type",
+                    models.CharField(
+                        choices=[("P", "Printed"), ("H", "Handwriting")], max_length=1
+                    ),
+                ),
+                (
+                    "confidence",
+                    models.DecimalField(
+                        decimal_places=3,
+                        max_digits=5,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(100),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_x_0",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_y_0",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_x_1",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_y_1",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "page",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="biblios.page"
+                    ),
+                ),
             ],
         ),
         migrations.AddConstraint(
-            model_name='page',
-            constraint=models.UniqueConstraint(fields=('document', 'number'), name='unique_page'),
+            model_name="page",
+            constraint=models.UniqueConstraint(
+                fields=("document", "number"), name="unique_page"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(fields=('identifier',), name='unique_doc_per_org'),
+            model_name="document",
+            constraint=models.UniqueConstraint(
+                fields=("identifier",), name="unique_doc_per_org"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='textblock',
-            constraint=models.UniqueConstraint(fields=('page', 'extraction_id', 'sequence'), name='unique_textblock_sequence'),
+            model_name="textblock",
+            constraint=models.UniqueConstraint(
+                fields=("page", "extraction_id", "sequence"),
+                name="unique_textblock_sequence",
+            ),
         ),
         migrations.CreateModel(
-            name='UserRole',
+            name="UserRole",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('E', 'Editor'), ('S', 'Staff'), ('A', 'Administrator'), ('G', 'Guest')], max_length=1)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='biblios.organization')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("E", "Editor"),
+                            ("S", "Staff"),
+                            ("A", "Administrator"),
+                            ("G", "Guest"),
+                        ],
+                        max_length=1,
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.organization",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('organization', 'role'), name='unique_roles')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("organization", "role"), name="unique_roles"
+                    )
+                ],
             },
         ),
         migrations.RemoveConstraint(
-            model_name='document',
-            name='unique_doc_per_org',
+            model_name="document",
+            name="unique_doc_per_org",
         ),
         migrations.AddConstraint(
-            model_name='document',
-            constraint=models.UniqueConstraint(fields=('series', 'identifier'), name='unique_doc_per_org'),
+            model_name="document",
+            constraint=models.UniqueConstraint(
+                fields=("series", "identifier"), name="unique_doc_per_org"
+            ),
         ),
         migrations.RemoveConstraint(
-            model_name='userrole',
-            name='unique_roles',
+            model_name="userrole",
+            name="unique_roles",
         ),
         migrations.AddConstraint(
-            model_name='userrole',
-            constraint=models.UniqueConstraint(fields=('user', 'organization', 'role'), name='unique_roles'),
+            model_name="userrole",
+            constraint=models.UniqueConstraint(
+                fields=("user", "organization", "role"), name="unique_roles"
+            ),
         ),
         migrations.AlterField(
-            model_name='userrole',
-            name='role',
-            field=models.CharField(choices=[('E', 'Editor'), ('A', 'Archivist'), ('G', 'Guest')], max_length=1),
+            model_name="userrole",
+            name="role",
+            field=models.CharField(
+                choices=[("E", "Editor"), ("A", "Archivist"), ("G", "Guest")],
+                max_length=1,
+            ),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='short_name',
+            model_name="organization",
+            name="short_name",
             field=models.SlugField(max_length=5),
         ),
         migrations.CreateModel(
-            name='CloudService',
+            name="CloudService",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('service', models.CharField(choices=[('T', 'Test'), ('A', 'Amazon Web Services')], max_length=1)),
-                ('client_id', models.CharField(max_length=100)),
-                ('client_secret', models.CharField(max_length=100)),
-                ('organization', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='biblios.organization')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "service",
+                    models.CharField(
+                        choices=[("T", "Test"), ("A", "Amazon Web Services")],
+                        max_length=1,
+                    ),
+                ),
+                ("client_id", models.CharField(max_length=100)),
+                ("client_secret", models.CharField(max_length=100)),
+                (
+                    "organization",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="biblios.organization",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='page',
-            name='image',
-            field=models.ImageField(blank=True, upload_to='pages'),
+            model_name="page",
+            name="image",
+            field=models.ImageField(blank=True, upload_to="pages"),
         ),
         migrations.AlterModelManagers(
-            name='user',
-            managers=[
-            ],
+            name="user",
+            managers=[],
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='username',
+            model_name="user",
+            name="username",
         ),
         migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='email address'),
+            model_name="user",
+            name="email",
+            field=models.EmailField(
+                max_length=254, unique=True, verbose_name="email address"
+            ),
         ),
         migrations.AddField(
-            model_name='textblock',
-            name='print_control',
-            field=models.CharField(choices=[('I', 'Include'), ('M', 'Merge With Prior'), ('O', 'Omit')], default='I', max_length=1),
+            model_name="textblock",
+            name="print_control",
+            field=models.CharField(
+                choices=[("I", "Include"), ("M", "Merge With Prior"), ("O", "Omit")],
+                default="I",
+                max_length=1,
+            ),
         ),
         migrations.AddField(
-            model_name='document',
-            name='use_long_s_detection',
+            model_name="document",
+            name="use_long_s_detection",
             field=models.BooleanField(default=True),
         ),
         migrations.AddIndex(
-            model_name='textblock',
-            index=models.Index(fields=['geo_x_0', 'geo_y_0'], name='biblios_tex_geo_x_0_1cbc8a_idx'),
+            model_name="textblock",
+            index=models.Index(
+                fields=["geo_x_0", "geo_y_0"], name="biblios_tex_geo_x_0_1cbc8a_idx"
+            ),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='first_name',
+            model_name="user",
+            name="first_name",
             field=models.CharField(max_length=50),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='last_name',
+            model_name="user",
+            name="last_name",
             field=models.CharField(max_length=50),
         ),
         migrations.AlterField(
-            model_name='page',
-            name='document',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pages', to='biblios.document'),
+            model_name="page",
+            name="document",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="pages",
+                to="biblios.document",
+            ),
         ),
         migrations.AddField(
-            model_name='textblock',
-            name='suggestions',
+            model_name="textblock",
+            name="suggestions",
             field=models.JSONField(blank=True, default=dict),
         ),
         migrations.AddField(
-            model_name='collection',
-            name='slug',
-            field=models.SlugField(default=''),
+            model_name="collection",
+            name="slug",
+            field=models.SlugField(default=""),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='consortium',
-            name='slug',
-            field=models.SlugField(default=''),
+            model_name="consortium",
+            name="slug",
+            field=models.SlugField(default=""),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='series',
-            name='slug',
-            field=models.SlugField(default=''),
+            model_name="series",
+            name="slug",
+            field=models.SlugField(default=""),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='document',
-            name='identifier',
+            model_name="document",
+            name="identifier",
             field=models.SlugField(max_length=25),
         ),
         migrations.AlterField(
-            model_name='collection',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='collections', to='biblios.organization'),
+            model_name="collection",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="collections",
+                to="biblios.organization",
+            ),
         ),
         migrations.AlterField(
-            model_name='document',
-            name='series',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='biblios.series'),
+            model_name="document",
+            name="series",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="biblios.series",
+            ),
         ),
         migrations.AlterField(
-            model_name='organization',
-            name='short_name',
+            model_name="organization",
+            name="short_name",
             field=models.SlugField(max_length=10),
         ),
         migrations.AlterField(
-            model_name='textblock',
-            name='page',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='words', to='biblios.page'),
+            model_name="textblock",
+            name="page",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="words",
+                to="biblios.page",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='collection',
-            constraint=models.UniqueConstraint(fields=('owner', 'slug'), name='unique_collection_slug'),
+            model_name="collection",
+            constraint=models.UniqueConstraint(
+                fields=("owner", "slug"), name="unique_collection_slug"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='organization',
-            constraint=models.UniqueConstraint(fields=('short_name',), name='unique_org_shortname'),
+            model_name="organization",
+            constraint=models.UniqueConstraint(
+                fields=("short_name",), name="unique_org_shortname"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='series',
-            constraint=models.UniqueConstraint(fields=('collection', 'slug'), name='unique_series_slug'),
+            model_name="series",
+            constraint=models.UniqueConstraint(
+                fields=("collection", "slug"), name="unique_series_slug"
+            ),
         ),
         migrations.CreateModel(
-            name='HistoricalCloudService',
+            name="HistoricalCloudService",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('service', models.CharField(choices=[('T', 'Test'), ('A', 'Amazon Web Services')], max_length=1)),
-                ('client_id', models.CharField(max_length=100)),
-                ('client_secret', models.CharField(max_length=100)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "service",
+                    models.CharField(
+                        choices=[("T", "Test"), ("A", "Amazon Web Services")],
+                        max_length=1,
+                    ),
+                ),
+                ("client_id", models.CharField(max_length=100)),
+                ("client_secret", models.CharField(max_length=100)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical cloud service',
-                'verbose_name_plural': 'historical cloud services',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical cloud service",
+                "verbose_name_plural": "historical cloud services",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalCollection',
+            name="HistoricalCollection",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('slug', models.SlugField()),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("slug", models.SlugField()),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical collection',
-                'verbose_name_plural': 'historical collections',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical collection",
+                "verbose_name_plural": "historical collections",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalDocument',
+            name="HistoricalDocument",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('identifier', models.SlugField(max_length=25)),
-                ('use_long_s_detection', models.BooleanField(default=True)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("identifier", models.SlugField(max_length=25)),
+                ("use_long_s_detection", models.BooleanField(default=True)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical document',
-                'verbose_name_plural': 'historical documents',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical document",
+                "verbose_name_plural": "historical documents",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalOrganization',
+            name="HistoricalOrganization",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('name', models.CharField(max_length=75)),
-                ('short_name', models.SlugField(max_length=10)),
-                ('city', models.CharField(max_length=25)),
-                ('state', localflavor.us.models.USStateField(max_length=2)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("name", models.CharField(max_length=75)),
+                ("short_name", models.SlugField(max_length=10)),
+                ("city", models.CharField(max_length=25)),
+                ("state", localflavor.us.models.USStateField(max_length=2)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical organization',
-                'verbose_name_plural': 'historical organizations',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical organization",
+                "verbose_name_plural": "historical organizations",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalPage',
+            name="HistoricalPage",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('number', models.SmallIntegerField(default=1)),
-                ('image', models.TextField(blank=True, max_length=100)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("number", models.SmallIntegerField(default=1)),
+                ("image", models.TextField(blank=True, max_length=100)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical page',
-                'verbose_name_plural': 'historical pages',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical page",
+                "verbose_name_plural": "historical pages",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalSeries',
+            name="HistoricalSeries",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('slug', models.SlugField()),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("slug", models.SlugField()),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical series',
-                'verbose_name_plural': 'historical seriess',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical series",
+                "verbose_name_plural": "historical seriess",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalTextBlock',
+            name="HistoricalTextBlock",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('extraction_id', models.CharField(blank=True, max_length=50)),
-                ('text', models.CharField(max_length=255)),
-                ('text_type', models.CharField(choices=[('P', 'Printed'), ('H', 'Handwriting')], max_length=1)),
-                ('confidence', models.DecimalField(decimal_places=3, max_digits=5, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(100)])),
-                ('print_control', models.CharField(choices=[('I', 'Include'), ('M', 'Merge With Prior'), ('O', 'Omit')], default='I', max_length=1)),
-                ('geo_x_0', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_y_0', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_x_1', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('geo_y_1', models.DecimalField(decimal_places=20, max_digits=20, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(1)])),
-                ('suggestions', models.JSONField(blank=True, default=dict)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("extraction_id", models.CharField(blank=True, max_length=50)),
+                ("text", models.CharField(max_length=255)),
+                (
+                    "text_type",
+                    models.CharField(
+                        choices=[("P", "Printed"), ("H", "Handwriting")], max_length=1
+                    ),
+                ),
+                (
+                    "confidence",
+                    models.DecimalField(
+                        decimal_places=3,
+                        max_digits=5,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(100),
+                        ],
+                    ),
+                ),
+                (
+                    "print_control",
+                    models.CharField(
+                        choices=[
+                            ("I", "Include"),
+                            ("M", "Merge With Prior"),
+                            ("O", "Omit"),
+                        ],
+                        default="I",
+                        max_length=1,
+                    ),
+                ),
+                (
+                    "geo_x_0",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_y_0",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_x_1",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                (
+                    "geo_y_1",
+                    models.DecimalField(
+                        decimal_places=20,
+                        max_digits=20,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(1),
+                        ],
+                    ),
+                ),
+                ("suggestions", models.JSONField(blank=True, default=dict)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical text block',
-                'verbose_name_plural': 'historical text blocks',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical text block",
+                "verbose_name_plural": "historical text blocks",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalUser',
+            name="HistoricalUser",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('email', models.EmailField(db_index=True, max_length=254, verbose_name='email address')),
-                ('first_name', models.CharField(max_length=50)),
-                ('last_name', models.CharField(max_length=50)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "is_superuser",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        verbose_name="superuser status",
+                    ),
+                ),
+                (
+                    "is_staff",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates whether the user can log into this admin site.",
+                        verbose_name="staff status",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        verbose_name="active",
+                    ),
+                ),
+                (
+                    "date_joined",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="date joined"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        db_index=True, max_length=254, verbose_name="email address"
+                    ),
+                ),
+                ("first_name", models.CharField(max_length=50)),
+                ("last_name", models.CharField(max_length=50)),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical user',
-                'verbose_name_plural': 'historical users',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical user",
+                "verbose_name_plural": "historical users",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalUserRole',
+            name="HistoricalUserRole",
             fields=[
-                ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('role', models.CharField(choices=[('E', 'Editor'), ('A', 'Archivist'), ('G', 'Guest')], max_length=1)),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField(db_index=True)),
-                ('history_change_reason', models.CharField(max_length=100, null=True)),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
+                (
+                    "id",
+                    models.BigIntegerField(
+                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("E", "Editor"), ("A", "Archivist"), ("G", "Guest")],
+                        max_length=1,
+                    ),
+                ),
+                ("history_id", models.AutoField(primary_key=True, serialize=False)),
+                ("history_date", models.DateTimeField(db_index=True)),
+                ("history_change_reason", models.CharField(max_length=100, null=True)),
+                (
+                    "history_type",
+                    models.CharField(
+                        choices=[("+", "Created"), ("~", "Changed"), ("-", "Deleted")],
+                        max_length=1,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'historical user role',
-                'verbose_name_plural': 'historical user roles',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': ('history_date', 'history_id'),
+                "verbose_name": "historical user role",
+                "verbose_name_plural": "historical user roles",
+                "ordering": ("-history_date", "-history_id"),
+                "get_latest_by": ("history_date", "history_id"),
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
         migrations.RemoveConstraint(
-            model_name='textblock',
-            name='unique_textblock_sequence',
+            model_name="textblock",
+            name="unique_textblock_sequence",
         ),
         migrations.RemoveIndex(
-            model_name='textblock',
-            name='biblios_tex_geo_x_0_1cbc8a_idx',
+            model_name="textblock",
+            name="biblios_tex_geo_x_0_1cbc8a_idx",
         ),
         migrations.RemoveField(
-            model_name='textblock',
-            name='sequence',
+            model_name="textblock",
+            name="sequence",
         ),
         migrations.AddField(
-            model_name='historicalcloudservice',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicalcloudservice",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcloudservice',
-            name='organization',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.organization'),
+            model_name="historicalcloudservice",
+            name="organization",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.organization",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcollection',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicalcollection",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicalcollection',
-            name='owner',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.organization'),
+            model_name="historicalcollection",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.organization",
+            ),
         ),
         migrations.AddField(
-            model_name='historicaldocument',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicaldocument",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaldocument',
-            name='series',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.series'),
+            model_name="historicaldocument",
+            name="series",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.series",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalorganization',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicalorganization",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicalpage',
-            name='document',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.document'),
+            model_name="historicalpage",
+            name="document",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.document",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalpage',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicalpage",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicalseries',
-            name='collection',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.collection'),
+            model_name="historicalseries",
+            name="collection",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.collection",
+            ),
         ),
         migrations.AddField(
-            model_name='historicalseries',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicalseries",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaltextblock',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicaltextblock",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaltextblock',
-            name='page',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.page'),
+            model_name="historicaltextblock",
+            name="page",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.page",
+            ),
         ),
         migrations.AddField(
-            model_name='historicaluser',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicaluser",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaluserrole',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicaluserrole",
+            name="history_user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaluserrole',
-            name='organization',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to='biblios.organization'),
+            model_name="historicaluserrole",
+            name="organization",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to="biblios.organization",
+            ),
         ),
         migrations.AddField(
-            model_name='historicaluserrole',
-            name='user',
-            field=models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="historicaluserrole",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                db_constraint=False,
+                null=True,
+                on_delete=django.db.models.deletion.DO_NOTHING,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaltextblock',
-            name='line',
+            model_name="historicaltextblock",
+            name="line",
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='historicaltextblock',
-            name='number',
+            model_name="historicaltextblock",
+            name="number",
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='textblock',
-            name='line',
+            model_name="textblock",
+            name="line",
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='textblock',
-            name='number',
+            model_name="textblock",
+            name="number",
             field=models.IntegerField(default=1),
             preserve_default=False,
         ),
         migrations.AlterModelOptions(
-            name='page',
-            options={'ordering': ['number']},
+            name="page",
+            options={"ordering": ["number"]},
         ),
         migrations.AlterModelOptions(
-            name='textblock',
-            options={'ordering': ['line', 'number']},
+            name="textblock",
+            options={"ordering": ["line", "number"]},
         ),
         migrations.CreateModel(
-            name='DublinCoreMetadata',
+            name="DublinCoreMetadata",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.JSONField(blank=True, default=list)),
-                ('description', models.JSONField(blank=True, default=list)),
-                ('creator', models.JSONField(blank=True, default=list)),
-                ('subject', models.JSONField(blank=True, default=list)),
-                ('publisher', models.JSONField(blank=True, default=list)),
-                ('contributor', models.JSONField(blank=True, default=list)),
-                ('date', models.JSONField(blank=True, default=list)),
-                ('type', models.JSONField(blank=True, default=list)),
-                ('format', models.JSONField(blank=True, default=list)),
-                ('identifier', models.JSONField(blank=True, default=list)),
-                ('source', models.JSONField(blank=True, default=list)),
-                ('language', models.JSONField(blank=True, default=list)),
-                ('relation', models.JSONField(blank=True, default=list)),
-                ('coverage', models.JSONField(blank=True, default=list)),
-                ('rights', models.JSONField(blank=True, default=list)),
-                ('document', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='metadata', to='biblios.document')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.JSONField(blank=True, default=list)),
+                ("description", models.JSONField(blank=True, default=list)),
+                ("creator", models.JSONField(blank=True, default=list)),
+                ("subject", models.JSONField(blank=True, default=list)),
+                ("publisher", models.JSONField(blank=True, default=list)),
+                ("contributor", models.JSONField(blank=True, default=list)),
+                ("date", models.JSONField(blank=True, default=list)),
+                ("type", models.JSONField(blank=True, default=list)),
+                ("format", models.JSONField(blank=True, default=list)),
+                ("identifier", models.JSONField(blank=True, default=list)),
+                ("source", models.JSONField(blank=True, default=list)),
+                ("language", models.JSONField(blank=True, default=list)),
+                ("relation", models.JSONField(blank=True, default=list)),
+                ("coverage", models.JSONField(blank=True, default=list)),
+                ("rights", models.JSONField(blank=True, default=list)),
+                (
+                    "document",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="metadata",
+                        to="biblios.document",
+                    ),
+                ),
             ],
             bases=(models.Model, rules.contrib.models.RulesModelMixin),
         ),
         migrations.AddField(
-            model_name='historicalorganization',
-            name='primary',
+            model_name="historicalorganization",
+            name="primary",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='organization',
-            name='primary',
+            model_name="organization",
+            name="primary",
             field=models.BooleanField(default=False),
         ),
         migrations.DeleteModel(
-            name='Consortium',
+            name="Consortium",
         ),
         migrations.DeleteModel(
-            name='Membership',
+            name="Membership",
         ),
         migrations.AddField(
-            model_name='document',
-            name='published_url',
+            model_name="document",
+            name="published_url",
             field=models.URLField(blank=True),
         ),
         migrations.AddField(
-            model_name='document',
-            name='status',
-            field=models.CharField(choices=[('N', 'New'), ('I', 'In Progress'), ('R', 'Ready for Review'), ('A', 'Approved')], default='N', max_length=1),
+            model_name="document",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("N", "New"),
+                    ("I", "In Progress"),
+                    ("R", "Ready for Review"),
+                    ("A", "Approved"),
+                ],
+                default="N",
+                max_length=1,
+            ),
         ),
         migrations.AddField(
-            model_name='historicaldocument',
-            name='published_url',
+            model_name="historicaldocument",
+            name="published_url",
             field=models.URLField(blank=True),
         ),
         migrations.AddField(
-            model_name='historicaldocument',
-            name='status',
-            field=models.CharField(choices=[('N', 'New'), ('I', 'In Progress'), ('R', 'Ready for Review'), ('A', 'Approved')], default='N', max_length=1),
+            model_name="historicaldocument",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("N", "New"),
+                    ("I", "In Progress"),
+                    ("R", "Ready for Review"),
+                    ("A", "Approved"),
+                ],
+                default="N",
+                max_length=1,
+            ),
         ),
         migrations.AlterField(
-            model_name='historicaltextblock',
-            name='confidence',
-            field=models.DecimalField(decimal_places=3, max_digits=5, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(99.999)]),
+            model_name="historicaltextblock",
+            name="confidence",
+            field=models.DecimalField(
+                decimal_places=3,
+                max_digits=5,
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(99.999),
+                ],
+            ),
         ),
         migrations.AlterField(
-            model_name='textblock',
-            name='confidence',
-            field=models.DecimalField(decimal_places=3, max_digits=5, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(99.999)]),
+            model_name="textblock",
+            name="confidence",
+            field=models.DecimalField(
+                decimal_places=3,
+                max_digits=5,
+                validators=[
+                    django.core.validators.MinValueValidator(0),
+                    django.core.validators.MaxValueValidator(99.999),
+                ],
+            ),
         ),
     ]
