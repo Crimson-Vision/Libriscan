@@ -21,19 +21,18 @@
   <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
   
   <!-- FilePond Dependencies -->
-  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
-  <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
-  <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
-  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-  
+  <link href="{% static 'css/filepond/filepond.css' %}" rel="stylesheet">
+  <link href="{% static 'css/filepond/filepond-plugin-image-preview.css' %}" rel="stylesheet">
+  <script src="{% static 'js/filepond/filepond-plugin-image-preview.js' %}"></script>
+  <script src="{% static 'js/filepond/filepond.js' %}"></script>
+
   <!-- OpenSeadragon Dependencies -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+  <script src="{% static 'js/openseadragon/openseadragon.min.js' %}"></script>
   
   <!-- Driver.js for Tutorials -->
-  <script src="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.js.iife.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@latest/dist/driver.css"/>
-  
-  
+  <script src="{% static 'js/driver.js/driver.js.iife.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/driver.js/driver.css' %}"/>
+
   <!-- Application CSS -->
   <link rel="stylesheet" href="{% static 'css/openseadragon-viewer.css' %}">
   <link rel="stylesheet" href="{% static 'css/word_selector.css' %}">
