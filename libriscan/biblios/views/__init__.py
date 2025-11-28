@@ -1,5 +1,6 @@
 __all__ = ["base", "organizations", "documents", "words"]
 from .base import index, scan
+from .auth import image_auth
 from .organizations import (
     organization_list,
     OrganizationDetail,
