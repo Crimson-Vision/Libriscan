@@ -11,7 +11,7 @@ urlpatterns = [
     path("upload/", views.handle_upload, name="handle_upload"),
     path("organizations", views.organization_list, name="organization-list"),
     # Auth for image URLs
-    path("auth/image/<str:image>", views.image_auth, name="image_auth"),
+    path("auth/image/<str:image>/", views.image_auth, name="image_auth"),
     # Search
     path("api/search/", search_documents, name="search_documents"),
     # Organization details
