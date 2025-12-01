@@ -28,6 +28,10 @@ To view all collections in your organization:
 2. All collections will be displayed in the "Collections" section
 3. Click on any collection name to view its contents, including Series and orphaned documents
 
+![Organization and Collections view](images/Collection-Series/Org-Collection.PNG)
+
+*Figure 1: Organization main page showing collections*
+
 ### Creating a New Collection
 
 To create a new collection:
