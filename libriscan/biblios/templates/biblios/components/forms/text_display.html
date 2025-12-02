@@ -9,7 +9,7 @@
     <div id="text-tabs-wrapper" class="relative">
       <div id="text-tabs" class="tabs tabs-lift">
         <!-- Raw Text Tab -->
-        {% if owner and request.user|is_not_guest:owner or not owner %}
+        {% if owner and request.user|can_edit_org:owner or not owner %}
         <label id="raw-text-tab-label" class="tab">
           <input id="raw-text-tab-input" type="radio" name="text_tabs" checked="checked" />
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
@@ -84,7 +84,7 @@
       </div>
 
       <!-- Filter Dropdown (Absolute Positioned Top Right) -->
-      {% if not owner or owner and request.user|is_not_guest:owner %}
+      {% if not owner or owner and request.user|can_edit_org:owner %}
       <div id="confidence-toggle-wrapper" class="absolute top-2 right-4 z-10">
         {% include 'biblios/components/forms/confidence_toggle.html' %}
       </div>

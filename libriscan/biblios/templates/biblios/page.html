@@ -195,7 +195,7 @@
        <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
         <div id="extract-prompt-body" class="card-body flex flex-col justify-center items-center h-full text-center p-6">
           <h2 id="extract-prompt-title" class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
-          {% if request.user|is_not_guest:page.document.collection.owner %}
+          {% if request.user|can_edit_org:page.document.collection.owner %}
           <button
             hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
             hx-target="#extractPrompt"

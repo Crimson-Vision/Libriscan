@@ -82,7 +82,7 @@
             </svg>
           </span>
           {{ collection }}
-          {% if request.user|is_not_guest:collection.owner %}
+          {% if request.user|can_edit_org:collection.owner %}
           <a 
             href="{% url 'collection_update' collection.owner.short_name collection.slug %}"
             id="collectionEditBtn"
@@ -128,7 +128,7 @@
                     </span>
                     <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ series }}</span>
                   </a>
-                  {% if request.user|is_not_guest:collection.owner %}
+                  {% if request.user|can_edit_org:collection.owner %}
                   <button 
                     id="series-delete-btn-{{ series.slug }}"
                     type="button" 
@@ -188,7 +188,7 @@
                       {% include "biblios/components/status/document_status_badge.html" with document=doc %}
                     </div>
                   </a>
-                  {% if request.user|is_not_guest:collection.owner %}
+                  {% if request.user|can_edit_org:collection.owner %}
                   <button 
                     id="document-delete-btn-{{ doc.identifier }}"
                     type="button" 
@@ -211,7 +211,7 @@
             </div>
           {% endfor %}
         </div>
-        {% if request.user|is_not_guest:collection.owner %}
+        {% if request.user|can_edit_org:collection.owner %}
         <div id="documents-actions" class="mt-4 flex justify-end">
           <a href="{% url 'document_create' collection.owner.short_name collection.slug %}"
              id="collectionAddDocumentBtn"

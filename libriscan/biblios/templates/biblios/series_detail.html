@@ -46,7 +46,7 @@
                             </svg>
                         </span>
                         {{ series }}
-                        {% if request.user|is_not_guest:series.collection.owner %}
+                        {% if request.user|can_edit_org:series.collection.owner %}
                         <a 
                             href="{% url 'series_update' series.collection.owner.short_name series.collection.slug series.slug %}"
                             class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
@@ -57,7 +57,7 @@
                         </a>
                         {% endif %}
                     </h2>
-                    {% if request.user|is_not_guest:series.collection.owner %}
+                    {% if request.user|can_edit_org:series.collection.owner %}
                     <button 
                         type="button" 
                         class="btn btn-ghost btn-sm btn-error tooltip tooltip-left"
@@ -89,7 +89,7 @@
                                                 {% include "biblios/components/status/document_status_badge.html" with document=doc %}
                                             </div>
                                         </a>
-                                        {% if request.user|is_not_guest:series.collection.owner %}
+                                        {% if request.user|can_edit_org:series.collection.owner %}
                                         <button 
                                             type="button" 
                                             class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
@@ -111,7 +111,7 @@
                             </div>
                         {% endfor %}
                     </div>
-                    {% if request.user|is_not_guest:series.collection.owner %}
+                    {% if request.user|can_edit_org:series.collection.owner %}
                     <div class="mt-4 flex justify-end">
                         <a href="{% url 'document_series_create' series.collection.owner.short_name series.collection.slug series.slug %}" 
                            class="btn btn-secondary btn-md">

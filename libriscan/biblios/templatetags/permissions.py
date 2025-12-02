@@ -39,10 +39,3 @@ def is_guest(user, org):
     ).exists()
 
 
-@register.filter
-def is_not_guest(user, org):
-    """Check if user is NOT a guest (i.e., Editor or Archivist)."""
-    if not user.is_authenticated:
-        return False
-    return is_org_editor(user, org)
-
