@@ -1,4 +1,5 @@
 {% load static %}
+{% load icon_tags %}
 <!-- Audit History Timeline: Displays word edit history with timestamps and change details -->
 
 <div id="auditHistoryContent" class="h-[50vh] overflow-y-auto px-0.5 sm:px-1 md:px-2">
@@ -7,9 +8,7 @@
   <div id="auditHistoryEmpty" class="flex flex-col items-center justify-center h-full text-center py-12">
     <div class="mb-6">
       <div class="w-24 h-24 rounded-full bg-base-200 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
+        {% icon 'clock' css_class='w-12 h-12 text-base-content/30' %}
       </div>
     </div>
     <h3 class="text-lg font-semibold mb-2 text-base-content">No History Yet</h3>
