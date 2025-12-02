@@ -1,4 +1,5 @@
 {% load static %}
+{% load icon_tags %}
 <!-- Text Display Component Template -->
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
@@ -10,9 +11,7 @@
         <!-- Raw Text Tab -->
         <label id="raw-text-tab-label" class="tab">
           <input id="raw-text-tab-input" type="radio" name="text_tabs" checked="checked" />
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
+          {% icon 'bars-3' css_class='size-4 sm:me-2' %}
           <span class="hidden sm:inline">Raw Text</span>
         </label>
         <div id="raw-text-content" class="tab-content bg-base-100 border-base-300 p-4">
@@ -47,9 +46,7 @@
                   title="Click to view details">
                   {% if word.review %}
                   <span class="review-flag-icon inline-flex items-center mr-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
-                    </svg>
+                    {% icon 'bookmark' css_class='size-3' %}
                   </span>
                   {% endif %}
                   <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
@@ -70,9 +67,7 @@
         <!-- Formatted Tab -->
         <label id="formatted-text-tab-label" class="tab">
           <input id="formatted-text-tab-input" type="radio" name="text_tabs" />
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 sm:me-2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-          </svg>
+          {% icon 'folder' css_class='size-4 sm:me-2' stroke_width='2' %}
           <span class="hidden sm:inline">Formatted</span>
         </label>
         <div id="formatted-text-content" class="tab-content bg-base-100 border-base-300 p-6">
