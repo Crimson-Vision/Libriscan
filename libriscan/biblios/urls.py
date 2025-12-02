@@ -6,9 +6,6 @@ from .views.base import search_documents
 urlpatterns = [
     # Core pages
     path("", views.index, name="index"),
-    path("scan/", views.scan, name="scan"),
-    # File handling
-    path("upload/", views.handle_upload, name="handle_upload"),
     path("organizations", views.organization_list, name="organization-list"),
     # Search
     path("api/search/", search_documents, name="search_documents"),
