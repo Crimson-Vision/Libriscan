@@ -28,6 +28,10 @@ To view all collections in your organization:
 2. All collections will be displayed in the "Collections" section
 3. Click on any collection name to view its contents, including Series and orphaned documents
 
+![Organization and Collections view](../images/Collection-Series/Org-Collection.PNG)
+
+*Figure 1: Organization main page showing collections*
+
 ### Creating a New Collection
 
 To create a new collection:
@@ -37,7 +41,10 @@ To create a new collection:
 3. The Slug field will automatically populate with a URL-friendly identifier
 4. Review the auto-generated slug and modify if necessary (letters, numbers, and hyphens only)
 5. Click "Create Collection" to save your new collection
+![Organization and Collections view](../images/Collection-Series/Create-New-Collection-1.PNG)
+![Organization and Collections view](../images/Collection-Series/Create-New-Collection-2.PNG)
 
+*Figure 2: Creating collections*
 ### Editing a Collection
 
 To edit an existing collection:
@@ -58,6 +65,8 @@ To delete a collection:
 3. Type "Delete" in the confirmation field exactly as shown
 4. Click "Delete Collection" to permanently remove the collection and all its contents
 
+![Organization and Collections view](../images/Collection-Series/Delete-Collection.PNG)
+![Organization and Collections view](../images/Collection-Series/confirm-delete-collection.PNG)
 ---
 
 ## Managing Series
@@ -84,6 +93,9 @@ To create a new Series within a collection:
 5. Review and modify the slug if necessary (letters, numbers, and hyphens only)
 6. Click "Create Series" to save
 
+![Organization and Collections view](../images/Collection-Series/add-new-series.PNG)
+![Organization and Collections view](../images/Collection-Series/create-new-series-1.PNG)
+
 ### Editing a Series
 
 To edit an existing Series:
@@ -104,5 +116,8 @@ To delete a Series:
 3. A confirmation dialog will appear with a warning message
 4. Type "Delete" in the confirmation field exactly as shown
 5. Click "Delete Series" to permanently remove the Series and all its contents
+
+![Organization and Collections view](../images/Collection-Series/delete-series.PNG)
+![Organization and Collections view](../images/Collection-Series/delete-series-2.PNG)
 
 ---
