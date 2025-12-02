@@ -1,3 +1,4 @@
+{% load icon_tags %}
 <!-- Status Dropdown Component -->
 <div class="dropdown dropdown-end" id="statusDropdown">
     <div tabindex="0" role="button" class="inline-flex items-center gap-0 rounded-lg overflow-hidden transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" id="statusButton">
@@ -6,9 +7,7 @@
             <span id="statusText">{{ document.get_status_display }}</span>
         </span>
         <span id="status-dropdown-arrow" class="flex items-center justify-center px-2 py-1.5 bg-base-200/60 hover:bg-base-200/80 transition-colors rounded-r-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-3 text-base-content/60">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-            </svg>
+            {% icon 'chevron-down' css_class='size-3 text-base-content/60' stroke_width='2' %}
         </span>
     </div>
     <ul id="status-dropdown-menu" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300 mt-2">
@@ -22,9 +21,7 @@
                hx-swap="none"
                hx-trigger="click">
                 <span class="badge badge-sm badge-ghost gap-1.5 px-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                    </svg>
+                    {% icon 'edit' css_class='size-3' %}
                     New
                 </span>
             </a>
@@ -39,9 +36,7 @@
                hx-swap="none"
                hx-trigger="click">
                 <span class="badge badge-sm badge-info gap-1.5 px-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
+                    {% icon 'clock' css_class='size-3' %}
                     In Progress
                 </span>
             </a>
@@ -56,9 +51,7 @@
                hx-swap="none"
                hx-trigger="click">
                 <span class="badge badge-sm badge-warning gap-1.5 px-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-                    </svg>
+                    {% icon 'shield-check' css_class='size-3' %}
                     Ready for Review
                 </span>
             </a>
@@ -73,9 +66,7 @@
                hx-swap="none"
                hx-trigger="click">
                 <span class="badge badge-sm badge-success gap-1.5 px-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
+                    {% icon 'check-circle' css_class='size-3' %}
                     Approved
                 </span>
             </a>
