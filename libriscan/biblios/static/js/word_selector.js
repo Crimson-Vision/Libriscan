@@ -12,7 +12,10 @@ class WordSelector {
   }
 
   applyReviewFlags() {
-    document.querySelectorAll('.word-block').forEach(wordBlock => {
+    const reviewedBlocks = document.querySelectorAll('.word-block[data-word-review="true"]');
+    if (reviewedBlocks.length === 0) return;
+    
+    reviewedBlocks.forEach(wordBlock => {
       const isReviewed = wordBlock.dataset.wordReview === 'true';
       const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
       

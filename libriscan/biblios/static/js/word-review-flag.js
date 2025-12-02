@@ -6,9 +6,9 @@ class WordReviewFlag {
     this.wordDetails = wordDetails;
     this.container = document.getElementById('reviewFlagContainer');
     this.urlCache = null;
-    this.filledIconPromise = window.SVGLoader.loadIcon('flag-filled', { cssClass: 'size-6', fill: 'currentColor' });
-    this.outlineIconPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-6' });
-    this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' });
+    this.filledIconPromise = null;
+    this.outlineIconPromise = null;
+    this.flagIconSmallPromise = null;
     
     document.addEventListener('wordSelected', (event) => this.updateFlagButton(event.detail));
     document.addEventListener('htmx:afterSwap', (event) => {
@@ -34,6 +34,11 @@ class WordReviewFlag {
 
   updateFlagButton(wordInfo) {
     if (!this.container || !wordInfo?.id) return;
+    
+    if (!this.filledIconPromise) {
+      this.filledIconPromise = window.SVGLoader.loadIcon('flag-filled', { cssClass: 'size-6', fill: 'currentColor' });
+      this.outlineIconPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-6' });
+    }
     
     const url = this.getUrlParts();
     const toggleUrl = `/${url.shortName}/${url.collectionSlug}/${url.identifier}/page${url.pageNumber}/word/${wordInfo.id}/toggle-review/`;
@@ -84,6 +89,9 @@ class WordReviewFlag {
     
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {
+      if (!this.flagIconSmallPromise) {
+        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' });
+      }
       const flagIcon = document.createElement('span');
       flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
       this.flagIconSmallPromise.then(svg => {
