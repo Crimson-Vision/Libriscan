@@ -37,13 +37,13 @@ def _update_attr(svg, attr, value):
 
 
 @register.simple_tag
-def icon(icon_name, css_class='', fill=None, stroke=None, stroke_width=None):
-    """Load SVG icon with customizable attributes. Usage: {% icon 'book' css_class='w-5 h-5' %}"""
+def icon(icon_name, css_class='', fill=None, stroke=None, stroke_width=None, id=None):
+    """Load SVG icon with customizable attributes. Usage: {% icon 'book' css_class='w-5 h-5' id='my-icon' %}"""
     svg = _load_svg(icon_name)
     if not svg:
         return mark_safe(f'<!-- Icon "{icon_name}" not found -->')
     
-    for attr, value in [('class', css_class), ('fill', fill), ('stroke', stroke), ('stroke-width', stroke_width)]:
+    for attr, value in [('class', css_class), ('fill', fill), ('stroke', stroke), ('stroke-width', stroke_width), ('id', id)]:
         if value is not None and value != '':
             svg = _update_attr(svg, attr, value)
     
