@@ -52,8 +52,6 @@ LB_TAGS = os.environ.get("LB_TAGS", "").split("\n")
 
 # Look for the tag with the SHA, so we can easily reference it
 LB_SHA = None
-
-
 for tag in LB_TAGS:
     s = tag.split(":")
     if len(s) > 1 and s[1].startswith("sha-"):
@@ -204,14 +202,18 @@ LOGGING = {
     },
 }
 
+# This env var can optionally be used to override the number of Huey workers
+# If you use this, it's your responsibility to ensure the value can be cast to an int
+HUEY_WORKERS = int(os.environ.get("HUEY_WORKERS", 4))
+
 # Task queuing
 HUEY = {
     "name": "libriscan",
     "huey_class": "huey.SqliteHuey",
     "filename": LOCAL_DIR / "task_queue.db",
     "immediate": False,
+    "consumer": {"workers": HUEY_WORKERS, "worker_type": "process"},
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
