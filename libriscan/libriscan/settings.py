@@ -212,7 +212,7 @@ HUEY = {
     "huey_class": "huey.SqliteHuey",
     "filename": LOCAL_DIR / "task_queue.db",
     "immediate": False,
-    "consumer": {"workers": HUEY_WORKERS, "worker_type": "process"},
+    "consumer": {"workers": HUEY_WORKERS, "worker_type": "thread"},
 }
 
 # Internationalization
