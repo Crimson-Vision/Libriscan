@@ -1,5 +1,6 @@
 {% extends "biblios/base.html" %}
 {% load static %}
+{% load permissions %}
 
 {% block title %}{{page}} · {% if page.document.series %}{{ page.document.series }} · {% endif %}{{ page.document.collection }} · {{ page.document.collection.owner.short_name}} · Libriscan{% endblock %}
 
@@ -187,13 +188,14 @@
   <!-- Right: Extracted Text -->
   <div id="rightColumn" class="h-full w-full">
       {% if page.words.exists %}
-        {% include "biblios/components/forms/text_display.html" with words=page.words.all %}
+        {% include "biblios/components/forms/text_display.html" with words=page.words.all owner=page.document.collection.owner %}
       {% elif extracting %}
         {% include "biblios/components/forms/extraction_loading.html" with short_name=keys.owner collection_slug=keys.collection_slug identifier=keys.doc number=page.number owner=page.document.collection.owner %}
       {% else %}
        <div id="extractPrompt" class="card bg-base-100 shadow-sm h-full">
         <div id="extract-prompt-body" class="card-body flex flex-col justify-center items-center h-full text-center p-6">
           <h2 id="extract-prompt-title" class="card-title text-2xl mb-4">No Text Extracted Yet</h2>
+          {% if request.user|can_edit_org:page.document.collection.owner %}
           <button
             hx-post="{% url 'page_extract' keys.owner keys.collection_slug keys.doc page.number %}"
             hx-target="#extractPrompt"
@@ -203,13 +205,18 @@
             {% if not page.can_extract %}disabled{% endif %}>
             Extract
           </button>
-          <p id="extract-prompt-message" class="mb-4 {% if not page.can_extract %}text-error{% endif %}">
-            {% if page.can_extract %}
-              Click <span class="font-bold">Extract</span> for intelligent extraction.
-            {% else %}
-              Text extraction is not available. The page may already have text blocks, or a cloud service may not be configured for this organization.
-            {% endif %}
-          </p>
+          {% endif %}
+           <p id="extract-prompt-message" class="mb-4 {% if not page.can_extract %}text-base-content/70{% endif %}">
+             {% if page.can_extract %}
+               Click <span class="font-bold">Extract</span> for intelligent extraction.
+             {% else %}
+               {% if request.user|is_guest:page.document.collection.owner %}
+                 This page doesn't have extracted text yet. Please contact an editor or archivist to extract text from this page.
+               {% else %}
+                 Text extraction is not available. This page may already have text blocks, or extraction may not be configured for this organization.
+               {% endif %}
+             {% endif %}
+           </p>
         </div>  
       </div>
       {% endif %}

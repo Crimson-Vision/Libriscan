@@ -1,5 +1,5 @@
 __all__ = ["base", "organizations", "documents", "words"]
-from .base import index, scan
+from .base import index
 from .organizations import (
     organization_list,
     OrganizationDetail,
@@ -26,7 +26,6 @@ from .documents import (
     delete_page,
     reorder_page,
     update_page_identifier,
-    handle_upload,
     extract_text,
     export_pdf,
     export_text,
