@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 from django.forms import ModelForm
-from django.forms.widgets import PasswordInput
 from simple_history.admin import SimpleHistoryAdmin
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
@@ -17,12 +17,22 @@ from .models import (
     User,
     UserRole,
 )
+from .widgets import SecretKeyWidget
 
 admin.site.site_header = "Libriscan Administration"
 admin.site.site_title = "Libriscan Admin"
 admin.site.index_title = "Libriscan Admin"
 
 
+#### Custom admin forms
+class CloudServiceForm(ModelForm):
+    class Meta:
+        fields = ["service", "client_id", "client_secret"]
+        model = CloudService
+        widgets = {"client_secret": SecretKeyWidget}
+
+
+#### Inlines
 class SeriesInline(admin.TabularInline):
     model = Series
     extra = 1
@@ -40,28 +50,40 @@ class PagesInline(admin.StackedInline):
     extra = 0
 
 
-class CloudServiceForm(ModelForm):
-    class Meta:
-        fields = ["service", "client_id", "client_secret"]
-        model = CloudService
-        widgets = {"client_secret": PasswordInput}
-
-
-class CloudServiceInline(admin.StackedInline):
-    model = CloudService
-    form = CloudServiceForm
-    extra = 1
-
-
 class MetadataInline(admin.StackedInline):
     model = DublinCoreMetadata
     extra = 1
 
 
+#### Model admins
 @admin.register(Organization)
 class OrgAdmin(SimpleHistoryAdmin):
-    inlines = [CloudServiceInline]
-    list_display = ["name", "city", "state"]
+    inlines = [UserRoleInline]
+    list_display = ["name", "short_name", "primary", "city", "state"]
+
+
+@admin.register(CloudService)
+class CloudServiceAdmin(SimpleHistoryAdmin):
+    form = CloudServiceForm
+    list_display = ["organization", "service"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "organization",
+                    "service",
+                ),
+            },
+        ),
+        (
+            "Secrets",
+            {
+                "fields": ("client_id", "client_secret"),
+                "description": "To change the secret key, delete this cloud service record and create a new one for the organization.",
+            },
+        ),
+    )
 
 
 @admin.register(Collection)
@@ -69,13 +91,6 @@ class CollectionAdmin(SimpleHistoryAdmin):
     inlines = [SeriesInline]
     list_display = ["name", "owner"]
     prepopulated_fields = {"slug": ["name"]}
-
-
-@admin.register(Series)
-class SeriesAdmin(admin.ModelAdmin):
-    list_display = ["name", "collection"]
-    prepopulated_fields = {"slug": ["name"]}
-    list_select_related = ["collection"]
 
 
 @admin.register(Document)
@@ -90,17 +105,7 @@ class PageAdmin(SimpleHistoryAdmin):
     list_display = ["number", "document", "document__collection__owner"]
 
 
-@admin.register(UserRole)
-class UserRoleAdmin(SimpleHistoryAdmin):
-    list_display = [
-        "user",
-        "user__first_name",
-        "user__last_name",
-        "organization",
-        "role",
-    ]
-
-
+@admin.register(User)
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -125,6 +130,7 @@ class CustomUserAdmin(UserAdmin):
             {"fields": ("is_staff", "is_active", "groups", "user_permissions")},
         ),
     )
+    inlines = (UserRoleInline,)
     add_fieldsets = (
         (
             None,
@@ -148,9 +154,7 @@ class CustomUserAdmin(UserAdmin):
     ordering = ("email",)
 
 
-admin.site.register(User, CustomUserAdmin)
-
-
+@admin.register(TextBlock)
 class TextAdmin(SimpleHistoryAdmin):
     search_fields = ("text",)
 
@@ -174,6 +178,3 @@ class TextAdmin(SimpleHistoryAdmin):
         ),
         (None, {"fields": ("suggestions",)}),
     )
-
-
-admin.site.register(TextBlock, TextAdmin)
