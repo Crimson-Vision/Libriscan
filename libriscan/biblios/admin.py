@@ -48,10 +48,28 @@ class CloudServiceForm(ModelForm):
         widgets = {"client_secret": SecretKeyWidget}
 
 
-class CloudServiceInline(admin.StackedInline):
-    model = CloudService
+@admin.register(CloudService)
+class CloudServiceAdmin(SimpleHistoryAdmin):
     form = CloudServiceForm
-    extra = 1
+    list_display = ["organization", "service"]
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "organization",
+                    "service",
+                ),
+            },
+        ),
+        (
+            None,
+            {
+                "fields": (("client_id", "client_secret"),),
+                "description": "To change the secret key, delete this cloud service record and create a new one for the organization.",
+            },
+        ),
+    )
 
 
 class MetadataInline(admin.StackedInline):
@@ -61,8 +79,8 @@ class MetadataInline(admin.StackedInline):
 
 @admin.register(Organization)
 class OrgAdmin(SimpleHistoryAdmin):
-    inlines = [UserRoleInline, CloudServiceInline]
-    list_display = ["name", "city", "state"]
+    inlines = [UserRoleInline]
+    list_display = ["name", "short_name", "primary", "city", "state"]
 
 
 @admin.register(Collection)
