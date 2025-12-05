@@ -105,17 +105,6 @@ class PageAdmin(SimpleHistoryAdmin):
     list_display = ["number", "document", "document__collection__owner"]
 
 
-@admin.register(UserRole)
-class UserRoleAdmin(SimpleHistoryAdmin):
-    list_display = [
-        "user",
-        "user__first_name",
-        "user__last_name",
-        "organization",
-        "role",
-    ]
-
-
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
