@@ -1,13 +1,10 @@
 import logging
-import os
 from datetime import datetime, timedelta
 
 from django import forms
 from django.conf import settings
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.decorators.http import require_http_methods
@@ -27,7 +24,7 @@ from biblios.models import (
     TextBlock,
 )
 
-from biblios.forms import DocumentForm, FilePondUploadForm, PageForm
+from biblios.forms import DocumentForm, PageForm
 from .base import (
     OrgPermissionRequiredMixin,
     get_org_by_page,
@@ -284,34 +281,6 @@ class PageCreateView(OrgPermissionRequiredMixin, CreateView):
         if "document" in form.fields:
             form.fields["document"].widget = forms.HiddenInput()
         return form
-
-
-@require_http_methods(["POST"])
-def handle_upload(request):
-    """Handle file uploads from FilePond."""
-    form = FilePondUploadForm(request.POST, request.FILES)
-
-    if not form.is_valid():
-        error_msg = form.errors.get("image", ["Upload failed."])[0]
-        return HttpResponse(error_msg, status=400)
-
-    try:
-        upload_file = form.cleaned_data["image"]
-        file_path = os.path.join("uploads", upload_file.name)
-        saved_path = default_storage.save(file_path, ContentFile(upload_file.read()))
-
-        # Store file info in session
-        request.session["filepond_last_upload"] = {
-            "path": saved_path,
-            "name": upload_file.name,
-            "size": upload_file.size,
-        }
-
-        return HttpResponse(saved_path)
-
-    except OSError as e:
-        logger.error("File upload error: %s", e)
-        return HttpResponse("An error occurred while processing your file.", status=500)
 
 
 class PageDetail(OrgPermissionRequiredMixin, DetailView):

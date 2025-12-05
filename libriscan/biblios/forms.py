@@ -50,28 +50,3 @@ class PageForm(forms.ModelForm):
         if identifier and not identifier.isalnum():
             raise forms.ValidationError("Identifier must contain only alphanumeric characters.")
         return identifier
-
-
-class FilePondUploadForm(forms.Form):
-    image = forms.ImageField()
-
-    def clean_image(self):
-        image = self.cleaned_data.get("image")
-        if not image:
-            raise forms.ValidationError("No file was submitted.")
-
-        # Check file type
-        if image.content_type not in getattr(settings, "ALLOWED_UPLOAD_TYPES", []):
-            raise forms.ValidationError(
-                "Invalid file type. Only JPG and PNG images are accepted."
-            )
-
-        # Check file size
-        max_size = getattr(settings, "MAX_UPLOAD_SIZE", 5 * 1024 * 1024)
-        if image.size > max_size:
-            max_size_mb = max_size / (1024 * 1024)
-            raise forms.ValidationError(
-                f"File size exceeds the {max_size_mb:.0f}MB limit. Please upload a smaller file."
-            )
-
-        return image

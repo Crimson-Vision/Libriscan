@@ -1,6 +1,7 @@
 {% extends "biblios/base.html" %}
 {% load icon_tags %}
 {% load static %}
+{% load permissions %}
 
 {% block tutorial_section %}
 <!-- Tutorials Section - Only on Document View -->
@@ -87,15 +88,18 @@
                               {% icon 'book' css_class='size-5' %}
                             </span>
                             {{ document }}
+                            {% if request.user|can_edit_org:document.collection.owner %}
                             <a id="document-edit-title-link" href="{% url 'document_update' keys.owner keys.collection_slug document.identifier %}" 
                                class="btn btn-ghost btn-xs tooltip tooltip-right"
                                data-tip="Edit title">
                                 {% icon 'edit' css_class='size-4' %}
                             </a>
+                            {% endif %}
                         </h2>
                         <!-- Status Dropdown -->
                         {% include "biblios/components/status/status_dropdown.html" %}
                     </div>
+                    {% if request.user|can_edit_org:document.collection.owner %}
                     <button 
                         id="document-delete-btn"
                         type="button" 
@@ -104,6 +108,7 @@
                         onclick="showDeleteDocumentModal('{{ document.identifier }}', '{% url 'document_delete' keys.owner keys.collection_slug document.identifier %}')">
                         {% icon 'trash' css_class='size-4' %}
                     </button>
+                    {% endif %}
                 </div>
                 
                 <!-- Pages Section -->
@@ -167,9 +172,11 @@
                                          hx-trigger="blur"
                                          hx-swap="none">
                                 </span>
+                                {% if request.user|can_edit_org:document.collection.owner %}
                                 <button id="page-edit-identifier-btn-{{ page.number }}" class="btn btn-ghost btn-xs btn-square edit-identifier-btn tooltip tooltip-right page-edit-identifier-btn" data-page="{{ page.number }}" data-tip="Edit identifier">
                                   {% icon 'edit' css_class='size-4' %}
                                 </button>
+                                {% endif %}
                                 <!-- Status Badges -->
                                 <div id="page-status-badges-{{ page.number }}" class="flex items-center gap-1.5 flex-wrap page-status-badges" data-page="{{ page.number }}">
                                   {% if not page.has_extraction %}
@@ -217,6 +224,7 @@
                             </div>
                             
                             <!-- Delete Button -->
+                            {% if request.user|can_edit_org:document.collection.owner %}
                             <div id="page-delete-button-{{ page.number }}" class="flex-shrink-0 page-delete-button" data-page="{{ page.number }}">
                         <button 
                           id="page-delete-btn-{{ page.number }}"
@@ -228,6 +236,7 @@
                           {% icon 'trash' css_class='size-4' %}
                         </button>
                             </div>
+                            {% endif %}
                           </div>
                         </div>
                       </a>
@@ -239,12 +248,14 @@
                       </div>
                     {% endfor %}
                   </div>
+                  {% if request.user|can_edit_org:document.collection.owner %}
                   <div id="pages-actions" class="mt-4 flex justify-end">
                       <a id="page-create-link" href="{% url 'page_create' keys.owner keys.collection_slug document.identifier %}" class="btn btn-secondary btn-md">
                           {% icon 'document' css_class='size-6' %}
                           Add New Page
                       </a>
                   </div>
+                  {% endif %}
                 </div>
 
                 <!-- Export Section -->

@@ -1,2 +1,2 @@
-# Template tags for biblios app
+# Template tags package
 

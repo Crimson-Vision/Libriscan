@@ -1,5 +1,7 @@
 {% load icon_tags %}
+{% load permissions %}
 <!-- Status Dropdown Component -->
+{% if request.user|can_edit_org:document.collection.owner %}
 <div class="dropdown dropdown-end" id="statusDropdown">
     <div tabindex="0" role="button" class="inline-flex items-center gap-0 rounded-lg overflow-hidden transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer" id="statusButton">
         <span id="statusBadge" class="badge badge-sm gap-1.5 px-3 py-1.5 font-semibold rounded-r-none border-r-0">
@@ -73,5 +75,4 @@
         </li>
     </ul>
 </div>
-
-
+{% endif %}

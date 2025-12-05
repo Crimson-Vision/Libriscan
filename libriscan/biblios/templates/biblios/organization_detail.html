@@ -1,6 +1,7 @@
 {% extends "biblios/base.html" %}
 {% load static %}
 {% load icon_tags %}
+{% load permissions %}
 
 {% block tutorial_section %}
 <!-- Tutorials Section - Only on Organization View -->
@@ -60,6 +61,7 @@
                   </span>
                   <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ c }}</span>
                 </a>
+                {% if request.user|can_admin_org:org %}
                 <button 
                   id="collection-delete-btn-{{ c.slug }}"
                   type="button" 
@@ -68,6 +70,7 @@
                   onclick="event.stopPropagation(); showDeleteCollectionModal('{{ c }}', '{% url 'collection_delete' org.short_name c.slug %}')">
                   {% icon 'trash' css_class='size-4' %}
                 </button>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -79,12 +82,14 @@
           </div>
         {% endfor %}
       </div>
+      {% if request.user|can_edit_org:org %}
       <div id="collections-actions" class="mt-4 flex justify-end">
         <a id="collection-create-link" href="{% url 'collection_create' org.short_name %}" class="btn btn-primary btn-md">
           {% icon 'plus' css_class='size-5' %}
           Add New Collection
         </a>
       </div>
+      {% endif %}
     </div>
   </div>
 

@@ -1,5 +1,6 @@
 {% extends "biblios/base.html" %}
 {% load icon_tags %}
+{% load permissions %}
 
 {% block title %}{{ series }} · {{ series.collection }} · {{ series.collection.owner.short_name }} · Libriscan{% endblock %}
 
@@ -42,13 +43,16 @@
                             {% icon 'folder' css_class='size-5 text-secondary' stroke_width='2' %}
                         </span>
                         {{ series }}
+                        {% if request.user|can_edit_org:series.collection.owner %}
                         <a 
                             href="{% url 'series_update' series.collection.owner.short_name series.collection.slug series.slug %}"
                             class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
                             data-tip="Edit series">
                             {% icon 'edit' css_class='size-4' %}
                         </a>
+                        {% endif %}
                     </h2>
+                    {% if request.user|can_edit_org:series.collection.owner %}
                     <button 
                         type="button" 
                         class="btn btn-ghost btn-sm btn-error tooltip tooltip-left"
@@ -56,6 +60,7 @@
                         onclick="showDeleteSeriesModal('{{ series }}', '{% url 'series_delete' series.collection.owner.short_name series.collection.slug series.slug %}')">
                         {% icon 'trash' css_class='size-4' %}
                     </button>
+                    {% endif %}
                 </div>
 
                 <!-- Documents Section -->
@@ -75,6 +80,7 @@
                                                 {% include "biblios/components/status/document_status_badge.html" with document=doc %}
                                             </div>
                                         </a>
+                                        {% if request.user|can_edit_org:series.collection.owner %}
                                         <button 
                                             type="button" 
                                             class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
@@ -82,6 +88,7 @@
                                             onclick="event.stopPropagation(); showDeleteDocumentModal('{{ doc.identifier }}', '{% url 'document_delete' series.collection.owner.short_name series.collection.slug doc.identifier %}')">
                                             {% icon 'trash' css_class='size-4' %}
                                         </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -93,6 +100,7 @@
                             </div>
                         {% endfor %}
                     </div>
+                    {% if request.user|can_edit_org:series.collection.owner %}
                     <div class="mt-4 flex justify-end">
                         <a href="{% url 'document_series_create' series.collection.owner.short_name series.collection.slug series.slug %}" 
                            class="btn btn-secondary btn-md">
@@ -100,6 +108,7 @@
                             Add New Document
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

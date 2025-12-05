@@ -1,5 +1,6 @@
 {% load static %}
 {% load icon_tags %}
+{% load permissions %}
 <!-- Text Display Component Template -->
 <!-- Displays text content in three tabs: Raw Text, Formatted, and Metadata -->
 
@@ -9,6 +10,7 @@
     <div id="text-tabs-wrapper" class="relative">
       <div id="text-tabs" class="tabs tabs-lift">
         <!-- Raw Text Tab -->
+        {% if owner and request.user|can_edit_org:owner or not owner %}
         <label id="raw-text-tab-label" class="tab">
           <input id="raw-text-tab-input" type="radio" name="text_tabs" checked="checked" />
           {% icon 'bars-3' css_class='size-4 sm:me-2' %}
@@ -63,6 +65,7 @@
           </div>
           {% include 'biblios/components/forms/word_details.html' with words=words %}
         </div>
+        {% endif %}
 
         <!-- Formatted Tab -->
         <label id="formatted-text-tab-label" class="tab">
@@ -76,9 +79,11 @@
       </div>
 
       <!-- Filter Dropdown (Absolute Positioned Top Right) -->
+      {% if not owner or owner and request.user|can_edit_org:owner %}
       <div id="confidence-toggle-wrapper" class="absolute top-2 right-4 z-10">
         {% include 'biblios/components/forms/confidence_toggle.html' %}
       </div>
+      {% endif %}
     </div>
   </div>
 </div>

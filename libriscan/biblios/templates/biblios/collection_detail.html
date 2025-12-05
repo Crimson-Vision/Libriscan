@@ -1,6 +1,7 @@
 {% extends "biblios/base.html" %}
 {% load static %}
 {% load icon_tags %}
+{% load permissions %}
 
 {% block tutorial_section %}
 <!-- Tutorials Section - Only on Collection View -->
@@ -59,6 +60,7 @@
             {% icon 'bars' css_class='size-5 text-accent' stroke_width='2' %}
           </span>
           {{ collection }}
+          {% if request.user|can_edit_org:collection.owner %}
           <a 
             href="{% url 'collection_update' collection.owner.short_name collection.slug %}"
             id="collectionEditBtn"
@@ -66,7 +68,9 @@
             data-tip="Edit collection">
             {% icon 'edit' css_class='size-4' %}
           </a>
+          {% endif %}
         </h2>
+        {% if request.user|can_admin_org:collection.owner %}
         <button 
           type="button" 
           id="collectionDeleteBtn"
@@ -75,6 +79,7 @@
           onclick="showDeleteCollectionModal('{{ collection }}', '{% url 'collection_delete' collection.owner.short_name collection.slug %}')">
           {% icon 'trash' css_class='size-4' %}
         </button>
+        {% endif %}
       </div>
       <!-- Series Section -->
       <div class="mb-4" id="collectionSeriesSection">
@@ -90,6 +95,7 @@
                     </span>
                     <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ series }}</span>
                   </a>
+                  {% if request.user|can_edit_org:collection.owner %}
                   <button 
                     id="series-delete-btn-{{ series.slug }}"
                     type="button" 
@@ -98,6 +104,7 @@
                     onclick="event.stopPropagation(); showDeleteSeriesModal('{{ series }}', '{% url 'series_delete' collection.owner.short_name collection.slug series.slug %}')">
                     {% icon 'trash' css_class='size-4' %}
                   </button>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -109,6 +116,7 @@
             </div>
           {% endfor %}
         </div>
+        {% if request.user|can_admin_org:collection.owner %}
         <div id="series-actions" class="mt-4 flex justify-end">
           <a href="{% url 'series_create' collection.owner.short_name collection.slug %}"
              id="collectionAddSeriesBtn"
@@ -117,6 +125,7 @@
             Add New Series
           </a>
         </div>
+        {% endif %}
       </div>
       <!-- Documents Section -->
       <div class="mb-4" id="collectionDocumentsSection">
@@ -135,6 +144,7 @@
                       {% include "biblios/components/status/document_status_badge.html" with document=doc %}
                     </div>
                   </a>
+                  {% if request.user|can_edit_org:collection.owner %}
                   <button 
                     id="document-delete-btn-{{ doc.identifier }}"
                     type="button" 
@@ -143,6 +153,7 @@
                     onclick="event.stopPropagation(); showDeleteDocumentModal('{{ doc.identifier }}', '{% url 'document_delete' collection.owner.short_name collection.slug doc.identifier %}')">
                     {% icon 'trash' css_class='size-4' %}
                   </button>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -154,6 +165,7 @@
             </div>
           {% endfor %}
         </div>
+        {% if request.user|can_edit_org:collection.owner %}
         <div id="documents-actions" class="mt-4 flex justify-end">
           <a href="{% url 'document_create' collection.owner.short_name collection.slug %}"
              id="collectionAddDocumentBtn"
@@ -162,6 +174,7 @@
             Add New Document
           </a>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>
