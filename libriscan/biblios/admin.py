@@ -24,6 +24,15 @@ admin.site.site_title = "Libriscan Admin"
 admin.site.index_title = "Libriscan Admin"
 
 
+#### Custom admin forms
+class CloudServiceForm(ModelForm):
+    class Meta:
+        fields = ["service", "client_id", "client_secret"]
+        model = CloudService
+        widgets = {"client_secret": SecretKeyWidget}
+
+
+#### Inlines
 class SeriesInline(admin.TabularInline):
     model = Series
     extra = 1
@@ -41,11 +50,16 @@ class PagesInline(admin.StackedInline):
     extra = 0
 
 
-class CloudServiceForm(ModelForm):
-    class Meta:
-        fields = ["service", "client_id", "client_secret"]
-        model = CloudService
-        widgets = {"client_secret": SecretKeyWidget}
+class MetadataInline(admin.StackedInline):
+    model = DublinCoreMetadata
+    extra = 1
+
+
+#### Model admins
+@admin.register(Organization)
+class OrgAdmin(SimpleHistoryAdmin):
+    inlines = [UserRoleInline]
+    list_display = ["name", "short_name", "primary", "city", "state"]
 
 
 @admin.register(CloudService)
@@ -70,17 +84,6 @@ class CloudServiceAdmin(SimpleHistoryAdmin):
             },
         ),
     )
-
-
-class MetadataInline(admin.StackedInline):
-    model = DublinCoreMetadata
-    extra = 1
-
-
-@admin.register(Organization)
-class OrgAdmin(SimpleHistoryAdmin):
-    inlines = [UserRoleInline]
-    list_display = ["name", "short_name", "primary", "city", "state"]
 
 
 @admin.register(Collection)
@@ -113,6 +116,7 @@ class UserRoleAdmin(SimpleHistoryAdmin):
     ]
 
 
+@admin.register(User)
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
@@ -161,9 +165,7 @@ class CustomUserAdmin(UserAdmin):
     ordering = ("email",)
 
 
-admin.site.register(User, CustomUserAdmin)
-
-
+@admin.register(TextBlock)
 class TextAdmin(SimpleHistoryAdmin):
     search_fields = ("text",)
 
@@ -187,6 +189,3 @@ class TextAdmin(SimpleHistoryAdmin):
         ),
         (None, {"fields": ("suggestions",)}),
     )
-
-
-admin.site.register(TextBlock, TextAdmin)
