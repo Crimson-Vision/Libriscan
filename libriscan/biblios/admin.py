@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 from django.forms import ModelForm
-from django.forms.widgets import PasswordInput
 from simple_history.admin import SimpleHistoryAdmin
 
 from .forms import CustomUserChangeForm, CustomUserCreationForm
@@ -17,6 +17,7 @@ from .models import (
     User,
     UserRole,
 )
+from .widgets import SecretKeyWidget
 
 admin.site.site_header = "Libriscan Administration"
 admin.site.site_title = "Libriscan Admin"
@@ -44,7 +45,7 @@ class CloudServiceForm(ModelForm):
     class Meta:
         fields = ["service", "client_id", "client_secret"]
         model = CloudService
-        widgets = {"client_secret": PasswordInput}
+        widgets = {"client_secret": SecretKeyWidget}
 
 
 class CloudServiceInline(admin.StackedInline):
@@ -60,7 +61,7 @@ class MetadataInline(admin.StackedInline):
 
 @admin.register(Organization)
 class OrgAdmin(SimpleHistoryAdmin):
-    inlines = [CloudServiceInline]
+    inlines = [UserRoleInline, CloudServiceInline]
     list_display = ["name", "city", "state"]
 
 
@@ -69,13 +70,6 @@ class CollectionAdmin(SimpleHistoryAdmin):
     inlines = [SeriesInline]
     list_display = ["name", "owner"]
     prepopulated_fields = {"slug": ["name"]}
-
-
-@admin.register(Series)
-class SeriesAdmin(admin.ModelAdmin):
-    list_display = ["name", "collection"]
-    prepopulated_fields = {"slug": ["name"]}
-    list_select_related = ["collection"]
 
 
 @admin.register(Document)
@@ -125,6 +119,7 @@ class CustomUserAdmin(UserAdmin):
             {"fields": ("is_staff", "is_active", "groups", "user_permissions")},
         ),
     )
+    inlines = (UserRoleInline,)
     add_fieldsets = (
         (
             None,
