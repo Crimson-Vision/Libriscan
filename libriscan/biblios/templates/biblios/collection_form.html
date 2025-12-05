@@ -1,4 +1,5 @@
 {% extends "biblios/base.html" %}
+{% load icon_tags %}
 
 {% block title %}Create New Collection · {{ short_name}} · Libriscan{% endblock %}
 
@@ -9,9 +10,7 @@
         <li>
             <a href="{% url 'organization' short_name %}" class="flex items-center gap-1 hover:underline text-primary">
                 <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
-                    </svg>
+                    {% icon 'building-library' css_class='size-4 text-primary' %}
                 </span>
                 {% if org %}{{ org }}{% else %}{{ short_name }}{% endif %}
             </a>
@@ -20,9 +19,7 @@
         <li>
             <a href="{% url 'collection' short_name object.slug %}" class="flex items-center gap-1 hover:underline text-primary">
                 <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
+                    {% icon 'bars' css_class='size-4 text-accent' stroke_width='2' %}
                 </span>
                 {{ object }}
             </a>
@@ -31,9 +28,7 @@
         <li>
             <span class="flex items-center gap-1 text-base-content/60">
                 <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
+                    {% icon 'bars' css_class='size-4 text-accent' stroke_width='2' %}
                 </span>
                 {% if object %}Edit Collection{% else %}New Collection{% endif %}
             </span>
@@ -45,9 +40,7 @@
     <div class="card-body">
         <h2 class="card-title text-2xl font-bold mb-4 flex items-center gap-2">
             <span class="inline-flex items-center justify-center size-10 rounded-full bg-accent/10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
+                {% icon 'bars' css_class='size-6 text-accent' stroke_width='2' %}
             </span>
             {% if object %}Edit Collection{% else %}Create New Collection{% endif %}
         </h2>

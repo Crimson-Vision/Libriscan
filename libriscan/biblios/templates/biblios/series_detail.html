@@ -1,4 +1,5 @@
 {% extends "biblios/base.html" %}
+{% load icon_tags %}
 {% load permissions %}
 
 {% block title %}{{ series }} · {{ series.collection }} · {{ series.collection.owner.short_name }} · Libriscan{% endblock %}
@@ -10,9 +11,7 @@
                 <li>
                     <a href="{{ series.collection.owner.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
                         <span class="inline-flex items-center justify-center size-5 rounded bg-primary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 text-primary">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
-                            </svg>
+                            {% icon 'building-library' css_class='size-4 text-primary' %}
                         </span>
                         {{ series.collection.owner }}
                     </a>
@@ -20,7 +19,7 @@
                 <li>
                     <a href="{{ series.collection.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
                         <span class="inline-flex items-center justify-center size-5 rounded bg-accent/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                            {% icon 'bars' css_class='size-4 text-accent' stroke_width='2' %}
                         </span>
                         {{ series.collection }}
                     </a>
@@ -28,7 +27,7 @@
                 <li>
                     <a href="{{ series.get_absolute_url }}" class="flex items-center gap-1 hover:underline text-primary">
                         <span class="inline-flex items-center justify-center size-5 rounded bg-secondary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" /></svg>
+                            {% icon 'folder' css_class='size-4 text-secondary' stroke_width='2' %}
                         </span>
                         {{ series }}
                     </a>
@@ -41,9 +40,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="card-title text-xl font-bold flex items-center gap-2">
                         <span class="inline-flex items-center justify-center size-8 rounded-full bg-secondary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                            </svg>
+                            {% icon 'folder' css_class='size-5 text-secondary' stroke_width='2' %}
                         </span>
                         {{ series }}
                         {% if request.user|can_edit_org:series.collection.owner %}
@@ -51,9 +48,7 @@
                             href="{% url 'series_update' series.collection.owner.short_name series.collection.slug series.slug %}"
                             class="btn btn-ghost btn-sm btn-square tooltip tooltip-right"
                             data-tip="Edit series">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                            </svg>
+                            {% icon 'edit' css_class='size-4' %}
                         </a>
                         {% endif %}
                     </h2>
@@ -63,9 +58,7 @@
                         class="btn btn-ghost btn-sm btn-error tooltip tooltip-left"
                         data-tip="Delete series"
                         onclick="showDeleteSeriesModal('{{ series }}', '{% url 'series_delete' series.collection.owner.short_name series.collection.slug series.slug %}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
+                        {% icon 'trash' css_class='size-4' %}
                     </button>
                     {% endif %}
                 </div>
@@ -80,9 +73,7 @@
                                     <div class="flex items-center justify-between">
                                         <a href="{{ doc.get_absolute_url }}" class="flex items-center gap-3 flex-1 group/link">
                                             <span class="inline-flex items-center justify-center size-10 rounded-lg bg-warning/20 group-hover/link:bg-warning/30 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                                                </svg>
+                                                {% icon 'book' css_class='size-5' %}
                                             </span>
                                             <div class="flex items-center gap-2 flex-1 min-w-0">
                                                 <span class="text-base font-semibold text-base-content group-hover/link:text-primary transition-colors">{{ doc }}</span>
@@ -95,9 +86,7 @@
                                             class="btn btn-ghost btn-sm btn-error opacity-70 hover:opacity-100 tooltip tooltip-left"
                                             data-tip="Delete document"
                                             onclick="event.stopPropagation(); showDeleteDocumentModal('{{ doc.identifier }}', '{% url 'document_delete' series.collection.owner.short_name series.collection.slug doc.identifier %}')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                            </svg>
+                                            {% icon 'trash' css_class='size-4' %}
                                         </button>
                                         {% endif %}
                                     </div>
@@ -115,9 +104,7 @@
                     <div class="mt-4 flex justify-end">
                         <a href="{% url 'document_series_create' series.collection.owner.short_name series.collection.slug series.slug %}" 
                            class="btn btn-secondary btn-md">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
+                            {% icon 'document' css_class='size-5' %}
                             Add New Document
                         </a>
                     </div>

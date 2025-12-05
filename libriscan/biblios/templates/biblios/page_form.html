@@ -1,21 +1,18 @@
 {% extends "biblios/base.html" %}
 {% load static %}
+{% load icon_tags %}
 
 {% block tutorial_section %}
 <!-- Tutorials Section - Only on Page Form View -->
 <li class="menu-title">
   <span class="flex items-center gap-2">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-    </svg>
+    {% icon 'academic-cap' css_class='size-4' %}
     Tutorials
   </span>
 </li>
 <li>
   <a id="startPageFormTutorial" class="active">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
-    </svg>
+    {% icon 'play' css_class='size-5' %}
     <div class="flex flex-col items-start">
       <span class="font-semibold">Page Upload Guide</span>
       <span class="text-xs opacity-70">Learn the basics</span>
@@ -61,9 +58,7 @@
                                     {% if field.field.required %}required{% endif %}>
                                 
                                 <div id="fileError" class="alert alert-error mt-2 hidden">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    {% icon 'x-circle' css_class='h-6 w-6' stroke_width='2' %}
                                     <span></span>
                                 </div>
                                 <label class="label">
@@ -90,9 +85,7 @@
                             
                             {% for error in field.errors %}
                             <div class="alert alert-error mt-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                {% icon 'x-circle' css_class='h-6 w-6' stroke_width='2' %}
                                 <span>{{ error }}</span>
                             </div>
                             {% endfor %}
@@ -101,9 +94,7 @@
                     </div>
                     
                     <button type="submit" id="submitBtn" class="btn btn-primary btn-lg w-full mt-8" disabled>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
+                        {% icon 'cloud-arrow-up' css_class='h-6 w-6' stroke_width='2' %}
                         Upload Page
                     </button>
                 </form>

@@ -6,15 +6,16 @@ class WordReviewFlag {
     this.wordDetails = wordDetails;
     this.container = document.getElementById('reviewFlagContainer');
     this.urlCache = null;
-    this.filledIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6"><path fill-rule="evenodd" d="M3 2.25a.75.75 0 0 1 .75.75v.54l1.838-.46a9.75 9.75 0 0 1 6.725.738l.108.054A8.25 8.25 0 0 0 18 4.524l3.11-.732a.75.75 0 0 1 .917.81 47.784 47.784 0 0 0 .005 10.337.75.75 0 0 1-.574.812l-3.114.733a9.75 9.75 0 0 1-6.594-.77l-.108-.054a8.25 8.25 0 0 0-5.69-.625l-2.202.55V21a.75.75 0 0 1-1.5 0V3A.75.75 0 0 1 3 2.25Z" clip-rule="evenodd" /></svg>';
-    this.outlineIcon = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>';
-    this.flagIconSmall = this.outlineIcon.replace('class="size-6"', 'class="size-4"');
+    this.filledIconPromise = null;
+    this.outlineIconPromise = null;
+    this.flagIconSmallPromise = null;
+    
     document.addEventListener('wordSelected', (event) => this.updateFlagButton(event.detail));
     document.addEventListener('htmx:afterSwap', (event) => {
       if (event.target.id === 'reviewFlagBtn') {
         this.updateWordData();
         const isReviewed = event.target.querySelector('svg')?.getAttribute('fill') !== 'none';
-        LibriscanUtils?.showToast(
+        window.LibriscanUtils?.showToast(
           isReviewed ? 'Flagged for review' : 'Review flag removed',
           'success'
         );
@@ -22,39 +23,46 @@ class WordReviewFlag {
     });
     document.addEventListener('htmx:responseError', (event) => {
       if (event.detail.path.includes('toggle-review')) {
-        LibriscanUtils?.showToast('Failed to toggle review flag', 'error');
+        window.LibriscanUtils?.showToast('Failed to toggle review flag', 'error');
       }
     });
   }
 
   getUrlParts() {
-    return this.urlCache || (this.urlCache = LibriscanUtils.parseLibriscanURL());
+    return this.urlCache || (this.urlCache = window.LibriscanUtils?.parseLibriscanURL() || {});
   }
 
   updateFlagButton(wordInfo) {
     if (!this.container || !wordInfo?.id) return;
     
+    if (!this.filledIconPromise) {
+      this.filledIconPromise = window.SVGLoader.loadIcon('flag-filled', { cssClass: 'size-6', fill: 'currentColor' });
+      this.outlineIconPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-6' });
+    }
+    
     const url = this.getUrlParts();
     const toggleUrl = `/${url.shortName}/${url.collectionSlug}/${url.identifier}/page${url.pageNumber}/word/${wordInfo.id}/toggle-review/`;
     const isReviewed = Boolean(wordInfo.review);
     const flaggedCount = document.querySelectorAll('.word-block[data-word-review="true"]').length;
+    const tipText = `Flag for Review (F)${flaggedCount > 0 ? ` - ${flaggedCount} flagged` : ''}`;
     
-    this.container.innerHTML = `
-      <button id="reviewFlagBtn" 
-              class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200 text-orange-500" 
-              data-tip="Flag for Review (F)${flaggedCount > 0 ? ` - ${flaggedCount} flagged` : ''}"
-              hx-post="${toggleUrl}"
-              hx-target="#reviewFlagBtn"
-              hx-swap="outerHTML">
-        <span class="flex items-center gap-1">
-          ${isReviewed ? this.filledIcon : this.outlineIcon}
-          <kbd class="kbd kbd-sm">F</kbd>
-          ${flaggedCount > 0 ? `<span class="badge badge-warning badge-sm min-w-[1.25rem]">${flaggedCount}</span>` : ''}
-        </span>
-      </button>
-    `;
-    
-    htmx?.process(this.container);
+    (isReviewed ? this.filledIconPromise : this.outlineIconPromise).then(icon => {
+      this.container.innerHTML = `
+        <button id="reviewFlagBtn" 
+                class="btn btn-ghost btn-sm tooltip tooltip-left opacity-70 hover:opacity-100 transition-opacity duration-200 text-orange-500" 
+                data-tip="${tipText}"
+                hx-post="${toggleUrl}"
+                hx-target="#reviewFlagBtn"
+                hx-swap="outerHTML">
+          <span class="flex items-center gap-1">
+            ${icon}
+            <kbd class="kbd kbd-sm">F</kbd>
+            ${flaggedCount > 0 ? `<span class="badge badge-warning badge-sm min-w-[1.25rem]">${flaggedCount}</span>` : ''}
+          </span>
+        </button>
+      `;
+      htmx?.process(this.container);
+    });
     this.updateWordBlockVisual(wordInfo.id, isReviewed);
   }
 
@@ -81,9 +89,14 @@ class WordReviewFlag {
     
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {
+      if (!this.flagIconSmallPromise) {
+        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' });
+      }
       const flagIcon = document.createElement('span');
       flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
-      flagIcon.innerHTML = this.flagIconSmall;
+      this.flagIconSmallPromise.then(svg => {
+        flagIcon.innerHTML = svg;
+      });
       wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);
     } else if (!isReviewed && existingIcon) {
       existingIcon.remove();
