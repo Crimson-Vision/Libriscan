@@ -6,7 +6,7 @@
 
 ## Documentation
 
-📖 **[Page Text Management User Guide](docs/PAGE_TEXT_MANAGEMENT_USER_GUIDE.md)** - Comprehensive guide to editing and managing extracted text, including image viewer controls, word editing, keyboard shortcuts, suggestions, audit history, and more.
+📖 **[Page Transcribe Management User Guide](docs/Page-Transcribe-Management.md)** - Comprehensive guide to editing and managing extracted text, including image viewer controls, word editing, keyboard shortcuts, suggestions, audit history, and more.
 
 ---
 
