@@ -63,9 +63,9 @@ class CloudServiceAdmin(SimpleHistoryAdmin):
             },
         ),
         (
-            None,
+            "Secrets",
             {
-                "fields": (("client_id", "client_secret"),),
+                "fields": ("client_id", "client_secret"),
                 "description": "To change the secret key, delete this cloud service record and create a new one for the organization.",
             },
         ),
