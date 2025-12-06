@@ -22,7 +22,11 @@ class SVGLoader {
       let svg = await response.text();
       
       if (options.cssClass) {
-        svg = svg.replace(/class="[^"]*"/, `class="${options.cssClass}"`) || svg.replace('<svg', `<svg class="${options.cssClass}"`);
+        if (svg.includes('class=')) {
+          svg = svg.replace(/class="[^"]*"/, `class="${options.cssClass}"`);
+        } else {
+          svg = svg.replace('<svg', `<svg class="${options.cssClass}"`);
+        }
       }
       
       if (options.fill !== undefined) {

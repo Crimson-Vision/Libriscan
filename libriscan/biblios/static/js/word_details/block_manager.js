@@ -22,6 +22,7 @@ class WordBlockManager {
     
     // Update btn-ghost/btn-dash classes for accepted words
     const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+    const isFlagged = wordBlock.classList.contains('btn-error');
     let acceptedToggleVisible = true;
     try {
       acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
@@ -30,15 +31,20 @@ class WordBlockManager {
       LibriscanUtils.showToast('Error checking accepted toggle visibility', 'error');
     }
     
+    // Update btn-dash/btn-ghost (preserve btn-error - don't remove it)
     wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
-    wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
+    if (!isFlagged) {
+      wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
+    } else {
+      wordBlock.classList.remove('btn-ghost');
+    }
     
-    // Update word visibility control classes
-    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
-    if (data.print_control === 'O') {
-      wordBlock.classList.add('word-visibility-control-omit');
-    } else if (data.print_control === 'M') {
-      wordBlock.classList.add('word-visibility-control-merge');
+    // Update word visibility control classes (read from dataset if not in data)
+    const printControl = data.print_control !== undefined ? data.print_control : wordBlock.dataset.wordPrintControl;
+    if (printControl !== undefined) {
+      wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
+      if (printControl === 'O') wordBlock.classList.add('word-visibility-control-omit');
+      else if (printControl === 'M') wordBlock.classList.add('word-visibility-control-merge');
     }
   }
 
@@ -49,6 +55,9 @@ class WordBlockManager {
   }
 
   static updateContent(wordBlock, text, confidence, confidenceLevel) {
+    // Check if word is flagged before clearing innerHTML
+    const isReviewed = wordBlock.dataset.wordReview === 'true';
+    
     wordBlock.innerHTML = '';
     const textSpan = document.createElement('span');
     const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
@@ -56,6 +65,16 @@ class WordBlockManager {
     if (isAccepted) textSpan.className = 'accepted-word';
     textSpan.textContent = text;
     wordBlock.appendChild(textSpan);
+    
+    // Restore review flag icon if word is flagged
+    if (isReviewed && window.SVGLoader) {
+      const flagIcon = document.createElement('span');
+      flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
+      window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' }).then(svg => {
+        flagIcon.innerHTML = svg;
+      });
+      wordBlock.insertBefore(flagIcon, textSpan);
+    }
   }
 
   static getAdjacentWordBlock(wordId, direction) {

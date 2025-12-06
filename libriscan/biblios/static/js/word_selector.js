@@ -18,33 +18,27 @@ class WordSelector {
     reviewedBlocks.forEach(wordBlock => {
       const isReviewed = wordBlock.dataset.wordReview === 'true';
       const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+      let acceptedToggleVisible = true;
+      try {
+        acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
+      } catch (error) {
+        console.warn('Error checking accepted toggle visibility:', error);
+      }
       
+      // Toggle classes (preserve word-visibility-control-* classes)
       wordBlock.classList.toggle('btn-error', isReviewed);
+      wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
+      wordBlock.classList.toggle('btn-ghost', !isReviewed && (!isAccepted || !acceptedToggleVisible));
       
-      if (isReviewed) {
-        wordBlock.classList.remove('btn-ghost');
-        // Keep btn-dash for accepted words even when reviewed
-        if (isAccepted) {
-          wordBlock.classList.add('btn-dash');
-        } else {
-          wordBlock.classList.remove('btn-dash');
-        }
-        if (!wordBlock.querySelector('.review-flag-icon')) {
-          const flagIcon = document.createElement('span');
-          flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
-          window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' }).then(svg => {
-            flagIcon.innerHTML = svg;
-          });
-          wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);
-        }
-      } else {
-        wordBlock.classList.remove('btn-error');
+      if (isReviewed && !wordBlock.querySelector('.review-flag-icon')) {
+        const flagIcon = document.createElement('span');
+        flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
+        window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' }).then(svg => {
+          flagIcon.innerHTML = svg;
+        });
+        wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);
+      } else if (!isReviewed) {
         wordBlock.querySelector('.review-flag-icon')?.remove();
-        if (isAccepted) {
-          wordBlock.classList.add('btn-dash');
-        } else {
-          wordBlock.classList.add('btn-ghost');
-        }
       }
     });
   }

@@ -11,6 +11,15 @@ class WordReviewFlag {
     this.flagIconSmallPromise = null;
     
     document.addEventListener('wordSelected', (event) => this.updateFlagButton(event.detail));
+    document.addEventListener('wordUpdated', (event) => {
+      // Restore flag icon if word is flagged (in case it was removed during content update)
+      const wordId = event.detail.wordId;
+      const wordBlock = WordBlockManager?.getWordBlock?.(wordId);
+      if (wordBlock && wordBlock.dataset.wordReview === 'true') {
+        const isReviewed = true;
+        this.updateWordBlockVisual(wordId, isReviewed);
+      }
+    });
     document.addEventListener('htmx:afterSwap', (event) => {
       if (event.target.id === 'reviewFlagBtn') {
         this.updateWordData();
@@ -71,26 +80,22 @@ class WordReviewFlag {
     if (!wordBlock) return;
     
     const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
-    
-    wordBlock.classList.toggle('btn-error', isReviewed);
-    
-    if (isReviewed) {
-      wordBlock.classList.remove('btn-ghost');
-      // Keep btn-dash for accepted words even when reviewed
-      if (isAccepted) {
-        wordBlock.classList.add('btn-dash');
-      } else {
-        wordBlock.classList.remove('btn-dash');
-      }
-    } else {
-      wordBlock.classList.toggle('btn-ghost', !isAccepted);
-      wordBlock.classList.toggle('btn-dash', isAccepted);
+    let acceptedToggleVisible = true;
+    try {
+      acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
+    } catch (error) {
+      console.warn('Error checking accepted toggle visibility:', error);
     }
+    
+    // Toggle btn-error (preserve other classes - don't remove word-visibility-control-*)
+    wordBlock.classList.toggle('btn-error', isReviewed);
+    wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
+    wordBlock.classList.toggle('btn-ghost', !isReviewed && (!isAccepted || !acceptedToggleVisible));
     
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {
       if (!this.flagIconSmallPromise) {
-        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' });
+        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' });
       }
       const flagIcon = document.createElement('span');
       flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
