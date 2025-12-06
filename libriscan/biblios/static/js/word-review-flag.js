@@ -86,7 +86,7 @@ class WordReviewFlag {
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {
       if (!this.flagIconSmallPromise) {
-        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' });
+        this.flagIconSmallPromise = window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' });
       }
       const flagIcon = document.createElement('span');
       flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';

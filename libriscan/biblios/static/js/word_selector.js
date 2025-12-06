@@ -33,7 +33,7 @@ class WordSelector {
       if (isReviewed && !wordBlock.querySelector('.review-flag-icon')) {
         const flagIcon = document.createElement('span');
         flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
-        window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-4' }).then(svg => {
+        window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' }).then(svg => {
           flagIcon.innerHTML = svg;
         });
         wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);

@@ -48,7 +48,7 @@
                   title="Click to view details">
                   {% if word.review %}
                   <span class="review-flag-icon inline-flex items-center mr-1">
-                    {% icon 'bookmark' css_class='size-3' %}
+                    {% icon 'flag-outline' css_class='size-3' %}
                   </span>
                   {% endif %}
                   <span class="{% if word.confidence_level == 'accepted' or word.confidence >= 99.999 %}accepted-word{% endif %}">
