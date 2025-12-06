@@ -11,6 +11,15 @@ class WordReviewFlag {
     this.flagIconSmallPromise = null;
     
     document.addEventListener('wordSelected', (event) => this.updateFlagButton(event.detail));
+    document.addEventListener('wordUpdated', (event) => {
+      // Restore flag icon if word is flagged (in case it was removed during content update)
+      const wordId = event.detail.wordId;
+      const wordBlock = WordBlockManager?.getWordBlock?.(wordId);
+      if (wordBlock && wordBlock.dataset.wordReview === 'true') {
+        const isReviewed = true;
+        this.updateWordBlockVisual(wordId, isReviewed);
+      }
+    });
     document.addEventListener('htmx:afterSwap', (event) => {
       if (event.target.id === 'reviewFlagBtn') {
         this.updateWordData();

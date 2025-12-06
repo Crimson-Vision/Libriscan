@@ -55,6 +55,9 @@ class WordBlockManager {
   }
 
   static updateContent(wordBlock, text, confidence, confidenceLevel) {
+    // Check if word is flagged before clearing innerHTML
+    const isReviewed = wordBlock.dataset.wordReview === 'true';
+    
     wordBlock.innerHTML = '';
     const textSpan = document.createElement('span');
     const isAccepted = confidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
@@ -62,6 +65,16 @@ class WordBlockManager {
     if (isAccepted) textSpan.className = 'accepted-word';
     textSpan.textContent = text;
     wordBlock.appendChild(textSpan);
+    
+    // Restore review flag icon if word is flagged
+    if (isReviewed && window.SVGLoader) {
+      const flagIcon = document.createElement('span');
+      flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
+      window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' }).then(svg => {
+        flagIcon.innerHTML = svg;
+      });
+      wordBlock.insertBefore(flagIcon, textSpan);
+    }
   }
 
   static getAdjacentWordBlock(wordId, direction) {
