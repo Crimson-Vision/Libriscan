@@ -107,6 +107,15 @@ TEMPLATES = [
     },
 ]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 WSGI_APPLICATION = "libriscan.wsgi.application"
 
 

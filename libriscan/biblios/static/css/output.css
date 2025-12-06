@@ -199,7 +199,7 @@
 }
 @layer utilities {
   .modal {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       pointer-events: none;
       visibility: hidden;
       position: fixed;
@@ -224,7 +224,7 @@
         display: none;
       }
     }
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       &.modal-open, &[open], &:target, .modal-toggle:checked + & {
         pointer-events: auto;
         visibility: visible;
@@ -254,7 +254,7 @@
     }
   }
   .tooltip {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-block;
       --tt-bg: var(--color-neutral);
@@ -279,11 +279,6 @@
         --tw-content: attr(data-tip);
         content: var(--tw-content);
       }
-      @media (prefers-reduced-motion: no-preference) {
-        & > .tooltip-content, &[data-tip]:before, &:after {
-          transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
-        }
-      }
       &:after {
         opacity: 0%;
         background-color: var(--tt-bg);
@@ -298,19 +293,24 @@
         --mask-tooltip: url("data:image/svg+xml,%3Csvg width='10' height='4' viewBox='0 0 8 4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.500009 1C3.5 1 3.00001 4 5.00001 4C7 4 6.5 1 9.5 1C10 1 10 0.499897 10 0H0C-1.99338e-08 0.5 0 1 0.500009 1Z' fill='black'/%3E%3C/svg%3E%0A");
         mask-image: var(--mask-tooltip);
       }
-      &.tooltip-open, &[data-tip]:not([data-tip=""]):hover, &:not(:has(.tooltip-content:empty)):has(.tooltip-content):hover, &[data-tip]:not([data-tip=""]):has(:focus-visible) {
-        > .tooltip-content, &[data-tip]:before, &:after {
-          opacity: 100%;
-          --tt-pos: 0rem;
+      @media (prefers-reduced-motion: no-preference) {
+        & > .tooltip-content, &[data-tip]:before, &:after {
+          transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 75ms;
         }
-        @media (prefers-reduced-motion: no-preference) {
+      }
+      &:is([data-tip]:not([data-tip=""]), :has(.tooltip-content:not(:empty))) {
+        &.tooltip-open, &:hover, &:has(:focus-visible) {
           & > .tooltip-content, &[data-tip]:before, &:after {
-            transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+            opacity: 100%;
+            --tt-pos: 0rem;
+            @media (prefers-reduced-motion: no-preference) {
+              transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+            }
           }
         }
       }
     }
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > .tooltip-content, &[data-tip]:before {
         transform: translateX(-50%) translateY(var(--tt-pos, 0.25rem));
         inset: auto auto var(--tt-off) 50%;
@@ -322,7 +322,7 @@
     }
   }
   .tab {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-flex;
       cursor: pointer;
@@ -349,15 +349,14 @@
       --tab-radius-min: calc(0.75rem - var(--border));
       --tab-radius-limit: min(var(--radius-field), var(--tab-radius-min));
       --tab-radius-grad: #0000 calc(69% - var(--border)),
-      var(--tab-border-color) calc(calc(69% - var(--border)) + 0.25px),
-      var(--tab-border-color) calc(calc(69% - var(--border)) + var(--border)),
-      var(--tab-bg) calc(calc(69% - var(--border)) + var(--border) + 0.25px);
+      var(--tab-border-color) calc(69% - var(--border) + 0.25px),
+      var(--tab-border-color) 69%,
+      var(--tab-bg) calc(69% + 0.25px);
       border-color: #0000;
       order: var(--tab-order);
       height: var(--tab-height);
       font-size: 0.875rem;
-      padding-inline-start: var(--tab-p);
-      padding-inline-end: var(--tab-p);
+      padding-inline: var(--tab-p);
       &:is(input[type="radio"]) {
         min-width: fit-content;
         &:after {
@@ -409,7 +408,7 @@
     }
   }
   .menu {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       width: fit-content;
       flex-direction: column;
@@ -480,6 +479,22 @@
           box-shadow: 2px 2px inset;
           pointer-events: none;
         }
+      }
+      details {
+        overflow: hidden;
+        interpolate-size: allow-keywords;
+      }
+      details::details-content {
+        block-size: 0;
+        @media (prefers-reduced-motion: no-preference) {
+          transition-behavior: allow-discrete;
+          transition-property: block-size, content-visibility;
+          transition-duration: 0.2s;
+          transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+        }
+      }
+      details[open]::details-content {
+        block-size: auto;
       }
       :where(li > details[open] > summary):after, :where(li > .menu-dropdown-toggle.menu-dropdown-show):after {
         rotate: 45deg;
@@ -570,7 +585,7 @@
     }
   }
   .dropdown {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-block;
       position-area: var(--anchor-v, bottom) var(--anchor-h, span-right);
@@ -585,7 +600,7 @@
       .dropdown-content {
         position: absolute;
       }
-      &:not(details, .dropdown-open, .dropdown-hover:hover, :focus-within) .dropdown-content, &.dropdown-hover:not(:hover) [tabindex]:first-child:focus:not(:focus-visible) ~ .dropdown-content {
+      &.dropdown-close .dropdown-content, &:not(details, .dropdown-open, .dropdown-hover:hover, :focus-within) .dropdown-content, &.dropdown-hover:not(:hover) [tabindex]:first-child:focus:not(:focus-visible) ~ .dropdown-content {
         display: none;
         transform-origin: top;
         opacity: 0%;
@@ -607,18 +622,21 @@
           opacity: 0;
         }
       }
-      &.dropdown-open, &:not(.dropdown-hover):focus, &:focus-within {
-        > [tabindex]:first-child {
-          pointer-events: none;
+      &:not(.dropdown-close) {
+        &.dropdown-open, &:not(.dropdown-hover):focus, &:focus-within {
+          > [tabindex]:first-child {
+            pointer-events: none;
+          }
+          .dropdown-content {
+            opacity: 100%;
+            scale: 100%;
+          }
         }
-        .dropdown-content {
-          opacity: 100%;
-        }
-      }
-      &.dropdown-hover:hover {
-        .dropdown-content {
-          opacity: 100%;
-          scale: 100%;
+        &.dropdown-hover:hover {
+          .dropdown-content {
+            opacity: 100%;
+            scale: 100%;
+          }
         }
       }
       &:is(details) {
@@ -626,11 +644,6 @@
           &::-webkit-details-marker {
             display: none;
           }
-        }
-      }
-      &.dropdown-open, &:focus, &:focus-within {
-        .dropdown-content {
-          scale: 100%;
         }
       }
       &:where([popover]) {
@@ -641,7 +654,7 @@
         color: inherit;
         @supports not (position-area: bottom) {
           margin: auto;
-          &.dropdown-open:not(:popover-open) {
+          &.dropdown-close, &.dropdown-open:not(:popover-open) {
             display: none;
             transform-origin: top;
             opacity: 0%;
@@ -651,7 +664,7 @@
             background-color: color-mix(in oklab, #000 30%, #0000);
           }
         }
-        &:not(.dropdown-open, :popover-open) {
+        &.dropdown-close, &:not(.dropdown-open, :popover-open) {
           display: none;
           transform-origin: top;
           opacity: 0%;
@@ -662,14 +675,11 @@
   }
   .\!btn {
     :where(&) {
-      @layer daisyui.component {
+      @layer daisyui.l1.l2.l3 {
         width: unset !important;
       }
     }
-    .prose & {
-      text-decoration-line: none !important;
-    }
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-flex !important;
       flex-shrink: 0 !important;
       cursor: pointer !important;
@@ -747,7 +757,7 @@
       }
       &:is(input[type="checkbox"], input[type="radio"]) {
         appearance: none !important;
-        &::after {
+        &[aria-label]::after {
           --tw-content: attr(aria-label) !important;
           content: var(--tw-content) !important;
         }
@@ -759,7 +769,7 @@
       }
     }
     &:disabled {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         &:not(.btn-link, .btn-ghost) {
           background-color: var(--color-base-content) !important;
           @supports (color: color-mix(in lab, red, red)) {
@@ -773,25 +783,11 @@
         --btn-fg: var(--color-base-content) !important;
         @supports (color: color-mix(in lab, red, red)) {
           --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000) !important;
-        }
-        @media (hover: hover) {
-          &:hover {
-            pointer-events: none !important;
-            background-color: var(--color-neutral) !important;
-            @supports (color: color-mix(in lab, red, red)) {
-              background-color: color-mix(in oklab, var(--color-neutral) 20%, transparent) !important;
-            }
-            --btn-border: #0000 !important;
-            --btn-fg: var(--color-base-content) !important;
-            @supports (color: color-mix(in lab, red, red)) {
-              --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000) !important;
-            }
-          }
         }
       }
     }
     &[disabled] {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         &:not(.btn-link, .btn-ghost) {
           background-color: var(--color-base-content) !important;
           @supports (color: color-mix(in lab, red, red)) {
@@ -805,34 +801,17 @@
         --btn-fg: var(--color-base-content) !important;
         @supports (color: color-mix(in lab, red, red)) {
           --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000) !important;
-        }
-        @media (hover: hover) {
-          &:hover {
-            pointer-events: none !important;
-            background-color: var(--color-neutral) !important;
-            @supports (color: color-mix(in lab, red, red)) {
-              background-color: color-mix(in oklab, var(--color-neutral) 20%, transparent) !important;
-            }
-            --btn-border: #0000 !important;
-            --btn-fg: var(--color-base-content) !important;
-            @supports (color: color-mix(in lab, red, red)) {
-              --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000) !important;
-            }
-          }
         }
       }
     }
   }
   .btn {
     :where(&) {
-      @layer daisyui.component {
+      @layer daisyui.l1.l2.l3 {
         width: unset;
       }
     }
-    .prose & {
-      text-decoration-line: none;
-    }
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-flex;
       flex-shrink: 0;
       cursor: pointer;
@@ -910,7 +889,7 @@
       }
       &:is(input[type="checkbox"], input[type="radio"]) {
         appearance: none;
-        &::after {
+        &[aria-label]::after {
           --tw-content: attr(aria-label);
           content: var(--tw-content);
         }
@@ -922,7 +901,7 @@
       }
     }
     &:disabled {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         &:not(.btn-link, .btn-ghost) {
           background-color: var(--color-base-content);
           @supports (color: color-mix(in lab, red, red)) {
@@ -936,25 +915,11 @@
         --btn-fg: var(--color-base-content);
         @supports (color: color-mix(in lab, red, red)) {
           --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-        }
-        @media (hover: hover) {
-          &:hover {
-            pointer-events: none;
-            background-color: var(--color-neutral);
-            @supports (color: color-mix(in lab, red, red)) {
-              background-color: color-mix(in oklab, var(--color-neutral) 20%, transparent);
-            }
-            --btn-border: #0000;
-            --btn-fg: var(--color-base-content);
-            @supports (color: color-mix(in lab, red, red)) {
-              --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-            }
-          }
         }
       }
     }
     &[disabled] {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         &:not(.btn-link, .btn-ghost) {
           background-color: var(--color-base-content);
           @supports (color: color-mix(in lab, red, red)) {
@@ -968,26 +933,12 @@
         --btn-fg: var(--color-base-content);
         @supports (color: color-mix(in lab, red, red)) {
           --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-        }
-        @media (hover: hover) {
-          &:hover {
-            pointer-events: none;
-            background-color: var(--color-neutral);
-            @supports (color: color-mix(in lab, red, red)) {
-              background-color: color-mix(in oklab, var(--color-neutral) 20%, transparent);
-            }
-            --btn-border: #0000;
-            --btn-fg: var(--color-base-content);
-            @supports (color: color-mix(in lab, red, red)) {
-              --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-            }
-          }
         }
       }
     }
   }
   .loading {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       pointer-events: none;
       display: inline-block;
       aspect-ratio: 1 / 1;
@@ -1001,7 +952,7 @@
     }
   }
   .btn-disabled {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       &:not(.btn-link, .btn-ghost) {
         background-color: var(--color-base-content);
         @supports (color: color-mix(in lab, red, red)) {
@@ -1016,20 +967,6 @@
       @supports (color: color-mix(in lab, red, red)) {
         --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
       }
-      @media (hover: hover) {
-        &:hover {
-          pointer-events: none;
-          background-color: var(--color-neutral);
-          @supports (color: color-mix(in lab, red, red)) {
-            background-color: color-mix(in oklab, var(--color-neutral) 20%, transparent);
-          }
-          --btn-border: #0000;
-          --btn-fg: var(--color-base-content);
-          @supports (color: color-mix(in lab, red, red)) {
-            --btn-fg: color-mix(in oklch, var(--color-base-content) 20%, #0000);
-          }
-        }
-      }
     }
   }
   .pointer-events-none {
@@ -1039,7 +976,7 @@
     visibility: visible;
   }
   .tabs-lift {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --tabs-height: auto;
       --tabs-direction: row;
       > .tab {
@@ -1122,7 +1059,7 @@
     }
   }
   .list {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       flex-direction: column;
       font-size: 0.875rem;
@@ -1153,7 +1090,7 @@
         }
       }
     }
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       .list-row {
         &:has(.list-col-grow:nth-child(1)) {
           --list-grid-cols: 1fr;
@@ -1181,7 +1118,7 @@
     }
   }
   .toast {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: fixed;
       inset-inline-start: auto;
       inset-inline-end: calc(0.25rem * 4);
@@ -1202,7 +1139,7 @@
     }
   }
   .toggle {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       border: var(--border) solid currentColor;
       color: var(--input-color);
       position: relative;
@@ -1337,7 +1274,7 @@
     }
   }
   .input {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       cursor: text;
       border: var(--border) solid #0000;
       position: relative;
@@ -1459,28 +1396,15 @@
       }
     }
   }
-  .indicator {
-    @layer daisyui.component {
-      position: relative;
-      display: inline-flex;
-      width: max-content;
-      :where(.indicator-item) {
-        z-index: 1;
-        position: absolute;
-        white-space: nowrap;
-        top: var(--indicator-t, 0);
-        bottom: var(--indicator-b, auto);
-        left: var(--indicator-s, auto);
-        right: var(--indicator-e, 0);
-        translate: var(--indicator-x, 50%) var(--indicator-y, -50%);
-      }
-    }
-  }
   .table {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       font-size: 0.875rem;
       position: relative;
       width: 100%;
+      border-collapse: separate;
+      --tw-border-spacing-x: calc(0.25rem * 0);
+      --tw-border-spacing-y: calc(0.25rem * 0);
+      border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
       border-radius: var(--radius-box);
       text-align: left;
       &:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
@@ -1509,7 +1433,7 @@
         font-size: 0.875rem;
         font-weight: 600;
       }
-      :where(tfoot) {
+      :where(tfoot tr:first-child :is(td, th)) {
         border-top: var(--border) solid var(--color-base-content);
         @supports (color: color-mix(in lab, red, red)) {
           border-top: var(--border) solid color-mix(in oklch, var(--color-base-content) 5%, #0000);
@@ -1533,7 +1457,7 @@
         left: calc(0.25rem * 0);
         background-color: var(--color-base-100);
       }
-      :where(thead tr, tbody tr:not(:last-child)) {
+      :where(thead tr :is(td, th), tbody tr:not(:last-child) :is(td, th)) {
         border-bottom: var(--border) solid var(--color-base-content);
         @supports (color: color-mix(in lab, red, red)) {
           border-bottom: var(--border) solid color-mix(in oklch, var(--color-base-content) 5%, #0000);
@@ -1542,7 +1466,7 @@
     }
   }
   .steps {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-grid;
       grid-auto-flow: column;
       overflow: hidden;
@@ -1600,7 +1524,7 @@
         }
       }
     }
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       .step-neutral {
         + .step-neutral:before, &:after, > .step-icon {
           --step-bg: var(--color-neutral);
@@ -1651,103 +1575,8 @@
       }
     }
   }
-  .range {
-    @layer daisyui.component {
-      appearance: none;
-      webkit-appearance: none;
-      --range-thumb: var(--color-base-100);
-      --range-thumb-size: calc(var(--size-selector, 0.25rem) * 6);
-      --range-progress: currentColor;
-      --range-fill: 1;
-      --range-p: 0.25rem;
-      --range-bg: currentColor;
-      @supports (color: color-mix(in lab, red, red)) {
-        --range-bg: color-mix(in oklab, currentColor 10%, #0000);
-      }
-      cursor: pointer;
-      overflow: hidden;
-      background-color: transparent;
-      vertical-align: middle;
-      width: clamp(3rem, 20rem, 100%);
-      --radius-selector-max: calc(
-      var(--radius-selector) + var(--radius-selector) + var(--radius-selector)
-    );
-      border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
-      border: none;
-      height: var(--range-thumb-size);
-      [dir="rtl"] & {
-        --range-dir: -1;
-      }
-      &:focus {
-        outline: none;
-      }
-      &:focus-visible {
-        outline: 2px solid;
-        outline-offset: 2px;
-      }
-      &::-webkit-slider-runnable-track {
-        width: 100%;
-        background-color: var(--range-bg);
-        border-radius: var(--radius-selector);
-        height: calc(var(--range-thumb-size) * 0.5);
-      }
-      @media (forced-colors: active) {
-        &::-webkit-slider-runnable-track {
-          border: 1px solid;
-        }
-      }
-      @media (forced-colors: active) {
-        &::-moz-range-track {
-          border: 1px solid;
-        }
-      }
-      &::-webkit-slider-thumb {
-        position: relative;
-        box-sizing: border-box;
-        border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
-        background-color: var(--range-thumb);
-        height: var(--range-thumb-size);
-        width: var(--range-thumb-size);
-        border: var(--range-p) solid;
-        appearance: none;
-        webkit-appearance: none;
-        top: 50%;
-        color: var(--range-progress);
-        transform: translateY(-50%);
-        box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px currentColor, 0 0 0 2rem var(--range-thumb) inset, calc((var(--range-dir, 1) * -100rem) - (var(--range-dir, 1) * var(--range-thumb-size) / 2)) 0 0 calc(100rem * var(--range-fill));
-        @supports (color: color-mix(in lab, red, red)) {
-          box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000), 0 0 0 2rem var(--range-thumb) inset, calc((var(--range-dir, 1) * -100rem) - (var(--range-dir, 1) * var(--range-thumb-size) / 2)) 0 0 calc(100rem * var(--range-fill));
-        }
-      }
-      &::-moz-range-track {
-        width: 100%;
-        background-color: var(--range-bg);
-        border-radius: var(--radius-selector);
-        height: calc(var(--range-thumb-size) * 0.5);
-      }
-      &::-moz-range-thumb {
-        position: relative;
-        box-sizing: border-box;
-        border-radius: calc(var(--radius-selector) + min(var(--range-p), var(--radius-selector-max)));
-        background-color: currentColor;
-        height: var(--range-thumb-size);
-        width: var(--range-thumb-size);
-        border: var(--range-p) solid;
-        top: 50%;
-        color: var(--range-progress);
-        box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px currentColor, 0 0 0 2rem var(--range-thumb) inset, calc((var(--range-dir, 1) * -100rem) - (var(--range-dir, 1) * var(--range-thumb-size) / 2)) 0 0 calc(100rem * var(--range-fill));
-        @supports (color: color-mix(in lab, red, red)) {
-          box-shadow: 0 -1px oklch(0% 0 0 / calc(var(--depth) * 0.1)) inset, 0 8px 0 -4px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset, 0 1px color-mix(in oklab, currentColor calc(var(--depth) * 10%), #0000), 0 0 0 2rem var(--range-thumb) inset, calc((var(--range-dir, 1) * -100rem) - (var(--range-dir, 1) * var(--range-thumb-size) / 2)) 0 0 calc(100rem * var(--range-fill));
-        }
-      }
-      &:disabled {
-        cursor: not-allowed;
-        opacity: 30%;
-      }
-    }
-  }
   .select {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       border: var(--border) solid #0000;
       position: relative;
       display: inline-flex;
@@ -1917,7 +1746,7 @@
     }
   }
   .timeline {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: flex;
       > li {
@@ -1980,7 +1809,7 @@
     }
   }
   .swap {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-grid;
       cursor: pointer;
@@ -2027,15 +1856,38 @@
     border-width: 0;
   }
   .menu-horizontal {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       display: inline-flex;
       flex-direction: row;
-      & > li:not(.menu-title) > details > ul {
-        position: absolute;
-        margin-inline-start: calc(0.25rem * 0);
-        margin-top: calc(0.25rem * 4);
-        padding-block: calc(0.25rem * 2);
-        padding-inline-end: calc(0.25rem * 2);
+      & > li:not(.menu-title) > details {
+        & > ul {
+          position: absolute;
+          margin-inline-start: calc(0.25rem * 0);
+          margin-top: calc(0.25rem * 4);
+          transform-origin: top;
+          border-radius: var(--radius-box);
+          background-color: var(--color-base-100);
+          padding-block: calc(0.25rem * 2);
+          padding-inline-end: calc(0.25rem * 2);
+          opacity: 0%;
+          scale: 95%;
+          box-shadow: 0 1px 3px 0 oklch(0% 0 0/0.1), 0 1px 2px -1px oklch(0% 0 0/0.1);
+          @media (prefers-reduced-motion: no-preference) {
+            @starting-style {
+              scale: 95%;
+              opacity: 0;
+            }
+            animation: menu 0.2s;
+            transition-property: opacity, scale, display;
+            transition-behavior: allow-discrete;
+            transition-duration: 0.2s;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          }
+        }
+        &[open] > ul {
+          opacity: 100%;
+          scale: 100%;
+        }
       }
       & > li > details > ul {
         &:before {
@@ -2043,15 +1895,10 @@
           content: var(--tw-content);
         }
       }
-      :where(& > li:not(.menu-title) > details > ul) {
-        border-radius: var(--radius-box);
-        background-color: var(--color-base-100);
-        box-shadow: 0 1px 3px 0 oklch(0% 0 0/0.1), 0 1px 2px -1px oklch(0% 0 0/0.1);
-      }
     }
   }
   .mockup-code {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       overflow: hidden;
       overflow-x: auto;
@@ -2091,7 +1938,7 @@
     }
   }
   .avatar {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-flex;
       vertical-align: middle;
@@ -2108,7 +1955,7 @@
     }
   }
   .checkbox {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       border: var(--border) solid var(--input-color, var(--color-base-content));
       @supports (color: color-mix(in lab, red, red)) {
         border: var(--border) solid var(--input-color, color-mix(in oklab, var(--color-base-content) 20%, #0000));
@@ -2187,14 +2034,14 @@
       }
     }
     &:disabled {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         cursor: not-allowed;
         opacity: 20%;
       }
     }
   }
   .radio {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-block;
       flex-shrink: 0;
@@ -2251,14 +2098,14 @@
       }
     }
     &:disabled {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         cursor: not-allowed;
         opacity: 20%;
       }
     }
   }
   .navbar {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       width: 100%;
       align-items: center;
@@ -2266,13 +2113,13 @@
       min-height: 4rem;
     }
     :where(&) {
-      @layer daisyui.modifier {
+      @layer daisyui.l1.l2 {
         position: relative;
       }
     }
   }
   .drawer {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: grid;
       width: 100%;
@@ -2280,7 +2127,7 @@
     }
   }
   .card {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: flex;
       flex-direction: column;
@@ -2329,7 +2176,7 @@
     }
   }
   .stats {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       display: inline-grid;
       grid-auto-flow: column;
@@ -2338,7 +2185,7 @@
     }
   }
   .progress {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       position: relative;
       height: calc(0.25rem * 2);
       width: 100%;
@@ -2403,7 +2250,7 @@
     position: sticky;
   }
   .tooltip-bottom {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > .tooltip-content, &[data-tip]:before {
         transform: translateX(-50%) translateY(var(--tt-pos, -0.25rem));
         inset: var(--tt-off) auto auto 50%;
@@ -2415,7 +2262,7 @@
     }
   }
   .tooltip-left {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > .tooltip-content, &[data-tip]:before {
         transform: translateX(calc(var(--tt-pos, 0.25rem) - 0.25rem)) translateY(-50%);
         inset: 50% var(--tt-off) auto auto;
@@ -2427,7 +2274,7 @@
     }
   }
   .tooltip-right {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > .tooltip-content, &[data-tip]:before {
         transform: translateX(calc(var(--tt-pos, -0.25rem) + 0.25rem)) translateY(-50%);
         inset: 50% auto auto var(--tt-off);
@@ -2439,7 +2286,7 @@
     }
   }
   .tooltip-top {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > .tooltip-content, &[data-tip]:before {
         transform: translateX(-50%) translateY(var(--tt-pos, 0.25rem));
         inset: auto auto var(--tt-off) 50%;
@@ -2451,7 +2298,7 @@
     }
   }
   .dropdown-end {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --anchor-h: span-left;
       :where(.dropdown-content) {
         inset-inline-end: calc(0.25rem * 0);
@@ -2479,7 +2326,7 @@
     }
   }
   .dropdown-top {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --anchor-v: top;
       .dropdown-content {
         top: auto;
@@ -2510,7 +2357,7 @@
     bottom: calc(var(--spacing) * 4);
   }
   .file-input {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       cursor: pointer;
       cursor: pointer;
       border: var(--border) solid #0000;
@@ -2620,7 +2467,7 @@
     }
   }
   .hero-content {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       isolation: isolate;
       display: flex;
       max-width: 80rem;
@@ -2631,7 +2478,7 @@
     }
   }
   .textarea {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       border: var(--border) solid #0000;
       min-height: calc(0.25rem * 20);
       flex-shrink: 1;
@@ -2706,7 +2553,7 @@
     }
   }
   .btn-active {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --btn-bg: var(--btn-color, var(--color-base-200));
       @supports (color: color-mix(in lab, red, red)) {
         --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 7%);
@@ -2715,89 +2562,8 @@
       isolation: isolate;
     }
   }
-  .stack {
-    @layer daisyui.component {
-      display: inline-grid;
-      grid-template-columns: 3px 4px 1fr 4px 3px;
-      grid-template-rows: 3px 4px 1fr 4px 3px;
-      & > * {
-        height: 100%;
-        width: 100%;
-        &:nth-child(n + 2) {
-          width: 100%;
-          opacity: 70%;
-        }
-        &:nth-child(2) {
-          z-index: 2;
-          opacity: 90%;
-        }
-        &:nth-child(1) {
-          z-index: 3;
-          width: 100%;
-        }
-      }
-    }
-    @layer daisyui.modifier {
-      &, &.stack-bottom {
-        > * {
-          grid-column: 3 / 4;
-          grid-row: 3 / 6;
-          &:nth-child(2) {
-            grid-column: 2 / 5;
-            grid-row: 2 / 5;
-          }
-          &:nth-child(1) {
-            grid-column: 1 / 6;
-            grid-row: 1 / 4;
-          }
-        }
-      }
-      &.stack-top {
-        > * {
-          grid-column: 3 / 4;
-          grid-row: 1 / 4;
-          &:nth-child(2) {
-            grid-column: 2 / 5;
-            grid-row: 2 / 5;
-          }
-          &:nth-child(1) {
-            grid-column: 1 / 6;
-            grid-row: 3 / 6;
-          }
-        }
-      }
-      &.stack-start {
-        > * {
-          grid-column: 1 / 4;
-          grid-row: 3 / 4;
-          &:nth-child(2) {
-            grid-column: 2 / 5;
-            grid-row: 2 / 5;
-          }
-          &:nth-child(1) {
-            grid-column: 3 / 6;
-            grid-row: 1 / 6;
-          }
-        }
-      }
-      &.stack-end {
-        > * {
-          grid-column: 3 / 6;
-          grid-row: 3 / 4;
-          &:nth-child(2) {
-            grid-column: 2 / 5;
-            grid-row: 2 / 5;
-          }
-          &:nth-child(1) {
-            grid-column: 1 / 4;
-            grid-row: 1 / 6;
-          }
-        }
-      }
-    }
-  }
   .modal-backdrop {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       grid-row-start: 1;
       display: grid;
@@ -2823,7 +2589,7 @@
     z-index: 100;
   }
   .tab-content {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       order: var(--tabcontent-order);
       display: none;
       border-color: transparent;
@@ -2843,7 +2609,7 @@
     }
   }
   .timeline-end {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       grid-column-end: 4;
       grid-row-start: 3;
@@ -2854,7 +2620,7 @@
     }
   }
   .timeline-start {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       grid-column-end: 4;
       grid-row-start: 1;
@@ -2865,7 +2631,7 @@
     }
   }
   .timeline-vertical {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       flex-direction: column;
       > li {
         justify-items: center;
@@ -2947,7 +2713,7 @@
     }
   }
   .modal-box {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       grid-row-start: 1;
       max-height: 100vh;
@@ -2968,13 +2734,13 @@
     }
   }
   .timeline-middle {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 2;
       grid-row-start: 2;
     }
   }
   .stat-value {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       white-space: nowrap;
       font-size: 2rem;
@@ -2982,7 +2748,7 @@
     }
   }
   .stat-desc {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       white-space: nowrap;
       color: var(--color-base-content);
@@ -2993,7 +2759,7 @@
     }
   }
   .stat-title {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       grid-column-start: 1;
       white-space: nowrap;
       color: var(--color-base-content);
@@ -3022,7 +2788,7 @@
     }
   }
   .divider {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       height: calc(0.25rem * 4);
       flex-direction: row;
@@ -3052,7 +2818,7 @@
     }
   }
   .filter {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       flex-wrap: wrap;
       input[type="radio"] {
@@ -3103,7 +2869,7 @@
     margin-inline: auto;
   }
   .input-lg {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --size: calc(var(--size-field, 0.25rem) * 12);
       font-size: max(var(--font-size, 1.125rem), 1.125rem);
       &[type="number"] {
@@ -3115,7 +2881,7 @@
     }
   }
   .input-sm {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --size: calc(var(--size-field, 0.25rem) * 8);
       font-size: max(var(--font-size, 0.75rem), 0.75rem);
       &[type="number"] {
@@ -3133,7 +2899,7 @@
     margin-block: calc(var(--spacing) * 2);
   }
   .label {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-flex;
       align-items: center;
       gap: calc(0.25rem * 1.5);
@@ -3175,7 +2941,7 @@
     margin-inline-start: calc(var(--spacing) * 2);
   }
   .modal-action {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       margin-top: calc(0.25rem * 6);
       display: flex;
       justify-content: flex-end;
@@ -3207,7 +2973,7 @@
     margin-top: auto;
   }
   .breadcrumbs {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       max-width: 100%;
       overflow-x: auto;
       padding-block: calc(0.25rem * 2);
@@ -3314,7 +3080,7 @@
     margin-left: calc(var(--spacing) * 7);
   }
   .status {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-block;
       aspect-ratio: 1 / 1;
       width: calc(0.25rem * 2);
@@ -3339,7 +3105,7 @@
     }
   }
   .badge {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -3350,7 +3116,6 @@
       border: var(--border) solid var(--badge-color, var(--color-base-200));
       font-size: 0.875rem;
       width: fit-content;
-      padding-inline: calc(0.25rem * 3 - var(--border));
       background-size: auto, calc(var(--noise) * 100%);
       background-image: none, var(--fx-noise);
       background-color: var(--badge-bg);
@@ -3358,19 +3123,19 @@
       --badge-fg: var(--color-base-content);
       --size: calc(var(--size-selector, 0.25rem) * 6);
       height: var(--size);
+      padding-inline: calc(var(--size) / 2 - var(--border));
     }
   }
   .kbd {
     box-shadow: none;
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border-radius: var(--radius-field);
       background-color: var(--color-base-200);
       vertical-align: middle;
-      padding-left: 0.5em;
-      padding-right: 0.5em;
+      padding-inline: 0.5em;
       border: var(--border) solid var(--color-base-content);
       @supports (color: color-mix(in lab, red, red)) {
         border: var(--border) solid color-mix(in srgb, var(--color-base-content) 20%, #0000);
@@ -3386,7 +3151,7 @@
     }
   }
   .tabs {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       flex-wrap: wrap;
       --tabs-height: auto;
@@ -3397,7 +3162,7 @@
     }
   }
   .footer {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: grid;
       width: 100%;
       grid-auto-flow: row;
@@ -3422,7 +3187,7 @@
     }
   }
   .stat {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: inline-grid;
       width: 100%;
       column-gap: calc(0.25rem * 4);
@@ -3439,7 +3204,7 @@
     }
   }
   .card-body {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       flex: auto;
       flex-direction: column;
@@ -3454,7 +3219,7 @@
   .alert {
     border-width: var(--border);
     border-color: var(--alert-border-color, var(--color-base-200));
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       border-style: solid;
       --alert-border-color: var(--color-base-200);
       display: grid;
@@ -3483,18 +3248,8 @@
       }
     }
   }
-  .fieldset {
-    @layer daisyui.component {
-      display: grid;
-      gap: calc(0.25rem * 1.5);
-      padding-block: calc(0.25rem * 1);
-      font-size: 0.75rem;
-      grid-template-columns: 1fr;
-      grid-auto-rows: max-content;
-    }
-  }
   .card-actions {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
@@ -3502,7 +3257,7 @@
     }
   }
   .card-title {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       display: flex;
       align-items: center;
       gap: calc(0.25rem * 2);
@@ -3570,6 +3325,7 @@
         border-radius: var(--radius-selector);
         border: var(--border) solid var(--color-base-300);
         padding-inline: 0.5em;
+        padding-block: 0.2em;
         font-weight: inherit;
         &:before, &:after {
           display: none;
@@ -3577,20 +3333,8 @@
       }
     }
   }
-  .mask {
-    @layer daisyui.component {
-      display: inline-block;
-      vertical-align: middle;
-      mask-size: contain;
-      mask-repeat: no-repeat;
-      mask-position: center;
-    }
-  }
   .block {
     display: block;
-  }
-  .contents {
-    display: contents;
   }
   .flex {
     display: flex;
@@ -3620,7 +3364,7 @@
     display: table-row;
   }
   .btn-circle {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       border-radius: calc(infinity * 1px);
       padding-inline: calc(0.25rem * 0);
       width: var(--size);
@@ -3628,7 +3372,7 @@
     }
   }
   .btn-square {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       padding-inline: calc(0.25rem * 0);
       width: var(--size);
       height: var(--size);
@@ -3716,18 +3460,8 @@
   .min-h-screen {
     min-height: 100vh;
   }
-  .loading-sm {
-    @layer daisyui.modifier {
-      width: calc(var(--size-selector, 0.25rem) * 5);
-    }
-  }
-  .loading-xl {
-    @layer daisyui.modifier {
-      width: calc(var(--size-selector, 0.25rem) * 8);
-    }
-  }
   .loading-xs {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       width: calc(var(--size-selector, 0.25rem) * 4);
     }
   }
@@ -3826,7 +3560,7 @@
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .swap-rotate {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       .swap-on, input:indeterminate ~ .swap-on {
         rotate: 45deg;
       }
@@ -3848,7 +3582,7 @@
     animation: var(--animate-pulse);
   }
   .link {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       cursor: pointer;
       text-decoration-line: underline;
       &:focus {
@@ -4002,7 +3736,7 @@
     overflow-y: auto;
   }
   .menu-sm {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       :where(li:not(.menu-title) > *:not(ul, details, .menu-title)), :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
         border-radius: var(--radius-field);
         padding-inline: calc(0.25rem * 2.5);
@@ -4066,19 +3800,17 @@
     border-left-width: 4px;
   }
   .btn-dash {
-    @layer daisyui.modifier {
-      &:not( .btn-active, :hover, :active:focus, :focus-visible, :disabled, [disabled], .btn-disabled, :checked ) {
+    @layer daisyui.l1 {
+      &:not( .btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled ) {
         --btn-shadow: "";
-        border-style: dashed;
         --btn-bg: #0000;
         --btn-fg: var(--btn-color);
         --btn-border: var(--btn-color);
         --btn-noise: none;
       }
       @media (hover: none) {
-        &:hover:not( .btn-active, :active, :focus-visible, :disabled, [disabled], .btn-disabled, :checked ) {
+        &:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
           --btn-shadow: "";
-          border-style: dashed;
           --btn-bg: #0000;
           --btn-fg: var(--btn-color);
           --btn-border: var(--btn-color);
@@ -4086,9 +3818,10 @@
         }
       }
     }
+    border-style: dashed;
   }
   .badge-ghost {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       border-color: var(--color-base-200);
       background-color: var(--color-base-200);
       color: var(--color-base-content);
@@ -4096,7 +3829,7 @@
     }
   }
   .badge-soft {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--badge-color, var(--color-base-content));
       background-color: var(--badge-color, var(--color-base-content));
       @supports (color: color-mix(in lab, red, red)) {
@@ -4110,7 +3843,7 @@
     }
   }
   .badge-outline {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--badge-color);
       --badge-bg: #0000;
       background-image: none;
@@ -4166,7 +3899,7 @@
     }
   }
   .table-zebra {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       tbody {
         tr {
           &:where(:nth-child(even)) {
@@ -4316,18 +4049,8 @@
     }
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
   }
-  .loading-bars {
-    @layer daisyui.modifier {
-      mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='1' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite'/%3E%3C/rect%3E%3Crect x='9' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.65s'/%3E%3C/rect%3E%3Crect x='17' y='1' width='6' height='22'%3E%3Canimate attributeName='y' values='1;5;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='height' values='22;14;22' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3Canimate attributeName='opacity' values='1;0.2;1' keyTimes='0;0.938;1' dur='.8s' repeatCount='indefinite' begin='-0.5s'/%3E%3C/rect%3E%3C/svg%3E");
-    }
-  }
-  .loading-infinity {
-    @layer daisyui.modifier {
-      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' style='shape-rendering:auto;' width='200px' height='200px' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid'%3E%3Cpath fill='none' stroke='black' stroke-width='10' stroke-dasharray='205.271 51.318' d='M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z' stroke-linecap='round' style='transform:scale(0.8);transform-origin:50px 50px'%3E%3Canimate attributeName='stroke-dashoffset' repeatCount='indefinite' dur='2s' keyTimes='0;1' values='0;256.589'/%3E%3C/path%3E%3C/svg%3E");
-    }
-  }
   .loading-spinner {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       mask-image: url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
     }
   }
@@ -4338,7 +4061,7 @@
     stroke: currentcolor;
   }
   .checkbox-sm {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       padding: 0.1875rem;
       --size: calc(var(--size-selector, 0.25rem) * 5);
     }
@@ -4368,7 +4091,7 @@
     padding: calc(var(--spacing) * 8);
   }
   .menu-title {
-    @layer daisyui.component {
+    @layer daisyui.l1.l2.l3 {
       padding-inline: calc(0.25rem * 3);
       padding-block: calc(0.25rem * 2);
       color: var(--color-base-content);
@@ -4377,20 +4100,6 @@
       }
       font-size: 0.875rem;
       font-weight: 600;
-    }
-  }
-  .badge-sm {
-    @layer daisyui.modifier {
-      --size: calc(var(--size-selector, 0.25rem) * 5);
-      font-size: 0.75rem;
-      padding-inline: calc(0.25rem * 2.5 - var(--border));
-    }
-  }
-  .badge-xs {
-    @layer daisyui.modifier {
-      --size: calc(var(--size-selector, 0.25rem) * 4);
-      font-size: 0.625rem;
-      padding-inline: calc(0.25rem * 2 - var(--border));
     }
   }
   .px-0\.5 {
@@ -4484,7 +4193,7 @@
     font-family: var(--font-mono);
   }
   .file-input-lg {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --size: calc(var(--size-field, 0.25rem) * 12);
       font-size: 1.125rem;
       line-height: 2.5rem;
@@ -4526,7 +4235,7 @@
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
   .tabs-lg {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --tab-height: calc(var(--size-field, 0.25rem) * 12);
       & > .tab {
         font-size: 1.125rem;
@@ -4535,14 +4244,26 @@
       }
     }
   }
+  .badge-sm {
+    @layer daisyui.l1.l2 {
+      --size: calc(var(--size-selector, 0.25rem) * 5);
+      font-size: 0.75rem;
+    }
+  }
+  .badge-xs {
+    @layer daisyui.l1.l2 {
+      --size: calc(var(--size-selector, 0.25rem) * 4);
+      font-size: 0.625rem;
+    }
+  }
   .kbd-sm {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --size: calc(var(--size-selector, 0.25rem) * 5);
       font-size: 0.75rem;
     }
   }
   .kbd-xs {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --size: calc(var(--size-selector, 0.25rem) * 4);
       font-size: 0.625rem;
     }
@@ -4597,35 +4318,35 @@
     white-space: nowrap;
   }
   .alert-error {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--color-error-content);
       --alert-border-color: var(--color-error);
       --alert-color: var(--color-error);
     }
   }
   .alert-info {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--color-info-content);
       --alert-border-color: var(--color-info);
       --alert-color: var(--color-info);
     }
   }
   .alert-success {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--color-success-content);
       --alert-border-color: var(--color-success);
       --alert-color: var(--color-success);
     }
   }
   .alert-warning {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       color: var(--color-warning-content);
       --alert-border-color: var(--color-warning);
       --alert-color: var(--color-warning);
     }
   }
   .file-input-primary {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --btn-color: var(--color-primary);
       &::file-selector-button {
         color: var(--color-primary-content);
@@ -4750,7 +4471,7 @@
     font-style: italic;
   }
   .link-hover {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       text-decoration-line: none;
       &:hover {
         @media (hover: hover) {
@@ -4761,6 +4482,11 @@
   }
   .line-through {
     text-decoration-line: line-through;
+  }
+  .prose {
+    & :where(.btn-link):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+      text-decoration-line: none;
+    }
   }
   .opacity-20 {
     opacity: 20%;
@@ -4801,10 +4527,6 @@
     --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .ring {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
   .outline {
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
@@ -4814,24 +4536,25 @@
     outline-width: 1px;
   }
   .btn-ghost {
-    @layer daisyui.modifier {
-      &:not(.btn-active, :hover, :active:focus, :focus-visible) {
+    @layer daisyui.l1 {
+      &:not(.btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn)) {
         --btn-shadow: "";
         --btn-bg: #0000;
         --btn-border: #0000;
         --btn-noise: none;
         &:not(:disabled, [disabled], .btn-disabled) {
           outline-color: currentcolor;
-          --btn-fg: currentColor;
+          --btn-fg: var(--btn-color, currentColor);
         }
       }
       @media (hover: none) {
-        &:hover:not(.btn-active, :active, :focus-visible, :disabled, [disabled], .btn-disabled) {
+        &:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
+          outline-color: currentcolor;
           --btn-shadow: "";
           --btn-bg: #0000;
+          --btn-fg: var(--btn-color, currentColor);
           --btn-border: #0000;
           --btn-noise: none;
-          --btn-fg: currentColor;
         }
       }
     }
@@ -4898,8 +4621,8 @@
     transition-timing-function: var(--ease-in-out);
   }
   .btn-outline {
-    @layer daisyui.modifier {
-      &:not( .btn-active, :hover, :active:focus, :focus-visible, :disabled, [disabled], .btn-disabled, :checked ) {
+    @layer daisyui.l1 {
+      &:not( .btn-active, :hover, :active:focus, :focus-visible, input:checked:not(.filter .btn), :disabled, [disabled], .btn-disabled ) {
         --btn-shadow: "";
         --btn-bg: #0000;
         --btn-fg: var(--btn-color);
@@ -4907,7 +4630,7 @@
         --btn-noise: none;
       }
       @media (hover: none) {
-        &:hover:not( .btn-active, :active, :focus-visible, :disabled, [disabled], .btn-disabled, :checked ) {
+        &:not(.btn-active, :active, :focus-visible, input:checked:not(.filter .btn)):hover {
           --btn-shadow: "";
           --btn-bg: #0000;
           --btn-fg: var(--btn-color);
@@ -4918,101 +4641,95 @@
     }
   }
   .btn-lg {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --fontsize: 1.125rem;
       --btn-p: 1.25rem;
       --size: calc(var(--size-field, 0.25rem) * 12);
     }
   }
   .btn-md {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --fontsize: 0.875rem;
       --btn-p: 1rem;
       --size: calc(var(--size-field, 0.25rem) * 10);
     }
   }
   .btn-sm {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --fontsize: 0.75rem;
       --btn-p: 0.75rem;
       --size: calc(var(--size-field, 0.25rem) * 8);
     }
   }
   .btn-xs {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --fontsize: 0.6875rem;
       --btn-p: 0.5rem;
       --size: calc(var(--size-field, 0.25rem) * 6);
     }
   }
   .badge-error {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-error);
       --badge-fg: var(--color-error-content);
     }
   }
   .badge-info {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-info);
       --badge-fg: var(--color-info-content);
     }
   }
   .badge-neutral {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-neutral);
       --badge-fg: var(--color-neutral-content);
     }
   }
   .badge-primary {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-primary);
       --badge-fg: var(--color-primary-content);
     }
   }
   .badge-success {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-success);
       --badge-fg: var(--color-success-content);
     }
   }
   .badge-warning {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       --badge-color: var(--color-warning);
       --badge-fg: var(--color-warning-content);
     }
   }
-  .btn-accent {
-    @layer daisyui.modifier.color {
-      --btn-color: var(--color-accent);
-      --btn-fg: var(--color-accent-content);
-    }
-  }
   .btn-error {
-    @layer daisyui.modifier.color {
+    @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-error);
       --btn-fg: var(--color-error-content);
     }
   }
   .btn-primary {
-    @layer daisyui.modifier.color {
+    @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-primary);
       --btn-fg: var(--color-primary-content);
     }
   }
   .btn-secondary {
-    @layer daisyui.modifier.color {
+    @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-secondary);
       --btn-fg: var(--color-secondary-content);
     }
   }
   .btn-warning {
-    @layer daisyui.modifier.color {
+    @layer daisyui.l1.l2.l3 {
       --btn-color: var(--color-warning);
       --btn-fg: var(--color-warning-content);
     }
   }
   .timeline-snap-icon {
-    @layer daisyui.modifier {
+    @layer daisyui.l1.l2 {
       > li {
         --timeline-col-start: 0.5rem;
         --timeline-row-start: minmax(0, 1fr);
@@ -5450,15 +5167,6 @@
       padding: calc(var(--spacing) * 3);
     }
   }
-  .sm\:badge-sm {
-    @media (width >= 40rem) {
-      @layer daisyui.modifier {
-        --size: calc(var(--size-selector, 0.25rem) * 5);
-        font-size: 0.75rem;
-        padding-inline: calc(0.25rem * 2.5 - var(--border));
-      }
-    }
-  }
   .sm\:px-1 {
     @media (width >= 40rem) {
       padding-inline: calc(var(--spacing) * 1);
@@ -5499,6 +5207,14 @@
     @media (width >= 40rem) {
       font-size: var(--text-xs);
       line-height: var(--tw-leading, var(--text-xs--line-height));
+    }
+  }
+  .sm\:badge-sm {
+    @media (width >= 40rem) {
+      @layer daisyui.l1.l2 {
+        --size: calc(var(--size-selector, 0.25rem) * 5);
+        font-size: 0.75rem;
+      }
     }
   }
   .sm\:text-\[9px\] {
@@ -5582,15 +5298,6 @@
       padding: calc(var(--spacing) * 4);
     }
   }
-  .md\:badge-md {
-    @media (width >= 48rem) {
-      @layer daisyui.modifier {
-        --size: calc(var(--size-selector, 0.25rem) * 6);
-        font-size: 0.875rem;
-        padding-inline: calc(0.25rem * 3 - var(--border));
-      }
-    }
-  }
   .md\:px-2 {
     @media (width >= 48rem) {
       padding-inline: calc(var(--spacing) * 2);
@@ -5637,6 +5344,14 @@
     @media (width >= 48rem) {
       font-size: var(--text-xs);
       line-height: var(--tw-leading, var(--text-xs--line-height));
+    }
+  }
+  .md\:badge-md {
+    @media (width >= 48rem) {
+      @layer daisyui.l1.l2 {
+        --size: calc(var(--size-selector, 0.25rem) * 6);
+        font-size: 0.875rem;
+      }
     }
   }
   .md\:text-\[10px\] {
@@ -5916,12 +5631,28 @@
     opacity: 1;
   }
 }
+@keyframes rotator {
+  89.9999%, 100% {
+    --first-item-position: 0 0%;
+  }
+  90%, 99.9999% {
+    --first-item-position: 0 calc(var(--items) * 100%);
+  }
+  100% {
+    translate: 0 -100%;
+  }
+}
 @keyframes skeleton {
   0% {
     background-position: 150%;
   }
   100% {
     background-position: -50%;
+  }
+}
+@keyframes menu {
+  0% {
+    opacity: 0;
   }
 }
 @keyframes progress {

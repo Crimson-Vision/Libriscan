@@ -9,5 +9,6 @@ gunicorn==23.0.0
 whitenoise==6.11.0
 pyspellchecker==0.8.4
 pymupdf==1.26.6
-django-_simple_history==3.10.1
+django-simple_history==3.10.1
 huey==2.5.4
+brotli==1.2.0
