@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-@source "../../templates/**/*.html";
-@source "../../static/js/**/*.js";
+@source "../libriscan/biblios/templates/**/*.html";
+@source "../libriscan/biblios/static/js/**/*.js";
 @source not "./tailwindcss.exe";
+@source not "./tailwindcss";
 @source not "./daisyui{,*}.mjs";
 
 @plugin "./daisyui.mjs";
