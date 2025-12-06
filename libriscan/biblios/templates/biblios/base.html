@@ -9,6 +9,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Libriscan{% endblock %}</title>
 
+  <link rel="preload" href="{% static 'css/output.css' %}" as="style" crossorigin="anonymous">
+  <!-- Preload critical JavaScript that loads in body for faster Time to Interactive -->
+  <link rel="preload" href="{% static 'js/utils.js' %}" as="script" crossorigin="anonymous">
+  <link rel="preload" href="{% static 'js/openseadragon-viewer.js' %}" as="script" crossorigin="anonymous">
+
   <!-- Favicon - Based on "Logo Hunter for Apple Store" from Figma Community -->
   <!-- Original: https://www.figma.com/slides/Pu0Bsm1StbjJn4CLDbXksX/Logo-Hunter-for-Apple-Store--Community- -->
   <!-- Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0) -->
@@ -22,10 +27,10 @@
   <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
   
   <!-- OpenSeadragon Dependencies -->
-  <script src="{% static 'js/openseadragon/openseadragon.min.js' %}"></script>
+  <script src="{% static 'js/openseadragon/openseadragon.min.js' %}" defer></script>
   
   <!-- Driver.js for Tutorials -->
-  <script src="{% static 'js/driver.js/driver.js.iife.js' %}"></script>
+  <script src="{% static 'js/driver.js/driver.js.iife.js' %}" defer></script>
   <link rel="stylesheet" href="{% static 'css/driver.js/driver.css' %}"/>
 
   <!-- Application CSS -->
