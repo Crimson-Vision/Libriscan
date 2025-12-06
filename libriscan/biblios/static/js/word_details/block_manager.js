@@ -22,6 +22,7 @@ class WordBlockManager {
     
     // Update btn-ghost/btn-dash classes for accepted words
     const isAccepted = data.confidence_level === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+    const isFlagged = wordBlock.classList.contains('btn-error');
     let acceptedToggleVisible = true;
     try {
       acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
@@ -30,15 +31,20 @@ class WordBlockManager {
       LibriscanUtils.showToast('Error checking accepted toggle visibility', 'error');
     }
     
+    // Update btn-dash/btn-ghost (preserve btn-error - don't remove it)
     wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
-    wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
+    if (!isFlagged) {
+      wordBlock.classList.toggle('btn-ghost', !isAccepted || !acceptedToggleVisible);
+    } else {
+      wordBlock.classList.remove('btn-ghost');
+    }
     
-    // Update word visibility control classes
-    wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
-    if (data.print_control === 'O') {
-      wordBlock.classList.add('word-visibility-control-omit');
-    } else if (data.print_control === 'M') {
-      wordBlock.classList.add('word-visibility-control-merge');
+    // Update word visibility control classes (read from dataset if not in data)
+    const printControl = data.print_control !== undefined ? data.print_control : wordBlock.dataset.wordPrintControl;
+    if (printControl !== undefined) {
+      wordBlock.classList.remove('word-visibility-control-omit', 'word-visibility-control-merge');
+      if (printControl === 'O') wordBlock.classList.add('word-visibility-control-omit');
+      else if (printControl === 'M') wordBlock.classList.add('word-visibility-control-merge');
     }
   }
 

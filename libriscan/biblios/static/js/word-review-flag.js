@@ -71,21 +71,17 @@ class WordReviewFlag {
     if (!wordBlock) return;
     
     const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
-    
-    wordBlock.classList.toggle('btn-error', isReviewed);
-    
-    if (isReviewed) {
-      wordBlock.classList.remove('btn-ghost');
-      // Keep btn-dash for accepted words even when reviewed
-      if (isAccepted) {
-        wordBlock.classList.add('btn-dash');
-      } else {
-        wordBlock.classList.remove('btn-dash');
-      }
-    } else {
-      wordBlock.classList.toggle('btn-ghost', !isAccepted);
-      wordBlock.classList.toggle('btn-dash', isAccepted);
+    let acceptedToggleVisible = true;
+    try {
+      acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
+    } catch (error) {
+      console.warn('Error checking accepted toggle visibility:', error);
     }
+    
+    // Toggle btn-error (preserve other classes - don't remove word-visibility-control-*)
+    wordBlock.classList.toggle('btn-error', isReviewed);
+    wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
+    wordBlock.classList.toggle('btn-ghost', !isReviewed && (!isAccepted || !acceptedToggleVisible));
     
     const existingIcon = wordBlock.querySelector('.review-flag-icon');
     if (isReviewed && !existingIcon) {
