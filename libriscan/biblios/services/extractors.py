@@ -63,7 +63,6 @@ class BaseExtractor(object):
 
         # Note that this method gets called indirectly via check_text
         return {
-            "extraction_id": None,
             "text": word,
             "text_type": None,
             "confidence": None,
@@ -197,7 +196,6 @@ class AWSExtractor(BaseExtractor):
         position = self.lines[word["Id"]]
 
         return TextBlock(
-            extraction_id=word["Id"],
             page=self.page,
             text=word["Text"],
             text_type=text_type,

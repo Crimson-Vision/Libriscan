@@ -27,8 +27,6 @@ services:
       - ~/appdata/libriscan/:/app/mnt
     environment:
       - TZ=America/New_York
-    ports:
-      - 8000:8000
 
   huey:
     container_name: huey

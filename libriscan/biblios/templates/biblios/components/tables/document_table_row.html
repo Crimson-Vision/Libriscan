@@ -1,3 +1,4 @@
+{% load icon_tags %}
 {% comment %}
 Reusable document table row component
 Usage: {% include 'biblios/components/tables/document_table_row.html' with doc=document badge_class='badge-neutral' action_text='Open' action_class='btn-primary' action_icon='arrow_right_icon' %}
@@ -12,9 +13,9 @@ Usage: {% include 'biblios/components/tables/document_table_row.html' with doc=d
     <a href="{{ doc.get_absolute_url }}" class="btn btn-sm {{ action_class|default:'btn-primary' }}">
       {{ action_text|default:'Open' }}
       {% if action_icon == 'arrow_right_icon' %}
-        {% include 'biblios/components/icons/arrow_right_icon.html' with class='w-4 h-4' %}
+        {% icon 'arrow-right' css_class='w-4 h-4' %}
       {% elif action_icon == 'eye_icon' %}
-        {% include 'biblios/components/icons/eye_icon.html' with class='w-4 h-4' %}
+        {% icon 'eye' css_class='w-4 h-4' %}
       {% endif %}
     </a>
   </td>

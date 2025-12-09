@@ -213,10 +213,10 @@ mnt/
 staticfiles/
 
 # Tailwind CSS standalone executables
-libriscan/biblios/static/css/tailwindcss
-libriscan/biblios/static/css/tailwindcss.exe
+tailwind-build/tailwindcss
+tailwind-build/tailwindcss.exe
 
 # DaisyUI plugin files
-libriscan/biblios/static/css/daisyui.mjs
-libriscan/biblios/static/css/daisyui-theme.mjs
+tailwind-build/daisyui.mjs
+tailwind-build/daisyui-theme.mjs
 node_modules/

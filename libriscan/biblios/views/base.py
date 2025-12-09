@@ -124,14 +124,6 @@ def index(request):
     return render(request, "biblios/index.html", context)
 
 
-def scan(request):
-    context = {
-        "allowed_upload_types": settings.ALLOWED_UPLOAD_TYPES,
-        "max_upload_size": settings.MAX_UPLOAD_SIZE,
-    }
-    return render(request, "biblios/scan.html", context)
-
-
 @require_http_methods(["GET"])
 def search_documents(request):
     """

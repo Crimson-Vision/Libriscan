@@ -12,34 +12,33 @@ class WordSelector {
   }
 
   applyReviewFlags() {
-    document.querySelectorAll('.word-block').forEach(wordBlock => {
+    const reviewedBlocks = document.querySelectorAll('.word-block[data-word-review="true"]');
+    if (reviewedBlocks.length === 0) return;
+    
+    reviewedBlocks.forEach(wordBlock => {
       const isReviewed = wordBlock.dataset.wordReview === 'true';
       const isAccepted = wordBlock.dataset.wordConfidenceLevel === WordDetailsConfig.CONFIDENCE_LEVELS.ACCEPTED;
+      let acceptedToggleVisible = true;
+      try {
+        acceptedToggleVisible = confidenceToggleInstance?.isLevelVisible?.('accepted') ?? true;
+      } catch (error) {
+        console.warn('Error checking accepted toggle visibility:', error);
+      }
       
+      // Toggle classes (preserve word-visibility-control-* classes)
       wordBlock.classList.toggle('btn-error', isReviewed);
+      wordBlock.classList.toggle('btn-dash', isAccepted && acceptedToggleVisible);
+      wordBlock.classList.toggle('btn-ghost', !isReviewed && (!isAccepted || !acceptedToggleVisible));
       
-      if (isReviewed) {
-        wordBlock.classList.remove('btn-ghost');
-        // Keep btn-dash for accepted words even when reviewed
-        if (isAccepted) {
-          wordBlock.classList.add('btn-dash');
-        } else {
-          wordBlock.classList.remove('btn-dash');
-        }
-        if (!wordBlock.querySelector('.review-flag-icon')) {
-          const flagIcon = document.createElement('span');
-          flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
-          flagIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" /></svg>';
-          wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);
-        }
-      } else {
-        wordBlock.classList.remove('btn-error');
+      if (isReviewed && !wordBlock.querySelector('.review-flag-icon')) {
+        const flagIcon = document.createElement('span');
+        flagIcon.className = 'review-flag-icon inline-flex items-center mr-1';
+        window.SVGLoader.loadIcon('flag-outline', { cssClass: 'size-3' }).then(svg => {
+          flagIcon.innerHTML = svg;
+        });
+        wordBlock.insertBefore(flagIcon, wordBlock.querySelector('span') || wordBlock.firstChild);
+      } else if (!isReviewed) {
         wordBlock.querySelector('.review-flag-icon')?.remove();
-        if (isAccepted) {
-          wordBlock.classList.add('btn-dash');
-        } else {
-          wordBlock.classList.add('btn-ghost');
-        }
       }
     });
   }
@@ -74,7 +73,6 @@ class WordSelector {
       number: parseInt(wordBlock.dataset.wordNumber),
       text_type: wordBlock.dataset.wordType,
       print_control: wordBlock.dataset.wordPrintControl,
-      extraction_id: wordBlock.dataset.wordExtractionId,
       review: wordBlock.dataset.wordReview === 'true',
       suggestions: this._parseSuggestions(wordBlock.dataset.wordSuggestions),
       // Limits for geometry coordinates removed from data-words-json

@@ -1,6 +1,3 @@
-// Alias 
-const fetchJSON = LibriscanUtils.fetchJSON.bind(LibriscanUtils);
-
 // Tab switching and view toggle - Single DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
   const tabs = document.querySelectorAll('#main-tabs .tab');
